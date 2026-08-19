@@ -22,7 +22,7 @@
     <aside class="ip-sidebar" id="ipSidebar">
         <div class="ip-sidebar-top">
             <div class="ip-brand">
-                <span class="ip-brand-icon"><i class="bi bi-mortarboard-fill"></i></span>
+                <img src="{{ asset('img/logo.jpg') }}" alt="Control Escolar" class="ip-brand-logo">
                 <span>Control Escolar</span>
             </div>
             <button type="button" class="ip-sidebar-toggle" id="ipSidebarToggle" aria-label="Ocultar barra lateral" title="Ocultar barra lateral">
