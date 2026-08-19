@@ -1,0 +1,843 @@
+:root {
+    --ip-primary: #0d6efd;
+    --ip-accent: #6f42c1;
+    --ip-success: #198754;
+    --ip-danger: #dc3545;
+    --ip-bg: #f4f6fb;
+    --ip-surface: #ffffff;
+    --ip-text: #1f2937;
+    --ip-muted: #6c757d;
+    --ip-border: #e5e7eb;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--ip-bg);
+    color: var(--ip-text);
+    margin: 0;
+}
+
+/* ---- Sidebar ---- */
+.ip-sidebar {
+    width: 248px;
+    background: linear-gradient(180deg, #0b1c47 0%, #12265e 100%);
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    padding: 1.25rem 1rem;
+    transition: width .2s ease;
+}
+
+.ip-sidebar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+}
+
+.ip-sidebar-toggle {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: .55rem;
+    background: rgba(255, 255, 255, .08);
+    color: #c7d2f0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+.ip-sidebar-toggle:hover {
+    background: rgba(255, 255, 255, .18);
+    color: #fff;
+}
+
+.ip-brand {
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: .25rem .5rem;
+    min-width: 0;
+}
+
+.ip-brand .ip-brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--ip-accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+}
+
+.ip-nav {
+    margin-top: 1rem;
+}
+
+.ip-nav a {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    color: #c7d2f0;
+    text-decoration: none;
+    padding: .6rem .75rem;
+    border-radius: .55rem;
+    font-size: .92rem;
+    font-weight: 500;
+    margin-bottom: .2rem;
+    transition: all .15s ease;
+}
+
+.ip-nav a i {
+    font-size: 1.05rem;
+    width: 20px;
+    text-align: center;
+}
+
+.ip-nav a:hover {
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+}
+
+.ip-nav a.active {
+    background: var(--ip-primary);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(13, 110, 253, .35);
+}
+
+.ip-nav-title {
+    color: #7d8ec4;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: .8rem .75rem .4rem;
+}
+
+/* ---- Main ---- */
+.ip-main {
+    margin-left: 248px;
+    padding: 1.75rem 2rem;
+    min-height: 100vh;
+}
+
+/* ---- Topbar ---- */
+.ip-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.ip-user-chip {
+    background: var(--ip-surface);
+    border: 1px solid var(--ip-border);
+    border-radius: 50rem;
+    padding: .35rem .9rem .35rem .4rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.ip-user-chip i {
+    color: var(--ip-white, #fff);
+}
+
+.ip-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--ip-accent);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+/* ---- Heading ---- */
+.ip-heading {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--ip-text);
+    margin: 0;
+}
+
+.ip-muted {
+    color: var(--ip-muted);
+    font-size: .88rem;
+}
+
+/* ---- Card ---- */
+.ip-card {
+    background: var(--ip-surface);
+    border: 1px solid var(--ip-border);
+    border-radius: .9rem;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 1px 3px rgba(16, 24, 40, .06);
+    overflow: hidden;
+}
+
+.ip-card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--ip-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.ip-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.ip-card-body {
+    padding: 1.25rem;
+}
+
+/* ---- Charts ---- */
+.ip-chart {
+    position: relative;
+    height: 300px;
+}
+
+/* ---- Table ---- */
+.ip-table {
+    margin: 0;
+    vertical-align: middle;
+}
+
+.ip-table thead th {
+    background: #eaf1ff;
+    color: #1f2937;
+    font-weight: 600;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid var(--ip-border);
+    white-space: nowrap;
+}
+
+.ip-table tbody td {
+    padding: .8rem 1.25rem;
+    font-size: .9rem;
+    border-color: #f0f1f5;
+}
+
+.ip-table tbody tr:hover {
+    background: #fafbff;
+}
+
+/* ---- Buttons ---- */
+.btn.ip-btn {
+    background: var(--ip-primary);
+    border-color: var(--ip-primary);
+    color: #fff;
+    font-weight: 600;
+    padding: .5rem 1.1rem;
+    border-radius: .55rem;
+}
+
+.btn.ip-btn:hover {
+    background: #0b5ed7;
+    border-color: #0a58ca;
+    color: #fff;
+}
+
+.btn.ip-btn-outline {
+    border: 1px solid var(--ip-border);
+    color: var(--ip-text);
+    background: #fff;
+    font-weight: 600;
+    padding: .5rem 1.1rem;
+    border-radius: .55rem;
+}
+
+.btn.ip-btn-outline:hover {
+    background: #f3f4f6;
+    color: var(--ip-text);
+}
+
+.btn.ip-btn-success {
+    background: var(--ip-success);
+    border-color: var(--ip-success);
+    color: #fff;
+    font-weight: 600;
+    padding: .5rem 1.1rem;
+    border-radius: .55rem;
+}
+
+.btn.ip-btn-success:hover {
+    background: #157347;
+    color: #fff;
+}
+
+.btn.ip-btn-danger {
+    background: var(--ip-danger);
+    border-color: var(--ip-danger);
+    color: #fff;
+    font-weight: 600;
+    padding: .5rem 1.1rem;
+    border-radius: .55rem;
+}
+
+.btn.ip-btn-danger:hover {
+    background: #bb2d3b;
+    color: #fff;
+}
+
+/* ---- Row actions ---- */
+.ip-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: .5rem;
+    border: none;
+    background: transparent;
+    color: var(--ip-primary);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: all .15s ease;
+}
+
+.ip-action:hover {
+    background: #eaf1ff;
+    color: var(--ip-primary);
+}
+
+.ip-action-danger {
+    color: var(--ip-danger);
+}
+
+.ip-action-danger:hover {
+    background: #fdecea;
+    color: var(--ip-danger);
+}
+
+.ip-action-success:hover {
+    background: #e3f3ea;
+    color: var(--ip-success);
+}
+
+/* ---- Inline table editing ---- */
+.ip-table-hint {
+    color: var(--ip-muted);
+    font-size: .875rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+
+.ip-inline-row.is-editing {
+    background: #fbfdff;
+}
+
+.ip-inline-row.is-editing td {
+    vertical-align: middle;
+}
+
+.ip-inline-row .cell-edit {
+    min-width: 90px;
+}
+
+.ip-inline-row .input-group .form-control {
+    min-width: 60px;
+}
+
+/* ---- Badges ---- */
+.ip-badge-active {
+    background: rgba(25, 135, 84, .12);
+    color: var(--ip-success);
+    font-weight: 600;
+    padding: .45em .75em;
+    border-radius: 50rem;
+}
+
+.ip-badge-inactive {
+    background: rgba(108, 117, 125, .12);
+    color: var(--ip-muted);
+    font-weight: 600;
+    padding: .45em .75em;
+    border-radius: 50rem;
+}
+
+/* ---- Forms ---- */
+.form-label {
+    font-weight: 500;
+    font-size: .86rem;
+    color: #374151;
+}
+
+.form-label .ip-required {
+    color: var(--ip-danger);
+}
+
+.form-control {
+    border-radius: .55rem;
+    border: 1px solid #d1d5db;
+    padding: .55rem .9rem;
+    font-size: .92rem;
+}
+
+.form-control:focus {
+    border-color: var(--ip-primary);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, .15);
+}
+
+.ip-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .75rem;
+    padding-top: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--ip-border);
+}
+
+/* ---- Archivo adjunto (alumnos) ---- */
+.ip-file-thumb {
+    max-height: 120px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* ---- Alerts ---- */
+.ip-alert {
+    border: none;
+    border-radius: .6rem;
+    font-size: .9rem;
+    font-weight: 500;
+}
+
+/* ---- Pagination ---- */
+.ip-card .pagination {
+    margin: 0;
+}
+
+.ip-card .pagination .page-link {
+    color: var(--ip-primary);
+    border-color: var(--ip-border);
+}
+
+.ip-card .pagination .page-item.active .page-link {
+    background: var(--ip-primary);
+    border-color: var(--ip-primary);
+}
+
+/* ---- Stat cards (dashboard) ---- */
+.ip-stat {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+}
+
+.ip-stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: .8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.ip-stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.ip-stat-label {
+    color: var(--ip-muted);
+    font-size: .84rem;
+}
+
+/* ---- Detail grid ---- */
+.ip-detail-label {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ip-muted);
+    margin-bottom: .15rem;
+}
+
+.ip-detail-value {
+    font-size: .95rem;
+    font-weight: 600;
+}
+
+/* ---- Login (pantalla dividida) ---- */
+.ip-login-split {
+    min-height: 100vh;
+    display: flex;
+    background: var(--ip-bg);
+    color: var(--ip-text);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Columna izquierda: formulario */
+.ip-login-left {
+    flex: 1 1 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+}
+
+.ip-login-form-box {
+    width: 100%;
+    max-width: 420px;
+}
+
+.ip-login-form-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.ip-login-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--ip-primary), var(--ip-accent));
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.ip-login-form-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 .15rem;
+}
+
+.ip-login-form-hint {
+    font-size: .78rem;
+    color: var(--ip-muted);
+}
+
+.ip-login-form-footer {
+    text-align: center;
+    color: var(--ip-muted);
+    font-size: .8rem;
+    margin-top: 1.75rem;
+    margin-bottom: 0;
+}
+
+.ip-login-left .input-group-text {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-right: 0;
+    color: var(--ip-muted);
+}
+
+.ip-login-left .form-control {
+    border-left: 0;
+}
+
+.btn.ip-btn-lg {
+    padding: .65rem 1.25rem;
+    border-radius: .6rem;
+    font-size: .95rem;
+}
+
+/* Columna derecha: identidad del sistema */
+.ip-login-right {
+    flex: 1 1 50%;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(150deg, #0b1c47 0%, #16307a 45%, #6f42c1 130%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2.5rem;
+    color: #fff;
+}
+
+.ip-login-hero {
+    position: relative;
+    z-index: 2;
+    max-width: 440px;
+    text-align: center;
+}
+
+.ip-login-hero-icon {
+    width: 84px;
+    height: 84px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, .12);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, .18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.6rem;
+    margin-bottom: 1.5rem;
+}
+
+.ip-login-hero-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 .4rem;
+}
+
+.ip-login-hero-subtitle {
+    color: rgba(255, 255, 255, .8);
+    font-size: 1.02rem;
+    margin-bottom: 2.25rem;
+}
+
+.ip-login-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 360px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+}
+
+.ip-login-features li {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: .75rem;
+    padding: .75rem 1rem;
+    font-size: .92rem;
+    font-weight: 500;
+}
+
+.ip-login-features li i {
+    font-size: 1.15rem;
+    width: 24px;
+    text-align: center;
+    color: #ffd166;
+}
+
+/* Círculos decorativos */
+.ip-login-deco {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .1);
+    z-index: 1;
+}
+
+.ip-login-deco-1 {
+    width: 320px;
+    height: 320px;
+    top: -100px;
+    right: -80px;
+}
+
+.ip-login-deco-2 {
+    width: 220px;
+    height: 220px;
+    bottom: -80px;
+    left: -60px;
+}
+
+.ip-login-deco-3 {
+    width: 90px;
+    height: 90px;
+    top: 12%;
+    left: 8%;
+    background: rgba(255, 209, 102, .12);
+    border: none;
+}
+
+/* Responsive: en móvil solo se muestra el login */
+@media (max-width: 991px) {
+    .ip-login-left {
+        flex-basis: 100%;
+    }
+
+    .ip-login-right {
+        display: none;
+    }
+}
+
+/* ---- Filtros de tabla ---- */
+.ip-filters {
+    background: var(--ip-surface);
+    border: 1px solid var(--ip-border);
+    border-radius: .9rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+}
+
+.ip-filters-label {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ip-muted);
+    margin-bottom: .25rem;
+    font-weight: 600;
+}
+
+.ip-filters .input-group-sm .input-group-text {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-right: 0;
+    color: var(--ip-muted);
+}
+
+.ip-filters .input-group-sm .form-control {
+    border-left: 0;
+}
+
+.ip-filters .form-select,
+.ip-filters .form-control {
+    border-radius: .5rem;
+}
+
+/* ---- Encabezados ordenables ---- */
+.ip-th-sortable {
+    white-space: nowrap;
+}
+
+.ip-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    color: #1f2937;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.ip-sort:hover {
+    color: var(--ip-primary);
+}
+
+.ip-sort-icons {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 0;
+    font-size: .6rem;
+    color: #c3c9d4;
+}
+
+.ip-sort .ip-sort-up,
+.ip-sort .ip-sort-down {
+    transition: color .15s ease;
+}
+
+.ip-sort.active .ip-sort-up {
+    color: #c3c9d4;
+}
+
+.ip-sort.active .ip-sort-down {
+    color: #c3c9d4;
+}
+
+.ip-sort.active.asc .ip-sort-up {
+    color: var(--ip-primary);
+}
+
+.ip-sort.active.desc .ip-sort-down {
+    color: var(--ip-primary);
+}
+
+/* Resumen de resultados */
+.ip-table-summary {
+    font-size: .82rem;
+    color: var(--ip-muted);
+}
+
+/* ---- Sidebar replegada (solo íconos) ---- */
+@media (min-width: 992px) {
+    .ip-main {
+        transition: margin-left .2s ease;
+    }
+
+    body.sidebar-collapsed .ip-sidebar {
+        width: 76px;
+    }
+
+    body.sidebar-collapsed .ip-main {
+        margin-left: 76px;
+    }
+
+    body.sidebar-collapsed .ip-sidebar-top {
+        justify-content: center;
+        padding-bottom: 1rem;
+    }
+
+    body.sidebar-collapsed .ip-brand {
+        display: none;
+    }
+
+    body.sidebar-collapsed .ip-nav-title {
+        display: none;
+    }
+
+    body.sidebar-collapsed .ip-nav a {
+        justify-content: center;
+    }
+
+    body.sidebar-collapsed .ip-nav a span {
+        display: none;
+    }
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .ip-sidebar {
+        width: 60px;
+        padding: 1rem .5rem;
+    }
+
+    .ip-sidebar-toggle {
+        display: none;
+    }
+
+    .ip-sidebar .ip-brand span,
+    .ip-nav a span,
+    .ip-nav-title {
+        display: none;
+    }
+
+    .ip-brand {
+        justify-content: center;
+        padding: .25rem 0 1.25rem;
+    }
+
+    .ip-nav a {
+        justify-content: center;
+    }
+
+    .ip-main {
+        margin-left: 60px;
+        padding: 1.25rem 1rem;
+    }
+}

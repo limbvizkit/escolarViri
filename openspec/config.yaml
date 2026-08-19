@@ -1,0 +1,49 @@
+schema: spec-driven
+
+context: |
+  Tech stack:
+  - Framework: Laravel 13 (PHP 8.3) — school management application ("escolar")
+  - Frontend: Blade views + Vite + Tailwind CSS v4
+  - Database: SQLite (default), Eloquent ORM
+  - Package managers: Composer (PHP deps), npm (frontend deps)
+  - Domain: school administration (Alumno, Empleado, Escuela, FormaPago,
+    Nivel, Pago, Rol, Sucursal, User)
+  - Routing: routes/web.php (no API routes yet)
+  - HTTP structure: app/Http/Controllers — thin controllers delegating to
+    Eloquent models
+  - UI conventions: use the "impecable" skill (.opencode/skills/impecable) for
+    all Blade/CSS/visual work so screens stay consistent
+  - Coding style: follow Laravel conventions; run `vendor/bin/pint` for
+    formatting; controllers stay thin, models own relationships and scopes
+
+strict_tdd: true
+
+rules:
+  proposal:
+    - State intent, scope, and approach before touching code
+    - Include a rollback plan for risky changes
+  specs:
+    - Use Given/When/Then scenarios for behavior
+    - Reference existing models and routes by name
+  design:
+    - Document architecture decisions with rationale
+    - Prefer Laravel conventions over custom abstractions
+  tasks:
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns and conventions
+    - Run tests before declaring a task done
+  verify:
+    test_command: "php artisan test"
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+
+testing:
+  strict_tdd: true
+  detected: "2026-08-14"
+  runner:
+    command: "php artisan test"
+    framework: "PHPUnit"
+    test_path: "tests/"
