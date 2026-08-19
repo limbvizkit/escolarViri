@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesión · Control Escolar</title>
+    <title>Iniciar sesión · Control Escolar de Learning Play House</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -14,7 +14,7 @@
     <section class="ip-login-left">
         <div class="ip-login-form-box">
             <div class="ip-login-form-brand">
-                <span class="ip-login-icon"><i class="bi bi-mortarboard-fill"></i></span>
+                <img src="{{ asset('img/logo.jpg') }}" alt="Control Escolar de Learning Play House" class="ip-login-logo">
                 <div>
                     <h1 class="ip-login-form-title">Iniciar sesión</h1>
                     <p class="ip-muted mb-0">Accede a tu panel de administración</p>
@@ -71,15 +71,15 @@
                 </button>
             </form>
 
-            <p class="ip-login-form-footer">© {{ date('Y') }} Control Escolar · Todos los derechos reservados</p>
+            <p class="ip-login-form-footer">© {{ date('Y') }} Control Escolar de Learning Play House · Todos los derechos reservados</p>
         </div>
     </section>
 
     {{-- Panel derecho: identidad del sistema --}}
     <aside class="ip-login-right">
         <div class="ip-login-hero">
-            <div class="ip-login-hero-icon"><i class="bi bi-mortarboard-fill"></i></div>
-            <h2 class="ip-login-hero-title">Control Escolar</h2>
+            <img src="{{ asset('img/logo.jpg') }}" alt="Control Escolar de Learning Play House" class="ip-login-hero-logo">
+            <h2 class="ip-login-hero-title">Control Escolar de Learning Play House</h2>
             <p class="ip-login-hero-subtitle">Sistema de administración para instituciones educativas</p>
 
             <ul class="ip-login-features">

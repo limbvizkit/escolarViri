@@ -75,15 +75,14 @@ body {
     min-width: 0;
 }
 
-.ip-brand .ip-brand-icon {
+.ip-brand .ip-brand-logo {
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    background: var(--ip-accent);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.15rem;
+    background: #fff;
+    object-fit: contain;
+    padding: 3px;
+    flex-shrink: 0;
 }
 
 .ip-nav {
@@ -518,16 +517,13 @@ body {
     margin-bottom: 1.75rem;
 }
 
-.ip-login-icon {
+.ip-login-logo {
     width: 52px;
     height: 52px;
     border-radius: 15px;
-    background: linear-gradient(135deg, var(--ip-primary), var(--ip-accent));
-    color: #fff;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
+    background: #fff;
+    object-fit: contain;
+    padding: 4px;
     flex-shrink: 0;
 }
 
@@ -587,17 +583,13 @@ body {
     text-align: center;
 }
 
-.ip-login-hero-icon {
+.ip-login-hero-logo {
     width: 84px;
     height: 84px;
     border-radius: 24px;
-    background: rgba(255, 255, 255, .12);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(255, 255, 255, .18);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.6rem;
+    background: #fff;
+    object-fit: contain;
+    padding: 6px;
     margin-bottom: 1.5rem;
 }
 
