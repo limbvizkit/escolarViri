@@ -13,8 +13,8 @@
     <div class="ip-card mb-4">
         <div class="ip-card-header">
             <h5 class="ip-card-title">{{ $escuela->nombre }}</h5>
-            <span class="badge ip-badge-{{ $escuela->estatus ? 'active' : 'inactive' }}">
-                {{ $escuela->estatus ? 'Activa' : 'Inactiva' }}
+            <span class="badge ip-badge-{{ $escuela->estatus_badge }}">
+                {{ $escuela->estatus_es_activo ? 'Activa' : 'Inactiva' }}
             </span>
         </div>
         <div class="ip-card-body">
@@ -65,8 +65,8 @@
                             <td class="ip-muted">{{ $sucursal->direccion ?? '—' }}</td>
                             <td>{{ $sucursal->empleados_count }}</td>
                             <td>
-                                <span class="badge ip-badge-{{ $sucursal->estatus ? 'active' : 'inactive' }}">
-                                    {{ $sucursal->estatus ? 'Activa' : 'Inactiva' }}
+                                <span class="badge ip-badge-{{ $sucursal->estatus_badge }}">
+                                    {{ $sucursal->estatus_es_activo ? 'Activa' : 'Inactiva' }}
                                 </span>
                             </td>
                         </tr>

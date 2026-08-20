@@ -28,7 +28,7 @@
                         <x-sortable field="id" label="#" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="nombre" label="Grado Escolar" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="alumnos_count" label="Alumnos" :current="request('sort')" :direction="request('direction')" />
-                        <x-sortable field="estatus" label="Estatus" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="estatus_id" label="Estatus" :current="request('sort')" :direction="request('direction')" />
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -39,8 +39,8 @@
                             <td class="fw-semibold">{{ $gradoEscolar->nombre }}</td>
                             <td><span class="badge ip-badge-active">{{ $gradoEscolar->alumnos_count }}</span></td>
                             <td>
-                                <span class="badge ip-badge-{{ $gradoEscolar->estatus ? 'active' : 'inactive' }}">
-                                    {{ $gradoEscolar->estatus ? 'Activo' : 'Inactivo' }}
+                                <span class="badge ip-badge-{{ $gradoEscolar->estatus_badge }}">
+                                    {{ $gradoEscolar->estatus_es_activo ? 'Activo' : 'Inactivo' }}
                                 </span>
                             </td>
                             <td class="text-end">

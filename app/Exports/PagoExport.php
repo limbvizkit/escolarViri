@@ -22,7 +22,7 @@ class PagoExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
     {
         return [
             '#', 'Alumno', 'Grado Escolar', 'Mes', 'Fecha', 'Entrada 8AM',
-            'Pronto pago', 'Pago normal', 'Talleres', 'Forma de pago',
+            'Pronto pago', 'Pago normal', 'Talleres', 'Lunch', 'Forma de pago',
         ];
     }
 
@@ -38,6 +38,7 @@ class PagoExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
             $pago->pronto_pago !== null ? (float) $pago->pronto_pago : '',
             $pago->pago_normal !== null ? (float) $pago->pago_normal : '',
             $pago->talleres !== null ? (float) $pago->talleres : '',
+            $pago->lunch !== null ? (float) $pago->lunch : '',
             $pago->formaPago->nombre ?? '',
         ];
     }

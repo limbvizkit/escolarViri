@@ -7,7 +7,7 @@
         <p class="ip-muted mb-0">Gestión de alumnos por grado escolar</p>
         <div class="d-flex gap-2">
             @php
-                $exportQuery = array_filter(request()->only(['q', 'grado_escolar_id', 'estatus', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
+                $exportQuery = array_filter(request()->only(['q', 'grado_escolar_id', 'sucursal_id', 'estatus', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
             @endphp
             <a href="{{ route('alumnos.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i>PDF
@@ -45,6 +45,7 @@
                         <x-sortable field="apellido_paterno" label="Apellido paterno" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="apellido_materno" label="Apellido materno" :current="request('sort')" :direction="request('direction')" />
                         <th>Grado Escolar</th>
+                        <th>Sucursal</th>
                         <x-sortable field="fecha_nacimiento" label="Fecha nacimiento" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="horario" label="Horario" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="inscripcion" label="Inscripción" :current="request('sort')" :direction="request('direction')" />
@@ -54,7 +55,7 @@
                         <x-sortable field="cuota_materiales" label="Cuota materiales" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="fecha_ingreso" label="Fecha ingreso" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="cuota_mensual" label="Cuota mensual" :current="request('sort')" :direction="request('direction')" />
-                        <x-sortable field="estatus" label="Estatus" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="estatus_id" label="Estatus" :current="request('sort')" :direction="request('direction')" />
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -107,6 +108,24 @@
                                     @foreach ($gradosEscolares as $gradoEscolar)
                                         <option value="{{ $gradoEscolar->id }}" {{ $alumno->grado_escolar_id == $gradoEscolar->id ? 'selected' : '' }}>
                                             {{ $gradoEscolar->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+
+                            <td>
+                                <div class="cell-view">
+                                    <span class="badge" data-target="sucursal_id" style="background:#eaf1ff;color:var(--ip-primary);font-weight:600;">
+                                        {{ $alumno->sucursal->nombre ?? '—' }}
+                                    </span>
+                                </div>
+                                <select name="sucursal_id" form="{{ $formId }}" data-key="sucursal_id" data-format="grado_escolar"
+                                        class="form-select form-select-sm cell-edit d-none"
+                                        data-original="{{ $alumno->sucursal_id }}">
+                                    <option value="">— Sin sucursal —</option>
+                                    @foreach ($sucursales as $sucursal)
+                                        <option value="{{ $sucursal->id }}" {{ $alumno->sucursal_id == $sucursal->id ? 'selected' : '' }}>
+                                            {{ $sucursal->nombre }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -167,15 +186,15 @@
 
                             <td>
                                 <div class="cell-view">
-                                    <span class="badge ip-badge-{{ $alumno->estatus ? 'active' : 'inactive' }}" data-target="estatus">
-                                        {{ $alumno->estatus ? 'Activo' : 'Inactivo' }}
+                                    <span class="badge ip-badge-{{ $alumno->estatus_badge }}" data-target="estatus_id">
+                                        {{ $alumno->estatus_es_activo ? 'Activo' : 'Inactivo' }}
                                     </span>
                                 </div>
-                                <select name="estatus" form="{{ $formId }}" data-key="estatus" data-format="estatus"
+                                <select name="estatus_id" form="{{ $formId }}" data-key="estatus_id" data-format="estatus_id"
                                         class="form-select form-select-sm cell-edit d-none"
-                                        data-original="{{ $alumno->estatus ? '1' : '0' }}">
-                                    <option value="1" {{ $alumno->estatus ? 'selected' : '' }}>Activo</option>
-                                    <option value="0" {{ !$alumno->estatus ? 'selected' : '' }}>Inactivo</option>
+                                        data-original="{{ $alumno->estatus_id }}">
+                                    <option value="1" @selected((int) $alumno->estatus_id === 1)>Activo</option>
+                                    <option value="2" @selected((int) $alumno->estatus_id === 2)>Inactivo</option>
                                 </select>
                             </td>
 
@@ -213,7 +232,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="16" class="text-center ip-muted py-4">
+                            <td colspan="17" class="text-center ip-muted py-4">
                                 No hay alumnos registrados.
                                 <a href="{{ route('alumnos.create') }}" class="d-block mt-2">Crear el primero</a>
                             </td>
@@ -280,7 +299,7 @@
                         view.textContent = val === '' || val === null ? 'NA' : '$' + Number(val).toFixed(2);
                     } else if (fmt === 'grado_escolar') {
                         view.textContent = inp.options[inp.selectedIndex].text;
-                    } else if (fmt === 'estatus') {
+                    } else if (fmt === 'estatus_id') {
                         const activo = val === '1';
                         view.textContent = activo ? 'Activo' : 'Inactivo';
                         view.classList.toggle('ip-badge-active', activo);
@@ -332,8 +351,8 @@
                     row.querySelectorAll('[data-key]').forEach(inp => {
                         const key = inp.dataset.key;
                         if (valores[key] === undefined) return;
-                        if (inp.dataset.format === 'estatus') {
-                            inp.value = valores[key] ? '1' : '0';
+                        if (inp.dataset.format === 'estatus_id') {
+                            inp.value = valores[key] ?? '';
                         } else if (inp.dataset.format === 'date') {
                             inp.value = valores[key] ? String(valores[key]).slice(0, 10) : '';
                         } else {

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Exports\AlumnoExport;
 use App\Models\Alumno;
+use App\Models\Estatus;
 use App\Models\GradoEscolar;
+use App\Models\Sucursal;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -28,12 +30,14 @@ class AlumnoController extends Controller
 
         $filtros = [
             ['name' => 'grado_escolar_id', 'label' => 'Grado Escolar', 'options' => GradoEscolar::orderBy('nombre')->pluck('nombre', 'id')->all()],
-            ['name' => 'estatus', 'label' => 'Estatus', 'options' => ['1' => 'Activo', '0' => 'Inactivo']],
+            ['name' => 'sucursal_id', 'label' => 'Sucursal', 'options' => Sucursal::active()->orderBy('nombre')->pluck('nombre', 'id')->all()],
+            ['name' => 'estatus', 'label' => 'Estatus', 'options' => [Estatus::ACTIVO => 'Activo', Estatus::INACTIVO => 'Inactivo']],
         ];
 
         $gradosEscolares = GradoEscolar::active()->orderBy('nombre')->get();
+        $sucursales = Sucursal::active()->orderBy('nombre')->get();
 
-        return view('alumnos.index', compact('alumnos', 'filtros', 'gradosEscolares'));
+        return view('alumnos.index', compact('alumnos', 'filtros', 'gradosEscolares', 'sucursales'));
     }
 
     public function inlineUpdate(Request $request, Alumno $alumno)
@@ -45,8 +49,8 @@ class AlumnoController extends Controller
             $datos = $request->validate($reglas, $this->mensajes());
         }
 
-        if ($request->has('estatus')) {
-            $datos['estatus'] = $request->boolean('estatus');
+        if ($request->has('estatus_id')) {
+            $datos['estatus_id'] = (int) $request->input('estatus_id');
         }
 
         $alumno->update($datos);
@@ -63,8 +67,9 @@ class AlumnoController extends Controller
     public function create(): View
     {
         $gradosEscolares = GradoEscolar::active()->orderBy('nombre')->get();
+        $sucursales = Sucursal::active()->orderBy('nombre')->get();
 
-        return view('alumnos.create', compact('gradosEscolares'));
+        return view('alumnos.create', compact('gradosEscolares', 'sucursales'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -73,7 +78,7 @@ class AlumnoController extends Controller
 
         $this->applyNaFlags($request, $validated);
 
-        $datos = $validated + ['estatus' => $request->boolean('estatus')];
+        $datos = $validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)];
 
         if ($request->hasFile('archivo')) {
             $datos['archivo'] = $request->file('archivo')->store('alumnos', 'public');
@@ -87,7 +92,7 @@ class AlumnoController extends Controller
 
     public function show(Alumno $alumno): View
     {
-        $alumno->load('gradoEscolar');
+        $alumno->load(['gradoEscolar', 'sucursal']);
 
         return view('alumnos.show', compact('alumno'));
     }
@@ -95,8 +100,9 @@ class AlumnoController extends Controller
     public function edit(Alumno $alumno): View
     {
         $gradosEscolares = GradoEscolar::active()->orderBy('nombre')->get();
+        $sucursales = Sucursal::active()->orderBy('nombre')->get();
 
-        return view('alumnos.edit', compact('alumno', 'gradosEscolares'));
+        return view('alumnos.edit', compact('alumno', 'gradosEscolares', 'sucursales'));
     }
 
     public function update(Request $request, Alumno $alumno): RedirectResponse
@@ -105,7 +111,7 @@ class AlumnoController extends Controller
 
         $this->applyNaFlags($request, $validated);
 
-        $datos = $validated + ['estatus' => $request->boolean('estatus')];
+        $datos = $validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)];
 
         if ($request->hasFile('archivo')) {
             if ($alumno->archivo) {
@@ -123,11 +129,7 @@ class AlumnoController extends Controller
 
     public function destroy(Alumno $alumno): RedirectResponse
     {
-        if ($alumno->archivo) {
-            Storage::disk('public')->delete($alumno->archivo);
-        }
-
-        $alumno->delete();
+        $alumno->update(['estatus_id' => Estatus::ELIMINADO]);
 
         return redirect()->route('alumnos.index')
             ->with('success', 'Alumno eliminado correctamente.');
@@ -154,7 +156,7 @@ class AlumnoController extends Controller
 
     private function filteredQuery(Request $request): Builder
     {
-        $query = Alumno::with('gradoEscolar');
+        $query = Alumno::with(['gradoEscolar', 'sucursal']);
 
         if ($request->filled('q')) {
             $query->search($request->input('q'));
@@ -164,8 +166,12 @@ class AlumnoController extends Controller
             $query->where('alumnos.grado_escolar_id', $request->input('grado_escolar_id'));
         }
 
+        if ($request->filled('sucursal_id')) {
+            $query->where('alumnos.sucursal_id', $request->input('sucursal_id'));
+        }
+
         if ($request->filled('estatus')) {
-            $query->where('alumnos.estatus', $request->boolean('estatus'));
+            $query->where('alumnos.estatus_id', $request->input('estatus'));
         }
 
         return $query;
@@ -175,7 +181,7 @@ class AlumnoController extends Controller
     {
         return ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'fecha_nacimiento', 'horario',
             'inscripcion', 'reinscripcion', 'entrevista_inicial', 'nat_geo', 'cuota_materiales',
-            'fecha_ingreso', 'cuota_mensual', 'estatus'];
+            'fecha_ingreso', 'cuota_mensual', 'estatus_id', 'sucursal_id'];
     }
 
     private function applyNaFlags(Request $request, array &$validated): void
@@ -196,6 +202,7 @@ class AlumnoController extends Controller
     {
         return [
             'grado_escolar_id' => ['required', 'exists:grados_escolares,id'],
+            'sucursal_id' => ['nullable', 'exists:sucursales,id'],
             'nombre' => ['required', 'string', 'max:255'],
             'apellido_paterno' => ['required', 'string', 'max:255'],
             'apellido_materno' => ['nullable', 'string', 'max:255'],
@@ -208,6 +215,7 @@ class AlumnoController extends Controller
             'cuota_materiales' => ['nullable', 'numeric', 'min:0'],
             'fecha_ingreso' => ['nullable', 'date'],
             'cuota_mensual' => ['nullable', 'numeric', 'min:0'],
+            'estatus_id' => ['nullable', 'exists:estatus,id'],
             'archivo' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
         ];
     }

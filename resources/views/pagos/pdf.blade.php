@@ -113,6 +113,7 @@
                 <th class="num">Pronto pago</th>
                 <th class="num">Pago normal</th>
                 <th class="num">Talleres</th>
+                <th class="num">Lunch</th>
                 <th>Forma de pago</th>
             </tr>
         </thead>
@@ -128,11 +129,12 @@
                     <td class="num">{{ $pago->pronto_pago !== null ? '$' . number_format((float) $pago->pronto_pago, 2) : '—' }}</td>
                     <td class="num">{{ $pago->pago_normal !== null ? '$' . number_format((float) $pago->pago_normal, 2) : '—' }}</td>
                     <td class="num">{{ $pago->talleres !== null ? '$' . number_format((float) $pago->talleres, 2) : '—' }}</td>
+                    <td class="num">{{ $pago->lunch !== null ? '$' . number_format((float) $pago->lunch, 2) : '—' }}</td>
                     <td>{{ $pago->formaPago->nombre ?? '—' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="empty">Sin registros</td>
+                    <td colspan="11" class="empty">Sin registros</td>
                 </tr>
             @endforelse
         </tbody>

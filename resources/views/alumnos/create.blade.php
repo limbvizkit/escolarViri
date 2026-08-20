@@ -29,7 +29,7 @@
                             <i class="bi bi-grid-1x2 me-1"></i>Clasificación
                         </h6>
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="grado_escolar_id" class="form-label">Grado Escolar <span class="ip-required">*</span></label>
                                 <select id="grado_escolar_id" name="grado_escolar_id"
                                         class="form-select @error('grado_escolar_id') is-invalid @enderror" required>
@@ -44,7 +44,22 @@
                                 @error('grado_escolar_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label for="sucursal_id" class="form-label">Sucursal</label>
+                                <select id="sucursal_id" name="sucursal_id"
+                                        class="form-select @error('sucursal_id') is-invalid @enderror">
+                                    <option value="">— Seleccionar sucursal —</option>
+                                    @foreach ($sucursales as $sucursal)
+                                        <option value="{{ $sucursal->id }}"
+                                            {{ old('sucursal_id', $alumno->sucursal_id ?? '') == $sucursal->id ? 'selected' : '' }}>
+                                            {{ $sucursal->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('sucursal_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-4">
                                 <label for="horario" class="form-label">Horario</label>
                                 <input type="text" id="horario" name="horario"
                                        class="form-control @error('horario') is-invalid @enderror"
@@ -191,14 +206,13 @@
                         </div>
 
                         <div class="col-md-4 mb-4">
-                            <label class="form-label d-block">Estatus</label>
-                            <div class="form-check form-switch mt-2">
-                                <input type="hidden" name="estatus" value="0">
-                                <input class="form-check-input" type="checkbox" role="switch" id="estatus"
-                                       name="estatus" value="1"
-                                       {{ old('estatus', $alumno->estatus ?? true) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="estatus">Activo</label>
-                            </div>
+                            <label for="estatus_id" class="form-label d-block">Estatus</label>
+                            <select id="estatus_id" name="estatus_id"
+                                    class="form-select @error('estatus_id') is-invalid @enderror">
+                                <option value="1" @selected((int) old('estatus_id', $alumno->estatus_id ?? 1) === 1)>Activo</option>
+                                <option value="2" @selected((int) old('estatus_id', $alumno->estatus_id ?? 1) === 2)>Inactivo</option>
+                            </select>
+                            @error('estatus_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
 
                         <div class="ip-form-actions">

@@ -42,7 +42,7 @@ return new class extends Migration
             'email' => null,
             'telefono' => null,
             'puesto' => $e[3],
-            'estatus' => true,
+            'estatus_id' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ], $this->empleados());

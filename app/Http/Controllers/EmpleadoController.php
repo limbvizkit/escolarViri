@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Empleado;
+use App\Models\Estatus;
 use App\Models\Sucursal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class EmpleadoController extends Controller
         }
 
         if ($request->filled('estatus')) {
-            $query->where('empleados.estatus', $request->boolean('estatus'));
+            $query->where('empleados.estatus_id', $request->input('estatus'));
         }
 
         if ($request->filled('sucursal_id')) {
@@ -29,13 +30,13 @@ class EmpleadoController extends Controller
         $empleados = $this->paginateOrdered(
             $query,
             $request,
-            ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'email', 'puesto', 'estatus'],
+            ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'email', 'puesto', 'estatus_id'],
             'apellido_paterno',
         );
 
         $filtros = [
             ['name' => 'sucursal_id', 'label' => 'Sucursal', 'options' => Sucursal::orderBy('nombre')->pluck('nombre', 'id')->all()],
-            ['name' => 'estatus', 'label' => 'Estatus', 'options' => ['1' => 'Activo', '0' => 'Inactivo']],
+            ['name' => 'estatus', 'label' => 'Estatus', 'options' => [Estatus::ACTIVO => 'Activo', Estatus::INACTIVO => 'Inactivo']],
         ];
 
         return view('empleados.index', compact('empleados', 'filtros'));
@@ -58,10 +59,10 @@ class EmpleadoController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:30'],
             'puesto' => ['nullable', 'string', 'max:255'],
-            'estatus' => ['nullable', 'boolean'],
+            'estatus_id' => ['nullable', 'exists:estatus,id'],
         ]);
 
-        Empleado::create($validated + ['estatus' => $request->boolean('estatus')]);
+        Empleado::create($validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)]);
 
         return redirect()->route('empleados.index')
             ->with('success', 'Empleado creado correctamente.');
@@ -91,10 +92,10 @@ class EmpleadoController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:30'],
             'puesto' => ['nullable', 'string', 'max:255'],
-            'estatus' => ['nullable', 'boolean'],
+            'estatus_id' => ['nullable', 'exists:estatus,id'],
         ]);
 
-        $empleado->update($validated + ['estatus' => $request->boolean('estatus')]);
+        $empleado->update($validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)]);
 
         return redirect()->route('empleados.index')
             ->with('success', 'Empleado actualizado correctamente.');
@@ -102,7 +103,7 @@ class EmpleadoController extends Controller
 
     public function destroy(Empleado $empleado): RedirectResponse
     {
-        $empleado->delete();
+        $empleado->update(['estatus_id' => Estatus::ELIMINADO]);
 
         return redirect()->route('empleados.index')
             ->with('success', 'Empleado eliminado correctamente.');

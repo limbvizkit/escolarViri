@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ConEstatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Escuela extends Model
 {
+    use ConEstatus;
     use HasFactory;
 
     protected $fillable = [
@@ -16,17 +18,12 @@ class Escuela extends Model
         'direccion',
         'telefono',
         'email',
-        'estatus',
+        'estatus_id',
     ];
 
     public function sucursales(): HasMany
     {
         return $this->hasMany(Sucursal::class);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('estatus', true);
     }
 
     public function scopeSearch($query, ?string $busqueda)

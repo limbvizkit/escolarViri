@@ -18,6 +18,7 @@ class Pago extends Model
         'pronto_pago',
         'pago_normal',
         'talleres',
+        'lunch',
         'forma_pago_id',
     ];
 
@@ -29,6 +30,7 @@ class Pago extends Model
             'pronto_pago' => 'decimal:2',
             'pago_normal' => 'decimal:2',
             'talleres' => 'decimal:2',
+            'lunch' => 'decimal:2',
         ];
     }
 

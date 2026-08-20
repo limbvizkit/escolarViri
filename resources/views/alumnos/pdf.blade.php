@@ -111,6 +111,7 @@
                 <th>#</th>
                 <th>Nombre completo</th>
                 <th>Grado Escolar</th>
+                <th>Sucursal</th>
                 <th>Fecha nacimiento</th>
                 <th>Horario</th>
                 <th class="num">Inscripción</th>
@@ -127,6 +128,7 @@
                     <td>{{ $alumno->id }}</td>
                     <td>{{ $alumno->nombre_completo }}</td>
                     <td>{{ $alumno->gradoEscolar->nombre ?? '—' }}</td>
+                    <td>{{ $alumno->sucursal->nombre ?? '—' }}</td>
                     <td>{{ $alumno->fecha_nacimiento?->format('d/m/Y') ?? '—' }}</td>
                     <td>{{ $alumno->horario ?? '—' }}</td>
                     <td class="num">{{ $alumno->inscripcion ? '$' . number_format((float) $alumno->inscripcion, 2) : 'NA' }}</td>
@@ -134,11 +136,11 @@
                     <td class="num">{{ $alumno->nat_geo ? '$' . number_format((float) $alumno->nat_geo, 2) : 'NA' }}</td>
                     <td class="num">{{ $alumno->cuota_materiales ? '$' . number_format((float) $alumno->cuota_materiales, 2) : 'NA' }}</td>
                     <td class="num">{{ $alumno->cuota_mensual ? '$' . number_format((float) $alumno->cuota_mensual, 2) : 'NA' }}</td>
-                    <td class="center">{{ $alumno->estatus ? 'Activo' : 'Inactivo' }}</td>
+                    <td class="center">{{ $alumno->estatus_es_activo ? 'Activo' : 'Inactivo' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="11" class="empty">Sin registros</td>
+                    <td colspan="12" class="empty">Sin registros</td>
                 </tr>
             @endforelse
         </tbody>

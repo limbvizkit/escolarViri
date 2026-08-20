@@ -19,8 +19,8 @@
                         {{ $alumno->gradoEscolar->nombre }}
                     </span>
                 @endif
-                <span class="badge ip-badge-{{ $alumno->estatus ? 'active' : 'inactive' }}">
-                    {{ $alumno->estatus ? 'Activo' : 'Inactivo' }}
+                <span class="badge ip-badge-{{ $alumno->estatus_badge }}">
+                    {{ $alumno->estatus_es_activo ? 'Activo' : 'Inactivo' }}
                 </span>
             </div>
         </div>
@@ -42,6 +42,10 @@
                 <div class="col-md-4">
                     <div class="ip-detail-label">Grado Escolar</div>
                     <div class="ip-detail-value">{{ $alumno->gradoEscolar->nombre ?? '—' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ip-detail-label">Sucursal</div>
+                    <div class="ip-detail-value">{{ $alumno->sucursal->nombre ?? '—' }}</div>
                 </div>
                 <div class="col-md-4">
                     <div class="ip-detail-label">Horario</div>

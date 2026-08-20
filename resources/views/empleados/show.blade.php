@@ -18,8 +18,8 @@
     <div class="ip-card">
         <div class="ip-card-header">
             <h5 class="ip-card-title">{{ $empleado->nombre_completo }}</h5>
-            <span class="badge ip-badge-{{ $empleado->estatus ? 'active' : 'inactive' }}">
-                {{ $empleado->estatus ? 'Activo' : 'Inactivo' }}
+            <span class="badge ip-badge-{{ $empleado->estatus_badge }}">
+                {{ $empleado->estatus_es_activo ? 'Activo' : 'Inactivo' }}
             </span>
         </div>
         <div class="ip-card-body">

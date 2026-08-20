@@ -63,7 +63,7 @@ class TallerController extends Controller
 
     public function alumnoCreate(Taller $taller): View
     {
-        $alumnosDisponibles = Alumno::where('estatus', true)
+        $alumnosDisponibles = Alumno::active()
             ->orderBy('apellido_paterno')
             ->orderBy('nombre')
             ->with('gradoEscolar')

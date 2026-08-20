@@ -153,8 +153,8 @@
                                 <div class="fw-semibold">{{ $escuela->nombre }}</div>
                                 <small class="ip-muted">{{ $escuela->clave }}</small>
                             </div>
-                            <span class="badge ip-badge-{{ $escuela->estatus ? 'active' : 'inactive' }}">
-                                {{ $escuela->estatus ? 'Activo' : 'Inactivo' }}
+                            <span class="badge ip-badge-{{ $escuela->estatus_badge }}">
+                                {{ $escuela->estatus_es_activo ? 'Activo' : 'Inactivo' }}
                             </span>
                         </li>
                     @empty
@@ -179,8 +179,8 @@
                                 <div class="fw-semibold">{{ $sucursal->nombre }}</div>
                                 <small class="ip-muted">{{ $sucursal->escuela->nombre ?? 'Sin escuela' }}</small>
                             </div>
-                            <span class="badge ip-badge-{{ $sucursal->estatus ? 'active' : 'inactive' }}">
-                                {{ $sucursal->estatus ? 'Activo' : 'Inactivo' }}
+                            <span class="badge ip-badge-{{ $sucursal->estatus_badge }}">
+                                {{ $sucursal->estatus_es_activo ? 'Activo' : 'Inactivo' }}
                             </span>
                         </li>
                     @empty

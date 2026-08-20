@@ -80,7 +80,7 @@ class AlumnoSeeder extends Seeder
                     'cuota_materiales' => $this->parseMonto($row[8] ?? ''),
                     'fecha_ingreso' => $this->parseFecha($row[9] ?? ''),
                     'cuota_mensual' => $this->parseMonto($row[10] ?? ''),
-                    'estatus' => true,
+                    'estatus_id' => 1,
                 ],
             );
 

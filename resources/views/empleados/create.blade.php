@@ -88,14 +88,13 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label d-block">Estatus</label>
-                                <div class="form-check form-switch mt-2">
-                                    <input type="hidden" name="estatus" value="0">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="estatus"
-                                           name="estatus" value="1"
-                                           {{ old('estatus', $empleado->estatus ?? true) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="estatus">Activo</label>
-                                </div>
+                                <label for="estatus_id" class="form-label d-block">Estatus</label>
+                                <select id="estatus_id" name="estatus_id"
+                                        class="form-select @error('estatus_id') is-invalid @enderror">
+                                    <option value="1" @selected((int) old('estatus_id', $empleado->estatus_id ?? 1) === 1)>Activo</option>
+                                    <option value="2" @selected((int) old('estatus_id', $empleado->estatus_id ?? 1) === 2)>Inactivo</option>
+                                </select>
+                                @error('estatus_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
                         </div>
 
