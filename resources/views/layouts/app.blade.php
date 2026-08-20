@@ -58,6 +58,9 @@
             <a href="{{ route('pagos.index') }}" class="{{ request()->routeIs('pagos.*') ? 'active' : '' }}">
                 <i class="bi bi-cash-coin"></i><span>Pagos</span>
             </a>
+            <a href="{{ route('adeudos.index') }}" class="{{ request()->routeIs('adeudos.*') ? 'active' : '' }}">
+                <i class="bi bi-cash-stack"></i><span>Adeudos</span>
+            </a>
             <a href="{{ route('talleres.index') }}" class="{{ request()->routeIs('talleres.*') ? 'active' : '' }}">
                 <i class="bi bi-easel"></i><span>Talleres</span>
             </a>
