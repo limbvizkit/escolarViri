@@ -14,6 +14,7 @@ class AdeudoAbono extends Model
 
     protected $fillable = [
         'adeudo_id',
+        'forma_pago_id',
         'monto',
         'fecha',
     ];
@@ -29,5 +30,10 @@ class AdeudoAbono extends Model
     public function adeudo(): BelongsTo
     {
         return $this->belongsTo(Adeudo::class);
+    }
+
+    public function formaPago(): BelongsTo
+    {
+        return $this->belongsTo(FormaPago::class);
     }
 }

@@ -54,4 +54,6 @@ Route::middleware('auth')->group(function () {
     Route::post('adeudos', [AdeudoController::class, 'store'])->name('adeudos.store');
     Route::get('adeudos/{adeudo}', [AdeudoController::class, 'show'])->name('adeudos.show');
     Route::post('adeudos/{adeudo}/abonar', [AdeudoController::class, 'abonar'])->name('adeudos.abonar');
+
+    Route::put('adeudos/{adeudo}/abonos/{abono}', [AdeudoController::class, 'abonoUpdate'])->name('adeudos.abonos.update');
 });

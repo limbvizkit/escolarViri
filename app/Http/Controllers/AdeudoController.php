@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Adeudo;
 use App\Models\AdeudoAbono;
 use App\Models\Alumno;
+use App\Models\FormaPago;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AdeudoController extends Controller
@@ -53,9 +56,15 @@ class AdeudoController extends Controller
 
     public function show(Adeudo $adeudo): View
     {
-        $adeudo->load(['alumno.gradoEscolar', 'abonos' => fn ($q) => $q->orderByDesc('fecha')->orderByDesc('id')]);
+        $adeudo->load([
+            'alumno.gradoEscolar',
+            'abonos' => fn ($q) => $q->orderByDesc('fecha')->orderByDesc('id'),
+            'abonos.formaPago',
+        ]);
 
-        return view('adeudos.show', compact('adeudo'));
+        $formasPago = FormaPago::active()->orderBy('nombre')->get();
+
+        return view('adeudos.show', compact('adeudo', 'formasPago'));
     }
 
     public function abonar(Request $request, Adeudo $adeudo): RedirectResponse
@@ -68,6 +77,7 @@ class AdeudoController extends Controller
         $validated = $request->validate([
             'monto' => ['required', 'numeric', 'min:0.01'],
             'fecha' => ['nullable', 'date'],
+            'forma_pago_id' => ['nullable', 'exists:formas_pago,id'],
         ], $this->mensajesAbono());
 
         if ((float) $validated['monto'] > $adeudo->pendiente) {
@@ -77,18 +87,77 @@ class AdeudoController extends Controller
 
         AdeudoAbono::create([
             'adeudo_id' => $adeudo->id,
+            'forma_pago_id' => $validated['forma_pago_id'] ?? null,
             'monto' => $validated['monto'],
             'fecha' => $validated['fecha'] ?? now(),
         ]);
 
-        $nuevoPagado = (float) $adeudo->monto_pagado + (float) $validated['monto'];
-        $adeudo->update([
-            'monto_pagado' => min($nuevoPagado, (float) $adeudo->monto),
-            'estatus' => $nuevoPagado >= (float) $adeudo->monto ? Adeudo::ESTATUS_PAGADO : Adeudo::ESTATUS_PARCIAL,
-        ]);
+        $this->recalcularAdeudo($adeudo);
 
         return redirect()->back()
             ->with('success', 'Abono registrado correctamente.');
+    }
+
+    public function abonoUpdate(Request $request, Adeudo $adeudo, AdeudoAbono $abono): JsonResponse
+    {
+        abort_unless($abono->adeudo_id === $adeudo->id, 404);
+
+        // Solo se validan los campos que el usuario envió: el JS inline
+        // deshabilita los que no cambió y los deshabilitados no se envían.
+        $datos = $request->only(['monto', 'fecha', 'forma_pago_id']);
+
+        if ($datos !== []) {
+            $reglas = collect([
+                'monto' => ['required', 'numeric', 'min:0.01'],
+                'fecha' => ['nullable', 'date'],
+                'forma_pago_id' => ['nullable', 'exists:formas_pago,id'],
+            ])->only(array_keys($datos))->all();
+
+            try {
+                $datos = $request->validate($reglas, $this->mensajesAbono());
+            } catch (ValidationException $e) {
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+        }
+
+        $nuevoMonto = array_key_exists('monto', $datos) ? (float) $datos['monto'] : (float) $abono->monto;
+        $otros = (float) $adeudo->abonos()->where('id', '!=', $abono->id)->sum('monto');
+
+        if ($nuevoMonto + $otros > (float) $adeudo->monto) {
+            return response()->json([
+                'mensaje' => 'El monto total de los abonos no puede superar el monto del adeudo.',
+            ], 422);
+        }
+
+        $abono->update([
+            'monto' => array_key_exists('monto', $datos) ? $datos['monto'] : $abono->monto,
+            'fecha' => array_key_exists('fecha', $datos) ? $datos['fecha'] : $abono->fecha,
+            'forma_pago_id' => array_key_exists('forma_pago_id', $datos) ? ($datos['forma_pago_id'] ?: null) : $abono->forma_pago_id,
+        ]);
+
+        $this->recalcularAdeudo($adeudo);
+
+        return response()->json([
+            'success' => true,
+            'mensaje' => 'Abono actualizado correctamente.',
+            'valores' => [
+                'monto' => (string) $abono->fresh()->monto,
+                'fecha' => $abono->fresh()->fecha?->format('Y-m-d') ?? '',
+                'forma_pago_id' => $abono->fresh()->forma_pago_id,
+            ],
+        ]);
+    }
+
+    private function recalcularAdeudo(Adeudo $adeudo): void
+    {
+        $pagado = (float) $adeudo->abonos()->sum('monto');
+
+        $adeudo->update([
+            'monto_pagado' => min($pagado, (float) $adeudo->monto),
+            'estatus' => $pagado >= (float) $adeudo->monto
+                ? Adeudo::ESTATUS_PAGADO
+                : ($pagado > 0 ? Adeudo::ESTATUS_PARCIAL : Adeudo::ESTATUS_PENDIENTE),
+        ]);
     }
 
     private function filteredQuery(Request $request): Builder
@@ -139,6 +208,7 @@ class AdeudoController extends Controller
             'monto.numeric' => 'El monto debe ser un número.',
             'monto.min' => 'El monto debe ser mayor a cero.',
             'fecha.date' => 'La fecha no es válida.',
+            'forma_pago_id.exists' => 'La forma de pago seleccionada no es válida.',
         ];
     }
 }
