@@ -37,8 +37,8 @@
                             <td>{{ $alumno->horario ?? '—' }}</td>
                             <td>{{ $alumno->cuota_mensual ? '$' . number_format($alumno->cuota_mensual, 2) : '—' }}</td>
                             <td>
-                                <span class="badge ip-badge-{{ $alumno->estatus ? 'active' : 'inactive' }}">
-                                    {{ $alumno->estatus ? 'Activo' : 'Inactivo' }}
+                                <span class="badge ip-badge-{{ $alumno->estatus_badge }}">
+                                    {{ $alumno->estatus_es_activo ? 'Activo' : 'Inactivo' }}
                                 </span>
                             </td>
                         </tr>

@@ -29,7 +29,7 @@
                         <th>Sucursal</th>
                         <x-sortable field="puesto" label="Puesto" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="email" label="Correo" :current="request('sort')" :direction="request('direction')" />
-                        <x-sortable field="estatus" label="Estatus" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="estatus_id" label="Estatus" :current="request('sort')" :direction="request('direction')" />
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -41,8 +41,8 @@
                             <td>{{ $empleado->puesto ?? '—' }}</td>
                             <td class="ip-muted">{{ $empleado->email ?? '—' }}</td>
                             <td>
-                                <span class="badge ip-badge-{{ $empleado->estatus ? 'active' : 'inactive' }}">
-                                    {{ $empleado->estatus ? 'Activo' : 'Inactivo' }}
+                                <span class="badge ip-badge-{{ $empleado->estatus_badge }}">
+                                    {{ $empleado->estatus_es_activo ? 'Activo' : 'Inactivo' }}
                                 </span>
                             </td>
                             <td class="text-end">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estatus;
 use App\Models\GradoEscolar;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,18 +20,18 @@ class GradoEscolarController extends Controller
         }
 
         if ($request->filled('estatus')) {
-            $query->where('grados_escolares.estatus', $request->boolean('estatus'));
+            $query->where('grados_escolares.estatus_id', $request->input('estatus'));
         }
 
         $gradosEscolares = $this->paginateOrdered(
             $query,
             $request,
-            ['id', 'nombre', 'alumnos_count', 'estatus'],
+            ['id', 'nombre', 'alumnos_count', 'estatus_id'],
             'nombre',
         );
 
         $filtros = [
-            ['name' => 'estatus', 'label' => 'Estatus', 'options' => ['1' => 'Activo', '0' => 'Inactivo']],
+            ['name' => 'estatus', 'label' => 'Estatus', 'options' => [Estatus::ACTIVO => 'Activo', Estatus::INACTIVO => 'Inactivo']],
         ];
 
         return view('grados-escolares.index', compact('gradosEscolares', 'filtros'));
@@ -48,7 +49,7 @@ class GradoEscolarController extends Controller
         GradoEscolar::create([
             'nombre' => $validated['nombre'],
             'slug' => Str::slug($validated['nombre']),
-            'estatus' => $request->boolean('estatus'),
+            'estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO),
         ]);
 
         return redirect()->route('grados-escolares.index')
@@ -74,7 +75,7 @@ class GradoEscolarController extends Controller
         $gradoEscolar->update([
             'nombre' => $validated['nombre'],
             'slug' => Str::slug($validated['nombre']),
-            'estatus' => $request->boolean('estatus'),
+            'estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO),
         ]);
 
         return redirect()->route('grados-escolares.index')
@@ -88,7 +89,7 @@ class GradoEscolarController extends Controller
                 ->with('error', 'No se puede eliminar un grado escolar que tiene alumnos asignados.');
         }
 
-        $gradoEscolar->delete();
+        $gradoEscolar->update(['estatus_id' => Estatus::ELIMINADO]);
 
         return redirect()->route('grados-escolares.index')
             ->with('success', 'Grado Escolar eliminado correctamente.');

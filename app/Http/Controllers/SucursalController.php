@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Escuela;
+use App\Models\Estatus;
 use App\Models\Sucursal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class SucursalController extends Controller
         }
 
         if ($request->filled('estatus')) {
-            $query->where('sucursales.estatus', $request->boolean('estatus'));
+            $query->where('sucursales.estatus_id', $request->input('estatus'));
         }
 
         if ($request->filled('escuela_id')) {
@@ -29,13 +30,13 @@ class SucursalController extends Controller
         $sucursales = $this->paginateOrdered(
             $query,
             $request,
-            ['id', 'nombre', 'direccion', 'estatus', 'empleados_count'],
+            ['id', 'nombre', 'direccion', 'estatus_id', 'empleados_count'],
             'nombre',
         );
 
         $filtros = [
             ['name' => 'escuela_id', 'label' => 'Escuela', 'options' => Escuela::orderBy('nombre')->pluck('nombre', 'id')->all()],
-            ['name' => 'estatus', 'label' => 'Estatus', 'options' => ['1' => 'Activa', '0' => 'Inactiva']],
+            ['name' => 'estatus', 'label' => 'Estatus', 'options' => [Estatus::ACTIVO => 'Activa', Estatus::INACTIVO => 'Inactiva']],
         ];
 
         return view('sucursales.index', compact('sucursales', 'filtros'));
@@ -56,10 +57,10 @@ class SucursalController extends Controller
             'direccion' => ['nullable', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
-            'estatus' => ['nullable', 'boolean'],
+            'estatus_id' => ['nullable', 'exists:estatus,id'],
         ]);
 
-        Sucursal::create($validated + ['estatus' => $request->boolean('estatus')]);
+        Sucursal::create($validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)]);
 
         return redirect()->route('sucursales.index')
             ->with('success', 'Sucursal creada correctamente.');
@@ -87,10 +88,10 @@ class SucursalController extends Controller
             'direccion' => ['nullable', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
-            'estatus' => ['nullable', 'boolean'],
+            'estatus_id' => ['nullable', 'exists:estatus,id'],
         ]);
 
-        $sucursal->update($validated + ['estatus' => $request->boolean('estatus')]);
+        $sucursal->update($validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)]);
 
         return redirect()->route('sucursales.index')
             ->with('success', 'Sucursal actualizada correctamente.');
@@ -98,7 +99,7 @@ class SucursalController extends Controller
 
     public function destroy(Sucursal $sucursal): RedirectResponse
     {
-        $sucursal->delete();
+        $sucursal->update(['estatus_id' => Estatus::ELIMINADO]);
 
         return redirect()->route('sucursales.index')
             ->with('success', 'Sucursal eliminada correctamente.');

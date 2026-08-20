@@ -43,6 +43,10 @@
                     <div class="ip-detail-label">TALLERES</div>
                     <div class="ip-detail-value">{{ $pago->talleres !== null ? '$' . number_format((float) $pago->talleres, 2) : '—' }}</div>
                 </div>
+                <div class="col-md-3">
+                    <div class="ip-detail-label">LUNCH</div>
+                    <div class="ip-detail-value">{{ $pago->lunch !== null ? '$' . number_format((float) $pago->lunch, 2) : '—' }}</div>
+                </div>
             </div>
         </div>
     </div>

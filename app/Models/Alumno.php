@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ConEstatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,10 +11,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Alumno extends Model
 {
+    use ConEstatus;
     use HasFactory;
 
     protected $fillable = [
         'grado_escolar_id',
+        'sucursal_id',
         'nombre',
         'apellido_paterno',
         'apellido_materno',
@@ -26,7 +29,7 @@ class Alumno extends Model
         'cuota_materiales',
         'fecha_ingreso',
         'cuota_mensual',
-        'estatus',
+        'estatus_id',
         'archivo',
     ];
 
@@ -49,9 +52,19 @@ class Alumno extends Model
         return $this->belongsTo(GradoEscolar::class);
     }
 
+    public function sucursal(): BelongsTo
+    {
+        return $this->belongsTo(Sucursal::class);
+    }
+
     public function pagos(): HasMany
     {
         return $this->hasMany(Pago::class);
+    }
+
+    public function documentos(): HasMany
+    {
+        return $this->hasMany(Documento::class);
     }
 
     public function talleres(): BelongsToMany

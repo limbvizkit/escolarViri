@@ -382,6 +382,14 @@ body {
     border-radius: 50rem;
 }
 
+.ip-badge-deleted {
+    background: rgba(220, 53, 69, .12);
+    color: var(--ip-danger);
+    font-weight: 600;
+    padding: .45em .75em;
+    border-radius: 50rem;
+}
+
 /* ---- Forms ---- */
 .form-label {
     font-weight: 500;

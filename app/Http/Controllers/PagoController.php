@@ -161,7 +161,7 @@ class PagoController extends Controller
 
     private function allowedSorts(): array
     {
-        return ['id', 'alumno_id', 'mes', 'fecha', 'entrada_8am', 'pronto_pago', 'pago_normal', 'talleres', 'forma_pago_id'];
+        return ['id', 'alumno_id', 'mes', 'fecha', 'entrada_8am', 'pronto_pago', 'pago_normal', 'talleres', 'lunch', 'forma_pago_id'];
     }
 
     private function reglas(): array
@@ -174,6 +174,7 @@ class PagoController extends Controller
             'pronto_pago' => ['nullable', 'numeric', 'min:0'],
             'pago_normal' => ['nullable', 'numeric', 'min:0'],
             'talleres' => ['nullable', 'numeric', 'min:0'],
+            'lunch' => ['nullable', 'numeric', 'min:0'],
             'forma_pago_id' => ['nullable', 'exists:formas_pago,id'],
         ];
     }

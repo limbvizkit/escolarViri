@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentacionController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\EscuelaController;
 use App\Http\Controllers\GradoEscolarController;
@@ -42,4 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::post('talleres/{taller}/alumnos', [TallerController::class, 'alumnoStore'])->name('talleres.alumnos.store');
     Route::delete('talleres/{taller}/alumnos/{alumno}', [TallerController::class, 'alumnoDestroy'])->name('talleres.alumnos.destroy');
     Route::resource('talleres', TallerController::class)->parameters(['talleres' => 'taller'])->except(['show']);
+    Route::get('documentacion', [DocumentacionController::class, 'index'])->name('documentacion.index');
+    Route::get('documentacion/descargar/{documento}', [DocumentacionController::class, 'descargar'])->name('documentacion.descargar');
+    Route::get('documentacion/{alumno}', [DocumentacionController::class, 'show'])->name('documentacion.show');
+    Route::post('documentacion/{alumno}', [DocumentacionController::class, 'store'])->name('documentacion.store');
+    Route::delete('documentacion/{documento}', [DocumentacionController::class, 'destroy'])->name('documentacion.destroy');
 });

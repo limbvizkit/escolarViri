@@ -47,19 +47,24 @@
             <a href="{{ route('empleados.index') }}" class="{{ request()->routeIs('empleados.*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill"></i><span>Empleados</span>
             </a>
+            <a href="{{ route('grados-escolares.index') }}" class="{{ request()->routeIs('grados-escolares.*') ? 'active' : '' }}">
+                <i class="bi bi-layers-fill"></i><span>Grados Escolares</span>
+            </a>
 
             <div class="ip-nav-title">Académico</div>
             <a href="{{ route('alumnos.index') }}" class="{{ request()->routeIs('alumnos.*') ? 'active' : '' }}">
                 <i class="bi bi-person-lines-fill"></i><span>Alumnos</span>
-            </a>
-            <a href="{{ route('grados-escolares.index') }}" class="{{ request()->routeIs('grados-escolares.*') ? 'active' : '' }}">
-                <i class="bi bi-layers-fill"></i><span>Grados Escolares</span>
             </a>
             <a href="{{ route('pagos.index') }}" class="{{ request()->routeIs('pagos.*') ? 'active' : '' }}">
                 <i class="bi bi-cash-coin"></i><span>Pagos</span>
             </a>
             <a href="{{ route('talleres.index') }}" class="{{ request()->routeIs('talleres.*') ? 'active' : '' }}">
                 <i class="bi bi-easel"></i><span>Talleres</span>
+            </a>
+
+            <div class="ip-nav-title">Documentación</div>
+            <a href="{{ route('documentacion.index') }}" class="{{ request()->routeIs('documentacion.*') ? 'active' : '' }}">
+                <i class="bi bi-folder2-open"></i><span>Documentación</span>
             </a>
 
             <div class="ip-nav-title">Acceso</div>

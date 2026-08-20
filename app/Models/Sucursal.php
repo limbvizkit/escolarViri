@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ConEstatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sucursal extends Model
 {
+    use ConEstatus;
     use HasFactory;
 
     protected $table = 'sucursales';
@@ -19,7 +21,7 @@ class Sucursal extends Model
         'direccion',
         'telefono',
         'email',
-        'estatus',
+        'estatus_id',
     ];
 
     public function escuela(): BelongsTo
@@ -30,11 +32,6 @@ class Sucursal extends Model
     public function empleados(): HasMany
     {
         return $this->hasMany(Empleado::class);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('estatus', true);
     }
 
     public function scopeSearch($query, ?string $busqueda)

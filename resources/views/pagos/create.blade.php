@@ -9,6 +9,7 @@
         'pronto_pago' => 'Pronto pago',
         'pago_normal' => 'Pago normal',
         'talleres' => 'Talleres',
+        'lunch' => 'Lunch',
     ];
 @endphp
 

@@ -49,6 +49,7 @@
                         <x-sortable field="pago_normal" label="Pago normal" :current="request('sort')" :direction="request('direction')" />
                         <th>Forma de pago</th>
                         <x-sortable field="talleres" label="Talleres" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="lunch" label="Lunch" :current="request('sort')" :direction="request('direction')" />
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -131,6 +132,18 @@
                                 </div>
                             </td>
 
+                            <td>
+                                <div class="cell-view" data-target="lunch">
+                                    {{ $pago->lunch !== null ? '$' . number_format((float) $pago->lunch, 2) : '—' }}
+                                </div>
+                                <div class="input-group input-group-sm cell-edit d-none">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" min="0" name="lunch" form="{{ $formId }}"
+                                           data-key="lunch" data-format="money"
+                                           class="form-control" value="{{ $pago->lunch }}" data-original="{{ $pago->lunch }}">
+                                </div>
+                            </td>
+
                             <td class="text-end">
                                 <form id="{{ $formId }}" method="POST" action="{{ route('pagos.inline-update', $pago) }}">
                                     @csrf
@@ -165,7 +178,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center ip-muted py-4">
+                            <td colspan="11" class="text-center ip-muted py-4">
                                 No hay pagos registrados.
                                 <a href="{{ route('pagos.create') }}" class="d-block mt-2">Registrar el primero</a>
                             </td>

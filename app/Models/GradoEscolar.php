@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ConEstatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GradoEscolar extends Model
 {
+    use ConEstatus;
     use HasFactory;
 
     protected $table = 'grados_escolares';
@@ -15,17 +17,12 @@ class GradoEscolar extends Model
     protected $fillable = [
         'nombre',
         'slug',
-        'estatus',
+        'estatus_id',
     ];
 
     public function alumnos(): HasMany
     {
         return $this->hasMany(Alumno::class);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('estatus', true);
     }
 
     public function scopeSearch($query, ?string $busqueda)
