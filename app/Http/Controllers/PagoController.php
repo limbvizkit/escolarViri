@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -138,6 +140,148 @@ class PagoController extends Controller
             ->orderBy($this->sortField($request, $this->allowedSorts(), 'alumno_id'), $this->sortDirection($request));
 
         return Excel::download(new PagoExport($query), 'pagos-'.now()->format('Y-m-d').'.xlsx');
+    }
+
+    public function precargar(): View
+    {
+        $mesActual = now()->format('Y-m');
+        $mesSiguiente = now()->startOfMonth()->addMonthNoOverflow()->format('Y-m');
+
+        $pagosActuales = $this->pagosDelMes($mesActual);
+        $pagosSiguientes = $this->pagosDelMes($mesSiguiente);
+        $formasPago = FormaPago::active()->orderBy('nombre')->get();
+
+        $etiquetaMesActual = Pago::mesLabel($mesActual);
+        $etiquetaMesSiguiente = Pago::mesLabel($mesSiguiente);
+
+        return view('pagos.precargar', compact(
+            'mesSiguiente',
+            'etiquetaMesActual',
+            'etiquetaMesSiguiente',
+            'pagosActuales',
+            'pagosSiguientes',
+            'formasPago',
+        ));
+    }
+
+    public function precargarStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'seleccionados' => ['required', 'array', 'min:1'],
+            'seleccionados.*' => ['exists:pagos,id'],
+        ], [
+            'seleccionados.required' => 'Selecciona al menos un pago para precargar.',
+            'seleccionados.min' => 'Selecciona al menos un pago para precargar.',
+        ]);
+
+        $mesSiguiente = now()->startOfMonth()->addMonthNoOverflow()->format('Y-m');
+        $seleccionados = array_map('intval', $validated['seleccionados']);
+        $filas = (array) $request->input('pagos', []);
+        $origenes = Pago::with('alumno')->whereIn('id', $seleccionados)->get()->keyBy('id');
+
+        foreach ($seleccionados as $id) {
+            $origen = $origenes->get($id);
+
+            if ($origen === null) {
+                continue;
+            }
+
+            $fila = array_intersect_key((array) ($filas[$id] ?? []), $this->reglasPrecarga());
+            $validador = Validator::make($fila, array_intersect_key($this->reglasPrecarga(), $fila), $this->mensajes());
+
+            if ($validador->fails()) {
+                return redirect()
+                    ->route('pagos.precargar')
+                    ->withInput()
+                    ->with('error', 'No se pudo precargar el pago de '.$origen->alumno->nombre_completo.': '.$validador->errors()->first());
+            }
+        }
+
+        try {
+            [$creados, $omitidos] = DB::transaction(function () use ($filas, $mesSiguiente, $origenes, $seleccionados) {
+                $creados = 0;
+                $omitidos = [];
+
+                foreach ($seleccionados as $id) {
+                    $origen = $origenes->get($id);
+
+                    if ($origen === null) {
+                        continue;
+                    }
+
+                    $datos = $this->datosParaNuevoPago($origen, $mesSiguiente, (array) ($filas[$id] ?? []));
+
+                    if (Pago::where('alumno_id', $origen->alumno_id)->where('mes', $datos['mes'])->exists()) {
+                        $omitidos[] = $origen->alumno->nombre_completo;
+
+                        continue;
+                    }
+
+                    Pago::create($datos);
+                    $creados++;
+                }
+
+                return [$creados, $omitidos];
+            });
+        } catch (QueryException) {
+            return redirect()
+                ->route('pagos.index')
+                ->with('error', 'Ocurrió un error al guardar los pagos. Intenta nuevamente.');
+        }
+
+        if ($creados === 0) {
+            return redirect()
+                ->route('pagos.index')
+                ->with('error', 'No se crearon pagos nuevos. Se omitieron '.count($omitidos).': '.implode(', ', $omitidos).'.');
+        }
+
+        $mensaje = "Se crearon {$creados} pagos para ".Pago::mesLabel($mesSiguiente).'.';
+
+        if ($omitidos !== []) {
+            $mensaje .= ' Se omitieron '.count($omitidos).': '.implode(', ', $omitidos).'.';
+        }
+
+        return redirect()->route('pagos.index')->with('success', $mensaje);
+    }
+
+    private function pagosDelMes(string $mes)
+    {
+        return Pago::with(['alumno.gradoEscolar', 'formaPago'])
+            ->where('mes', $mes)
+            ->get()
+            ->sortBy(fn ($pago) => [$pago->alumno->apellido_paterno, $pago->alumno->nombre])
+            ->values();
+    }
+
+    private function reglasPrecarga(): array
+    {
+        return collect($this->reglas())->except('alumno_id')->all();
+    }
+
+    private function datosParaNuevoPago(Pago $origen, string $mesSiguiente, array $fila): array
+    {
+        $datos = [
+            'alumno_id' => $origen->alumno_id,
+            'mes' => $mesSiguiente,
+            'fecha' => $origen->fecha?->copy()->addMonthNoOverflow(),
+            'entrada_8am' => $origen->entrada_8am,
+            'pronto_pago' => $origen->pronto_pago,
+            'pago_normal' => $origen->pago_normal,
+            'talleres' => $origen->talleres,
+            'lunch' => $origen->lunch,
+            'forma_pago_id' => $origen->forma_pago_id,
+        ];
+
+        foreach (array_keys($this->reglasPrecarga()) as $campo) {
+            if (! array_key_exists($campo, $fila)) {
+                continue;
+            }
+
+            $valor = $fila[$campo];
+            $datos[$campo] = ($valor === null || $valor === '') ? null : $valor;
+        }
+
+        return $datos;
     }
 
     private function filteredQuery(Request $request): Builder
