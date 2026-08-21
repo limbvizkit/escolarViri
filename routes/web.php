@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
     Route::put('alumnos/{alumno}/inline-update', [AlumnoController::class, 'inlineUpdate'])->name('alumnos.inline-update');
     Route::get('pagos/exportar/pdf', [PagoController::class, 'exportPdf'])->name('pagos.export.pdf');
     Route::get('pagos/exportar/excel', [PagoController::class, 'exportExcel'])->name('pagos.export.excel');
+    Route::get('pagos/precargar', [PagoController::class, 'precargar'])->name('pagos.precargar');
+    Route::post('pagos/precargar', [PagoController::class, 'precargarStore'])->name('pagos.precargar.store');
     Route::resource('pagos', PagoController::class)->parameters(['pagos' => 'pago']);
     Route::put('pagos/{pago}/inline-update', [PagoController::class, 'inlineUpdate'])->name('pagos.inline-update');
     Route::put('talleres/inscripciones/{tallerAlumno}/monto', [TallerController::class, 'montoUpdate'])->name('talleres.inscripcion.monto.update');

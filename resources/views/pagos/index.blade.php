@@ -15,6 +15,9 @@
             <a href="{{ route('pagos.export.excel', $exportQuery) }}" class="btn ip-btn-success btn-sm">
                 <i class="bi bi-file-earmark-excel me-1"></i>Excel
             </a>
+            <a href="{{ route('pagos.precargar') }}" class="btn ip-btn-outline">
+                <i class="bi bi-collection me-1"></i>Precargar pagos
+            </a>
             <a href="{{ route('pagos.create') }}" class="btn ip-btn">
                 <i class="bi bi-plus-lg me-1"></i>Nuevo pago
             </a>

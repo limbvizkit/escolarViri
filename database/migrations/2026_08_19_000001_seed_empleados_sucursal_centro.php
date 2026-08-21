@@ -34,15 +34,39 @@ return new class extends Migration
 
     public function up(): void
     {
+        // La sucursal (y su escuela) deben existir para respetar la FK de empleados.
+        $escuelaId = DB::table('escuelas')->min('id');
+
+        if ($escuelaId === null) {
+            $escuelaId = DB::table('escuelas')->insertGetId([
+                'nombre' => 'Instituto Educativo Horizonte',
+                'clave' => 'IEH-001',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $sucursalId = DB::table('sucursales')->where('nombre', 'Sucursal Centro')->value('id');
+
+        if ($sucursalId === null) {
+            $sucursalId = DB::table('sucursales')->insertGetId([
+                'escuela_id' => $escuelaId,
+                'nombre' => 'Sucursal Centro',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Sin estatus_id: la columna no existe todavia en este punto;
+        // la migracion add_estatus_id la rellena despues desde estatus.
         $rows = array_map(fn (array $e) => [
-            'sucursal_id' => 1,
+            'sucursal_id' => $sucursalId,
             'nombre' => $e[0],
             'apellido_paterno' => $e[1],
             'apellido_materno' => $e[2],
             'email' => null,
             'telefono' => null,
             'puesto' => $e[3],
-            'estatus_id' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ], $this->empleados());
