@@ -244,8 +244,172 @@ body {
     border-color: #f0f1f5;
 }
 
-.ip-table tbody tr:hover {
-    background: #fafbff;
+.ip-table tbody tr:hover > td,
+.ip-table tbody tr:hover > th {
+    background-color: #f0f4ff;
+}
+
+.ip-table.ip-table-zebra tbody tr:nth-child(odd) > td,
+.ip-table.ip-table-zebra tbody tr:nth-child(odd) > th {
+    background-color: #f8f9fd;
+}
+
+.ip-table.ip-table-zebra tbody tr:nth-child(odd):hover > td,
+.ip-table.ip-table-zebra tbody tr:nth-child(odd):hover > th {
+    background-color: #f0f4ff;
+}
+
+/* Preservar estado de edición inline sobre zebra/hover */
+.ip-table tbody tr.ip-inline-row.is-editing > td,
+.ip-table tbody tr.ip-inline-row.is-editing > th,
+.ip-table.ip-table-zebra tbody tr.ip-inline-row.is-editing:nth-child(odd) > td,
+.ip-table.ip-table-zebra tbody tr.ip-inline-row.is-editing:nth-child(odd) > th,
+.ip-table tbody tr.ip-inline-row.is-editing:hover > td,
+.ip-table tbody tr.ip-inline-row.is-editing:hover > th,
+.ip-table.ip-table-zebra tbody tr.ip-inline-row.is-editing:nth-child(odd):hover > td,
+.ip-table.ip-table-zebra tbody tr.ip-inline-row.is-editing:nth-child(odd):hover > th {
+    background-color: #fbfdff;
+}
+
+/* Sticky header para tablas dentro de .table-responsive */
+.ip-table-sticky-head thead th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: inset 0 -1px 0 var(--ip-border);
+}
+
+.ip-table-sticky-head.table-responsive,
+.table-responsive:has(> .ip-table-sticky-head) {
+    overflow-y: visible;
+}
+
+@media (max-width: 991px) {
+    .ip-table-sticky-head.table-responsive,
+    .table-responsive:has(> .ip-table-sticky-head) {
+        overflow-y: hidden;
+    }
+}
+
+/* Contenedor con scroll vertical interno para tablas largas */
+.ip-table-scroll {
+    max-height: 60vh;
+    overflow: auto;
+    border-bottom: 1px solid var(--ip-border);
+}
+
+.ip-table-scroll .ip-table {
+    min-width: 1100px;
+}
+
+.ip-table-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #eaf1ff;
+    box-shadow: inset 0 -1px 0 var(--ip-border);
+}
+
+/* Toolbar superior de formulario con tabla */
+.ip-form-actions.ip-form-actions-top {
+    justify-content: flex-end;
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+/* Badges de forma de pago */
+.ip-badge-forma-pago {
+    background: rgba(108, 117, 125, .12);
+    color: var(--ip-muted);
+    font-weight: 600;
+    padding: .45em .75em;
+    border-radius: 50rem;
+}
+
+/* Colores semánticos por forma de pago (fallback si no coincide ninguna: base arriba) */
+.ip-badge-forma-pago.ip-forma-pago-efectivo,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-efectivo {
+    background: #e3f3ea;
+    color: #198754;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-transferencia,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-transferencia {
+    background: #e7f1ff;
+    color: #0d6efd;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-tarjeta,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-tarjeta,
+.ip-badge-forma-pago.ip-forma-pago-tarjeta-de-credito,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-tarjeta-de-credito,
+.ip-badge-forma-pago.ip-forma-pago-tarjeta-de-debito,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-tarjeta-de-debito,
+.ip-badge-forma-pago.ip-forma-pago-terminal,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-terminal {
+    background: #f3e8ff;
+    color: #6f42c1;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-open-pay,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-open-pay,
+.ip-badge-forma-pago.ip-forma-pago-mercado-pago,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-mercado-pago,
+.ip-badge-forma-pago.ip-forma-pago-paypal,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-paypal {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-deposito,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-deposito {
+    background: #fff3cd;
+    color: #997404;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-cheque,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-cheque {
+    background: #ffe5d0;
+    color: #c25e00;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-domiciliacion,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-domiciliacion {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-oxxo,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-oxxo {
+    background: #fdecea;
+    color: #b02a37;
+}
+
+/* Colores por ID de forma de pago (fuente de verdad; tiene prioridad sobre slugs) */
+.ip-badge-forma-pago.ip-forma-pago-1,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-1 {
+    background: #e7f1ff;
+    color: #0d6efd;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-2,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-2 {
+    background: #f3e8ff;
+    color: #6f42c1;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-3,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-3 {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.ip-badge-forma-pago.ip-forma-pago-4,
+.ip-table tbody tr.ip-inline-row.is-editing .ip-badge-forma-pago.ip-forma-pago-4 {
+    background: #e3f3ea;
+    color: #198754;
 }
 
 /* ---- Buttons ---- */

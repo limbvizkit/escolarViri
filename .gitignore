@@ -27,6 +27,7 @@ Homestead.yaml
 Thumbs.db
 # Local AI runtime state
 .atl/
+opencode.json
 
 # Sensitive data exports
 alumnosViri.csv
