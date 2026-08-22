@@ -151,6 +151,11 @@ class PagoController extends Controller
         $pagosSiguientes = $this->pagosDelMes($mesSiguiente);
         $formasPago = FormaPago::active()->orderBy('nombre')->get();
 
+        $alumnosConPagoSiguiente = $pagosSiguientes->pluck('alumno_id')->all();
+        $pagosActuales = $pagosActuales
+            ->reject(fn ($pago) => in_array($pago->alumno_id, $alumnosConPagoSiguiente, true))
+            ->values();
+
         $etiquetaMesActual = Pago::mesLabel($mesActual);
         $etiquetaMesSiguiente = Pago::mesLabel($mesSiguiente);
 
@@ -225,13 +230,13 @@ class PagoController extends Controller
             });
         } catch (QueryException) {
             return redirect()
-                ->route('pagos.index')
+                ->route('pagos.precargar')
                 ->with('error', 'Ocurrió un error al guardar los pagos. Intenta nuevamente.');
         }
 
         if ($creados === 0) {
             return redirect()
-                ->route('pagos.index')
+                ->route('pagos.precargar')
                 ->with('error', 'No se crearon pagos nuevos. Se omitieron '.count($omitidos).': '.implode(', ', $omitidos).'.');
         }
 
@@ -241,7 +246,7 @@ class PagoController extends Controller
             $mensaje .= ' Se omitieron '.count($omitidos).': '.implode(', ', $omitidos).'.';
         }
 
-        return redirect()->route('pagos.index')->with('success', $mensaje);
+        return redirect()->route('pagos.precargar')->with('success', $mensaje);
     }
 
     private function pagosDelMes(string $mes)
