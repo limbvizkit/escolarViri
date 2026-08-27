@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Adeudo;
 use App\Models\AdeudoAbono;
 use App\Models\Alumno;
+use App\Models\Estatus;
 use App\Models\FormaPago;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -48,7 +49,10 @@ class AdeudoController extends Controller
     {
         $validated = $request->validate($this->reglas(), $this->mensajes());
 
-        Adeudo::create($validated + ['monto_pagado' => 0]);
+        Adeudo::create($validated + [
+            'monto_pagado' => 0,
+            'estatus_id' => Estatus::ACTIVO,
+        ]);
 
         return redirect()->route('adeudos.index')
             ->with('success', 'Adeudo registrado correctamente.');
@@ -62,9 +66,33 @@ class AdeudoController extends Controller
             'abonos.formaPago',
         ]);
 
+        $alumnos = Alumno::with('gradoEscolar')->orderBy('apellido_paterno')->get();
         $formasPago = FormaPago::active()->orderBy('nombre')->get();
 
-        return view('adeudos.show', compact('adeudo', 'formasPago'));
+        return view('adeudos.show', compact('adeudo', 'alumnos', 'formasPago'));
+    }
+
+    public function update(Request $request, Adeudo $adeudo): RedirectResponse
+    {
+        $validated = $request->validate($this->reglasActualizacion(), $this->mensajesActualizacion());
+
+        $adeudo->update($validated);
+
+        return redirect()->route('adeudos.show', $adeudo)
+            ->with('success', 'Adeudo actualizado correctamente.');
+    }
+
+    public function destroy(Adeudo $adeudo): RedirectResponse
+    {
+        if ($adeudo->abonos()->exists()) {
+            return redirect()->route('adeudos.index')
+                ->with('error', 'No es posible eliminar este adeudo porque tiene abonos registrados.');
+        }
+
+        $adeudo->update(['estatus_id' => Estatus::ELIMINADO]);
+
+        return redirect()->route('adeudos.index')
+            ->with('success', 'Adeudo eliminado correctamente.');
     }
 
     public function abonar(Request $request, Adeudo $adeudo): RedirectResponse
@@ -162,7 +190,7 @@ class AdeudoController extends Controller
 
     private function filteredQuery(Request $request): Builder
     {
-        $query = Adeudo::with(['alumno.gradoEscolar']);
+        $query = Adeudo::active()->with(['alumno.gradoEscolar']);
 
         if ($request->filled('q')) {
             $query->search($request->input('q'));
@@ -198,6 +226,29 @@ class AdeudoController extends Controller
             'monto.min' => 'El monto debe ser mayor a cero.',
             'estatus.required' => 'Selecciona un estatus.',
             'estatus.in' => 'El estatus seleccionado no es válido.',
+        ];
+    }
+
+    private function reglasActualizacion(): array
+    {
+        return [
+            'alumno_id' => ['required', 'exists:alumnos,id'],
+            'concepto' => ['required', 'string', 'max:255'],
+            'anotaciones' => ['nullable', 'string', 'max:1000'],
+            'created_at' => ['required', 'date'],
+        ];
+    }
+
+    private function mensajesActualizacion(): array
+    {
+        return [
+            'alumno_id.required' => 'Selecciona un alumno.',
+            'alumno_id.exists' => 'El alumno seleccionado no es válido.',
+            'concepto.required' => 'Indica el concepto del adeudo.',
+            'concepto.max' => 'El concepto no puede superar los 255 caracteres.',
+            'anotaciones.max' => 'Las anotaciones no pueden superar los 1000 caracteres.',
+            'created_at.required' => 'Indica la fecha de creación.',
+            'created_at.date' => 'La fecha de creación no es válida.',
         ];
     }
 

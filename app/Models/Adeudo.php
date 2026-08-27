@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,8 @@ class Adeudo extends Model
         'monto',
         'monto_pagado',
         'estatus',
+        'estatus_id',
+        'created_at',
     ];
 
     protected function casts(): array
@@ -34,7 +37,15 @@ class Adeudo extends Model
             'monto' => 'decimal:2',
             'monto_pagado' => 'decimal:2',
             'estatus' => 'string',
+            'estatus_id' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('no-eliminado', function (Builder $builder) {
+            $builder->where($builder->getModel()->getTable().'.estatus_id', '!=', Estatus::ELIMINADO);
+        });
     }
 
     public function alumno(): BelongsTo
@@ -45,6 +56,26 @@ class Adeudo extends Model
     public function abonos(): HasMany
     {
         return $this->hasMany(AdeudoAbono::class);
+    }
+
+    public function estatusRegistro(): BelongsTo
+    {
+        return $this->belongsTo(Estatus::class, 'estatus_id');
+    }
+
+    public function scopeActive($query): Builder
+    {
+        return $query->where($this->getTable().'.estatus_id', Estatus::ACTIVO);
+    }
+
+    public function scopeVisibles($query): Builder
+    {
+        return $query->where($this->getTable().'.estatus_id', '!=', Estatus::ELIMINADO);
+    }
+
+    public function getEstatusEsActivoAttribute(): bool
+    {
+        return $this->estatus_id === Estatus::ACTIVO;
     }
 
     public function getPendienteAttribute(): float

@@ -55,6 +55,8 @@ Route::middleware('auth')->group(function () {
     Route::get('adeudos/crear', [AdeudoController::class, 'create'])->name('adeudos.create');
     Route::post('adeudos', [AdeudoController::class, 'store'])->name('adeudos.store');
     Route::get('adeudos/{adeudo}', [AdeudoController::class, 'show'])->name('adeudos.show');
+    Route::put('adeudos/{adeudo}', [AdeudoController::class, 'update'])->name('adeudos.update');
+    Route::delete('adeudos/{adeudo}', [AdeudoController::class, 'destroy'])->name('adeudos.destroy');
     Route::post('adeudos/{adeudo}/abonar', [AdeudoController::class, 'abonar'])->name('adeudos.abonar');
 
     Route::put('adeudos/{adeudo}/abonos/{abono}', [AdeudoController::class, 'abonoUpdate'])->name('adeudos.abonos.update');
