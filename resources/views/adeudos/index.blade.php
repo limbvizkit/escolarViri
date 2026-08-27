@@ -70,9 +70,19 @@
                                 <span class="{{ $badge }}">{{ ucfirst($adeudo->estatus) }}</span>
                             </td>
                             <td class="text-end">
-                                <a href="{{ route('adeudos.show', $adeudo) }}" class="ip-action" title="Ver">
-                                    <i class="bi bi-eye"></i>
-                                </a>
+                                <div class="d-inline-flex gap-1">
+                                    <a href="{{ route('adeudos.show', $adeudo) }}" class="ip-action" title="Ver">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <form action="{{ route('adeudos.destroy', $adeudo) }}" method="POST" class="d-inline"
+                                          onsubmit="return confirm('¿Estás seguro de eliminar este registro?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="ip-action ip-action-danger" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

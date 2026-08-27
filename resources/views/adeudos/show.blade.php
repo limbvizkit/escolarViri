@@ -15,57 +15,150 @@
             <div class="ip-card mb-4">
                 <div class="ip-card-header">
                     <h5 class="ip-card-title">Detalle del adeudo</h5>
+                    <button type="button" class="btn ip-btn-outline btn-sm" id="btn-editar-detalle">
+                        <i class="bi bi-pencil-fill me-1"></i>Editar detalle
+                    </button>
                 </div>
                 <div class="ip-card-body">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="ip-detail-label">ALUMNO</div>
-                            <div class="ip-detail-value">{{ $adeudo->alumno->nombre_completo }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="ip-detail-label">CONCEPTO</div>
-                            <div class="ip-detail-value">{{ $adeudo->concepto }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="ip-detail-label">ANOTACIONES</div>
-                            <div class="ip-detail-value">{{ $adeudo->anotaciones ?? '—' }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="ip-detail-label">MONTO</div>
-                            <div class="ip-detail-value">{{ '$' . number_format((float) $adeudo->monto, 2) }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="ip-detail-label">ABONADO</div>
-                            <div class="ip-detail-value">{{ '$' . number_format((float) $adeudo->monto_pagado, 2) }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="ip-detail-label">PENDIENTE</div>
-                            <div class="ip-detail-value">
-                                @if ($adeudo->pendiente > 0)
-                                    <span class="fw-semibold text-danger">{{ $adeudo->pendienteFormateado }}</span>
-                                @else
-                                    <span class="fw-semibold text-success">{{ $adeudo->pendienteFormateado }}</span>
-                                @endif
+                    <form id="detalle-form" method="POST" action="{{ route('adeudos.update', $adeudo) }}">
+                        @csrf
+                        @method('PUT')
+
+                        <div id="detalle-view" class="row g-4">
+                            <div class="col-md-6">
+                                <div class="ip-detail-label">ALUMNO</div>
+                                <div class="ip-detail-value">{{ $adeudo->alumno->nombre_completo }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="ip-detail-label">CONCEPTO</div>
+                                <div class="ip-detail-value">{{ $adeudo->concepto }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="ip-detail-label">ANOTACIONES</div>
+                                <div class="ip-detail-value">{{ $adeudo->anotaciones ?? '—' }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">MONTO</div>
+                                <div class="ip-detail-value">{{ '$' . number_format((float) $adeudo->monto, 2) }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">ABONADO</div>
+                                <div class="ip-detail-value">{{ '$' . number_format((float) $adeudo->monto_pagado, 2) }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">PENDIENTE</div>
+                                <div class="ip-detail-value">
+                                    @if ($adeudo->pendiente > 0)
+                                        <span class="fw-semibold text-danger">{{ $adeudo->pendienteFormateado }}</span>
+                                    @else
+                                        <span class="fw-semibold text-success">{{ $adeudo->pendienteFormateado }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">ESTATUS</div>
+                                <div class="ip-detail-value">
+                                    @php
+                                        $badge = match ($adeudo->estatus) {
+                                            \App\Models\Adeudo::ESTATUS_PAGADO => 'badge ip-badge-active',
+                                            \App\Models\Adeudo::ESTATUS_PARCIAL => 'badge text-bg-info',
+                                            default => 'badge text-bg-warning',
+                                        };
+                                    @endphp
+                                    <span class="{{ $badge }}">{{ ucfirst($adeudo->estatus) }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="ip-detail-label">FECHA DE CREACIÓN</div>
+                                <div class="ip-detail-value">{{ $adeudo->created_at?->format('d/m/Y') ?? '—' }}</div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="ip-detail-label">ESTATUS</div>
-                            <div class="ip-detail-value">
-                                @php
-                                    $badge = match ($adeudo->estatus) {
-                                        \App\Models\Adeudo::ESTATUS_PAGADO => 'badge ip-badge-active',
-                                        \App\Models\Adeudo::ESTATUS_PARCIAL => 'badge text-bg-info',
-                                        default => 'badge text-bg-warning',
-                                    };
-                                @endphp
-                                <span class="{{ $badge }}">{{ ucfirst($adeudo->estatus) }}</span>
+
+                        <div id="detalle-edit" class="row g-4 d-none">
+                            <div class="col-md-6">
+                                <label for="alumno_id" class="form-label">Alumno <span class="ip-required">*</span></label>
+                                <select id="alumno_id" name="alumno_id"
+                                        class="form-select @error('alumno_id') is-invalid @enderror" required>
+                                    <option value="">— Seleccionar alumno —</option>
+                                    @foreach ($alumnos->groupBy(fn ($alumno) => $alumno->gradoEscolar->nombre ?? 'Sin grado escolar') as $grupo => $lista)
+                                        <optgroup label="{{ $grupo }}">
+                                            @foreach ($lista as $alumno)
+                                                <option value="{{ $alumno->id }}"
+                                                    {{ old('alumno_id', $adeudo->alumno_id) == $alumno->id ? 'selected' : '' }}>
+                                                    {{ $alumno->nombre_completo }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                                @error('alumno_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="concepto" class="form-label">Concepto <span class="ip-required">*</span></label>
+                                <input type="text" id="concepto" name="concepto" maxlength="255"
+                                       class="form-control @error('concepto') is-invalid @enderror"
+                                       value="{{ old('concepto', $adeudo->concepto) }}" required>
+                                @error('concepto')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="anotaciones" class="form-label">Anotaciones</label>
+                                <textarea id="anotaciones" name="anotaciones" rows="3" maxlength="1000"
+                                          class="form-control @error('anotaciones') is-invalid @enderror"
+                                          placeholder="Notas adicionales sobre el adeudo (opcional)">{{ old('anotaciones', $adeudo->anotaciones) }}</textarea>
+                                @error('anotaciones')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">MONTO</div>
+                                <div class="ip-detail-value">{{ '$' . number_format((float) $adeudo->monto, 2) }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">ABONADO</div>
+                                <div class="ip-detail-value">{{ '$' . number_format((float) $adeudo->monto_pagado, 2) }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">PENDIENTE</div>
+                                <div class="ip-detail-value">
+                                    @if ($adeudo->pendiente > 0)
+                                        <span class="fw-semibold text-danger">{{ $adeudo->pendienteFormateado }}</span>
+                                    @else
+                                        <span class="fw-semibold text-success">{{ $adeudo->pendienteFormateado }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">ESTATUS</div>
+                                <div class="ip-detail-value">
+                                    @php
+                                        $badge = match ($adeudo->estatus) {
+                                            \App\Models\Adeudo::ESTATUS_PAGADO => 'badge ip-badge-active',
+                                            \App\Models\Adeudo::ESTATUS_PARCIAL => 'badge text-bg-info',
+                                            default => 'badge text-bg-warning',
+                                        };
+                                    @endphp
+                                    <span class="{{ $badge }}">{{ ucfirst($adeudo->estatus) }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="created_at" class="form-label">Fecha de creación <span class="ip-required">*</span></label>
+                                <input type="date" id="created_at" name="created_at"
+                                       class="form-control @error('created_at') is-invalid @enderror"
+                                       value="{{ old('created_at', $adeudo->created_at?->format('Y-m-d')) }}" required>
+                                @error('created_at')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-12">
+                                <div class="ip-form-actions">
+                                    <button type="button" class="btn ip-btn-outline" id="btn-cancelar-detalle">Cancelar</button>
+                                    <button type="submit" class="btn ip-btn-success">
+                                        <i class="bi bi-check-lg me-1"></i>Guardar cambios
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="ip-detail-label">FECHA DE CREACIÓN</div>
-                            <div class="ip-detail-value">{{ $adeudo->created_at?->format('d/m/Y') ?? '—' }}</div>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -377,6 +470,39 @@
                 } else if (cancel) {
                     cancelarFila(row);
                 }
+            });
+        })();
+
+        (function () {
+            'use strict';
+
+            const detalleView = document.getElementById('detalle-view');
+            const detalleEdit = document.getElementById('detalle-edit');
+            const btnEditar = document.getElementById('btn-editar-detalle');
+            const btnCancelar = document.getElementById('btn-cancelar-detalle');
+            const detalleForm = document.getElementById('detalle-form');
+
+            if (!detalleView || !detalleEdit || !btnEditar || !btnCancelar || !detalleForm) return;
+
+            const hayErrores = detalleEdit.querySelectorAll('.is-invalid').length > 0;
+
+            function setModoDetalle(editando) {
+                detalleView.classList.toggle('d-none', editando);
+                detalleEdit.classList.toggle('d-none', !editando);
+                btnEditar.classList.toggle('d-none', editando);
+            }
+
+            if (hayErrores) {
+                setModoDetalle(true);
+            }
+
+            btnEditar.addEventListener('click', function () {
+                setModoDetalle(true);
+            });
+
+            btnCancelar.addEventListener('click', function () {
+                detalleForm.reset();
+                setModoDetalle(false);
             });
         })();
     </script>
