@@ -33,6 +33,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('grados-escolares', GradoEscolarController::class)->parameters(['grados-escolares' => 'gradoEscolar']);
     Route::get('alumnos/exportar/pdf', [AlumnoController::class, 'exportPdf'])->name('alumnos.export.pdf');
     Route::get('alumnos/exportar/excel', [AlumnoController::class, 'exportExcel'])->name('alumnos.export.excel');
+    Route::get('alumnos/{alumno}/archivos/{archivo}/descargar', [AlumnoController::class, 'downloadArchivo'])->name('alumnos.archivos.download');
+    Route::post('alumnos/{alumno}/archivos', [AlumnoController::class, 'uploadArchivo'])->name('alumnos.archivos.store');
+    Route::delete('alumnos/{alumno}/archivos/{archivo}', [AlumnoController::class, 'destroyArchivo'])->name('alumnos.archivos.destroy');
     Route::resource('alumnos', AlumnoController::class)->parameters(['alumnos' => 'alumno']);
     Route::put('alumnos/{alumno}/inline-update', [AlumnoController::class, 'inlineUpdate'])->name('alumnos.inline-update');
     Route::get('pagos/exportar/pdf', [PagoController::class, 'exportPdf'])->name('pagos.export.pdf');

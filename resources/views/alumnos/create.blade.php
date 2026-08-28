@@ -5,6 +5,13 @@
     $action = $editing ? route('alumnos.update', $alumno) : route('alumnos.store');
     $method = $editing ? 'PUT' : 'POST';
     $presetGradoEscolar = request()->query('grado_escolar_id', $alumno->grado_escolar_id ?? '');
+
+    $archivosExistentes = $editing ? $alumno->archivos : collect();
+    $archivoLegacy = $editing && $alumno->archivo ? $alumno->archivo : null;
+
+    $esImagen = function (string $ruta): bool {
+        return in_array(strtolower(pathinfo($ruta, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp', 'gif'], true);
+    };
 @endphp
 
 @extends('layouts.app')
@@ -20,6 +27,90 @@
                 </div>
 
                 <div class="ip-card-body">
+                    @if ($editing && ($archivosExistentes->isNotEmpty() || $archivoLegacy))
+                        <h6 class="fw-semibold text-uppercase small text-secondary mb-3">
+                            <i class="bi bi-folder me-1"></i>Archivos adjuntos
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            @foreach ($archivosExistentes as $archivoItem)
+                                @php
+                                    $urlArchivo = Storage::url($archivoItem->archivo);
+                                    $imagenArchivo = $esImagen($archivoItem->archivo);
+                                    $nombreArchivo = $archivoItem->nombre_original ?? basename($archivoItem->archivo);
+                                @endphp
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if ($imagenArchivo)
+                                            <div class="ip-doc-thumb" data-bs-toggle="modal" data-bs-target="#archivoModal"
+                                                 data-bs-src="{{ $urlArchivo }}" data-bs-title="{{ $nombreArchivo }}"
+                                                 role="button" tabindex="0" title="Ver {{ $nombreArchivo }}">
+                                                <img src="{{ $urlArchivo }}" alt="{{ $nombreArchivo }}">
+                                            </div>
+                                        @else
+                                            <a href="{{ $urlArchivo }}" target="_blank" rel="noopener noreferrer"
+                                               class="ip-doc-thumb" title="Ver {{ $nombreArchivo }}">
+                                                <i class="bi bi-file-earmark-text ip-doc-icon"></i>
+                                            </a>
+                                        @endif
+                                        <div class="flex-grow-1 min-w-0">
+                                            <div class="fw-semibold text-truncate" title="{{ $nombreArchivo }}">{{ $nombreArchivo }}</div>
+                                            <span class="badge ip-badge-active">Guardado</span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="{{ route('alumnos.archivos.download', [$alumno, $archivoItem]) }}"
+                                               class="btn ip-btn-outline btn-sm" title="Descargar">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            <form action="{{ route('alumnos.archivos.destroy', [$alumno, $archivoItem]) }}"
+                                                  method="POST" class="d-inline"
+                                                  onsubmit="return confirm('¿Seguro que deseas eliminar este archivo?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="ip-action ip-action-danger" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+
+                            @if ($archivoLegacy)
+                                @php
+                                    $urlLegacy = Storage::url($archivoLegacy);
+                                    $imagenLegacy = $esImagen($archivoLegacy);
+                                    $nombreLegacy = basename($archivoLegacy);
+                                @endphp
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if ($imagenLegacy)
+                                            <div class="ip-doc-thumb" data-bs-toggle="modal" data-bs-target="#archivoModal"
+                                                 data-bs-src="{{ $urlLegacy }}" data-bs-title="{{ $nombreLegacy }}"
+                                                 role="button" tabindex="0" title="Ver {{ $nombreLegacy }}">
+                                                <img src="{{ $urlLegacy }}" alt="{{ $nombreLegacy }}">
+                                            </div>
+                                        @else
+                                            <a href="{{ $urlLegacy }}" target="_blank" rel="noopener noreferrer"
+                                               class="ip-doc-thumb" title="Ver {{ $nombreLegacy }}">
+                                                <i class="bi bi-file-earmark-text ip-doc-icon"></i>
+                                            </a>
+                                        @endif
+                                        <div class="flex-grow-1 min-w-0">
+                                            <div class="fw-semibold text-truncate" title="{{ $nombreLegacy }}">{{ $nombreLegacy }}</div>
+                                            <span class="badge text-bg-warning">Histórico</span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="{{ $urlLegacy }}" target="_blank" rel="noopener noreferrer"
+                                               class="btn ip-btn-outline btn-sm" title="Ver">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                     <form action="{{ $action }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method($method)
@@ -67,6 +158,23 @@
                                        placeholder="Ej. LUNES, MARTES, 9:00-1:00">
                                 @error('horario')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                                 <div class="form-text">Un día de la semana o un rango de horas.</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="horario_extendido_id" class="form-label">Horario extendido</label>
+                                <select id="horario_extendido_id" name="horario_extendido_id"
+                                        class="form-select @error('horario_extendido_id') is-invalid @enderror">
+                                    <option value="">— Seleccionar horario extendido —</option>
+                                    @foreach ($horariosExtendidos as $horarioExtendido)
+                                        <option value="{{ $horarioExtendido->id }}"
+                                            {{ old('horario_extendido_id', $alumno->horario_extendido_id ?? '') == $horarioExtendido->id ? 'selected' : '' }}>
+                                            {{ $horarioExtendido->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('horario_extendido_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
                         </div>
 
@@ -169,39 +277,16 @@
                             <i class="bi bi-paperclip me-1"></i>Archivo adjunto
                         </h6>
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                @if ($editing && $alumno->archivo)
-                                    @php
-                                        $extArchivo = strtolower(pathinfo($alumno->archivo, PATHINFO_EXTENSION));
-                                        $esImagen = in_array($extArchivo, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true);
-                                    @endphp
-                                    <div class="mb-3">
-                                        <label class="form-label d-block">Archivo actual</label>
-                                        @if ($esImagen)
-                                            <img id="archivo-preview" src="{{ Storage::url($alumno->archivo) }}"
-                                                 alt="{{ basename($alumno->archivo) }}"
-                                                 class="img-thumbnail ip-file-thumb d-block mb-2">
-                                            <span class="ip-muted small d-block" id="archivo-nombre">{{ basename($alumno->archivo) }}</span>
-                                        @else
-                                            <a href="{{ Storage::url($alumno->archivo) }}" target="_blank"
-                                               class="btn ip-btn-outline btn-sm mb-2">
-                                                <i class="bi bi-file-earmark-text me-1"></i>{{ basename($alumno->archivo) }}
-                                            </a>
-                                            <img id="archivo-preview" class="d-none img-thumbnail ip-file-thumb d-block mb-2"
-                                                 alt="Vista previa del nuevo archivo">
-                                        @endif
-                                    </div>
-                                @else
-                                    <img id="archivo-preview" class="d-none img-thumbnail ip-file-thumb d-block mb-2"
-                                         alt="Vista previa del nuevo archivo">
-                                @endif
+                            <div class="col-md-8">
+                                <div id="archivos-preview" class="d-flex flex-wrap gap-3 mb-3"></div>
 
-                                <label for="archivo" class="form-label">Archivo</label>
-                                <input type="file" id="archivo" name="archivo"
-                                       class="form-control @error('archivo') is-invalid @enderror"
-                                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                                @error('archivo')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                                <div class="form-text">PDF, JPG, PNG, DOC o DOCX. Tamaño máximo 5 MB.</div>
+                                <label for="archivos" class="form-label">Archivos</label>
+                                <input type="file" id="archivos" name="archivos[]"
+                                       class="form-control @error('archivos.*') is-invalid @enderror"
+                                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple>
+                                @error('archivos.*')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                @error('archivos')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                <div class="form-text">PDF, JPG, PNG, DOC o DOCX. Tamaño máximo 5 MB por archivo.</div>
                             </div>
                         </div>
 
@@ -226,6 +311,20 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="archivoModal" tabindex="-1" aria-labelledby="archivoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="archivoModalLabel">Vista previa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="archivoModalImg" class="img-fluid" alt="Vista previa">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -234,36 +333,68 @@
             'use strict';
 
             const checkboxes = document.querySelectorAll('.js-na-checkbox');
-            if (!checkboxes.length) return;
+            if (checkboxes.length) {
+                function sync(cb) {
+                    const input = document.getElementById(cb.dataset.naTarget);
+                    if (!input) return;
+                    input.disabled = cb.checked;
+                }
 
-            function sync(cb) {
-                const input = document.getElementById(cb.dataset.naTarget);
-                if (!input) return;
-                input.disabled = cb.checked;
+                checkboxes.forEach(function (cb) {
+                    sync(cb);
+                    cb.addEventListener('change', function () {
+                        sync(cb);
+                    });
+                });
             }
 
-            checkboxes.forEach(function (cb) {
-                sync(cb);
-                cb.addEventListener('change', function () {
-                    sync(cb);
+            const modal = document.getElementById('archivoModal');
+            if (modal) {
+                const img = document.getElementById('archivoModalImg');
+                const title = document.getElementById('archivoModalLabel');
+
+                modal.addEventListener('show.bs.modal', function (event) {
+                    const trigger = event.relatedTarget;
+                    img.src = trigger.getAttribute('data-bs-src');
+                    title.textContent = trigger.getAttribute('data-bs-title');
                 });
-            });
+            }
 
-            const archivoInput = document.getElementById('archivo');
-            if (archivoInput) {
-                archivoInput.addEventListener('change', function () {
-                    const file = this.files && this.files[0];
-                    const preview = document.getElementById('archivo-preview');
-                    if (!preview || !file || !file.type.startsWith('image/')) return;
+            const archivosInput = document.getElementById('archivos');
+            const previewContainer = document.getElementById('archivos-preview');
 
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        preview.src = e.target.result;
-                        preview.classList.remove('d-none');
-                        const nombre = document.getElementById('archivo-nombre');
-                        if (nombre) nombre.textContent = file.name;
-                    };
-                    reader.readAsDataURL(file);
+            if (archivosInput && previewContainer) {
+                archivosInput.addEventListener('change', function () {
+                    previewContainer.innerHTML = '';
+
+                    Array.from(this.files || []).forEach(function (file) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'text-center';
+
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.alt = file.name;
+                                img.className = 'img-thumbnail ip-file-thumb d-block mb-1';
+                                wrapper.appendChild(img);
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                            const icon = document.createElement('div');
+                            icon.className = 'ip-doc-thumb mb-1';
+                            icon.innerHTML = '<i class="bi bi-file-earmark-text ip-doc-icon"></i>';
+                            wrapper.appendChild(icon);
+                        }
+
+                        const nombre = document.createElement('div');
+                        nombre.textContent = file.name;
+                        nombre.className = 'small ip-muted text-truncate ip-file-name';
+                        wrapper.appendChild(nombre);
+
+                        previewContainer.appendChild(wrapper);
+                    });
                 });
             }
         })();

@@ -30,7 +30,7 @@ class EmpleadoController extends Controller
         $empleados = $this->paginateOrdered(
             $query,
             $request,
-            ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'email', 'puesto', 'estatus_id'],
+            ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'email', 'puesto', 'horario', 'fecha_nacimiento', 'tipo_sangre', 'curp', 'estatus_id'],
             'apellido_paterno',
         );
 
@@ -51,16 +51,7 @@ class EmpleadoController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'sucursal_id' => ['required', 'exists:sucursales,id'],
-            'nombre' => ['required', 'string', 'max:255'],
-            'apellido_paterno' => ['required', 'string', 'max:255'],
-            'apellido_materno' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'telefono' => ['nullable', 'string', 'max:30'],
-            'puesto' => ['nullable', 'string', 'max:255'],
-            'estatus_id' => ['nullable', 'exists:estatus,id'],
-        ]);
+        $validated = $request->validate($this->rules());
 
         Empleado::create($validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)]);
 
@@ -84,16 +75,7 @@ class EmpleadoController extends Controller
 
     public function update(Request $request, Empleado $empleado): RedirectResponse
     {
-        $validated = $request->validate([
-            'sucursal_id' => ['required', 'exists:sucursales,id'],
-            'nombre' => ['required', 'string', 'max:255'],
-            'apellido_paterno' => ['required', 'string', 'max:255'],
-            'apellido_materno' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'telefono' => ['nullable', 'string', 'max:30'],
-            'puesto' => ['nullable', 'string', 'max:255'],
-            'estatus_id' => ['nullable', 'exists:estatus,id'],
-        ]);
+        $validated = $request->validate($this->rules());
 
         $empleado->update($validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)]);
 
@@ -107,5 +89,32 @@ class EmpleadoController extends Controller
 
         return redirect()->route('empleados.index')
             ->with('success', 'Empleado eliminado correctamente.');
+    }
+
+    /**
+     * Reglas de validación compartidas para crear y actualizar empleados.
+     */
+    private function rules(): array
+    {
+        return [
+            'sucursal_id' => ['required', 'exists:sucursales,id'],
+            'nombre' => ['required', 'string', 'max:255'],
+            'apellido_paterno' => ['required', 'string', 'max:255'],
+            'apellido_materno' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'puesto' => ['nullable', 'string', 'max:255'],
+            'horario' => ['nullable', 'string', 'max:255'],
+            'fecha_nacimiento' => ['nullable', 'date'],
+            'numeros_emergencia' => ['nullable', 'string', 'max:1000'],
+            'tipo_sangre' => ['nullable', 'string', 'max:10'],
+            'enfermedad' => ['nullable', 'string', 'max:1000'],
+            'alergias' => ['nullable', 'string', 'max:1000'],
+            'medicamento' => ['nullable', 'string', 'max:1000'],
+            'direccion' => ['nullable', 'string', 'max:1000'],
+            'telefono_personal' => ['nullable', 'string', 'max:30'],
+            'curp' => ['nullable', 'string', 'max:18'],
+            'estatus_id' => ['nullable', 'exists:estatus,id'],
+        ];
     }
 }

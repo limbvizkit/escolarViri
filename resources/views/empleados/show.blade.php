@@ -29,16 +29,58 @@
                     <div class="ip-detail-value">{{ $empleado->sucursal->nombre ?? '—' }}</div>
                 </div>
                 <div class="col-md-4">
-                    <div class="ip-detail-label">Puesto</div>
+                    <div class="ip-detail-label">Área / Puesto</div>
                     <div class="ip-detail-value">{{ $empleado->puesto ?? '—' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ip-detail-label">Horario</div>
+                    <div class="ip-detail-value">{{ $empleado->horario ?? '—' }}</div>
                 </div>
                 <div class="col-md-4">
                     <div class="ip-detail-label">Teléfono</div>
                     <div class="ip-detail-value">{{ $empleado->telefono ?? '—' }}</div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <div class="ip-detail-label">Teléfono personal</div>
+                    <div class="ip-detail-value">{{ $empleado->telefono_personal ?? '—' }}</div>
+                </div>
+                <div class="col-md-4">
                     <div class="ip-detail-label">Correo</div>
                     <div class="ip-detail-value">{{ $empleado->email ?? '—' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ip-detail-label">Fecha de nacimiento</div>
+                    <div class="ip-detail-value">
+                        {{ $empleado->fecha_nacimiento ? $empleado->fecha_nacimiento->format('d/m/Y') : '—' }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ip-detail-label">Tipo de sangre</div>
+                    <div class="ip-detail-value">{{ $empleado->tipo_sangre ?? '—' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ip-detail-label">CURP</div>
+                    <div class="ip-detail-value">{{ $empleado->curp ?? '—' }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="ip-detail-label">Dirección</div>
+                    <div class="ip-detail-value">{{ $empleado->direccion ?? '—' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ip-detail-label">Números de emergencias</div>
+                    <div class="ip-detail-value">{{ $empleado->numeros_emergencia ?? '—' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ip-detail-label">Enfermedad</div>
+                    <div class="ip-detail-value">{{ $empleado->enfermedad ?? '—' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ip-detail-label">Alergias</div>
+                    <div class="ip-detail-value">{{ $empleado->alergias ?? '—' }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="ip-detail-label">Medicamento</div>
+                    <div class="ip-detail-value">{{ $empleado->medicamento ?? '—' }}</div>
                 </div>
                 <div class="col-md-6">
                     <div class="ip-detail-label">Usuario asociado</div>
