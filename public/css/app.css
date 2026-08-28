@@ -554,6 +554,12 @@ body {
     border-radius: 50rem;
 }
 
+.ip-badge-horario-extendido {
+    background: #eaf1ff;
+    color: var(--ip-primary);
+    font-weight: 600;
+}
+
 /* ---- Forms ---- */
 .form-label {
     font-weight: 500;
@@ -591,6 +597,45 @@ body {
     max-height: 120px;
     width: auto;
     object-fit: contain;
+}
+
+.ip-doc-thumb {
+    width: 80px;
+    height: 80px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ip-bg);
+    border: 1px solid var(--ip-border);
+    border-radius: .55rem;
+    overflow: hidden;
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: box-shadow .15s ease;
+}
+
+.ip-doc-thumb:hover {
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, .15);
+}
+
+.ip-doc-thumb[role="button"]:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, .25);
+}
+
+.ip-doc-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.ip-doc-thumb .ip-doc-icon {
+    font-size: 2rem;
+    color: var(--ip-muted);
+}
+
+.ip-file-name {
+    max-width: 120px;
 }
 
 /* ---- Alerts ---- */
@@ -936,6 +981,34 @@ body {
 .ip-table-summary {
     font-size: .82rem;
     color: var(--ip-muted);
+}
+
+/* ---- Celdas compactas con truncado ---- */
+.ip-cell-compact {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ip-cell-compact-sm {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ip-cell-compact-lg {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ip-cell-wrap {
+    max-width: 180px;
+    font-size: .82rem;
+    line-height: 1.35;
 }
 
 /* ---- Sidebar replegada (solo íconos) ---- */

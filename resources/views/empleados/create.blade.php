@@ -11,7 +11,7 @@
 
 @section('content')
     <div class="row justify-content-center">
-        <div class="col-lg-9">
+        <div class="col-lg-10">
             <div class="ip-card">
                 <div class="ip-card-header">
                     <h5 class="ip-card-title">Datos del empleado</h5>
@@ -63,12 +63,21 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="puesto" class="form-label">Puesto</label>
+                                <label for="puesto" class="form-label">Área / Puesto</label>
                                 <input type="text" id="puesto" name="puesto"
                                        class="form-control @error('puesto') is-invalid @enderror"
                                        value="{{ old('puesto', $empleado->puesto ?? '') }}"
-                                       placeholder="Ej. Profesor, Coordinador">
+                                       placeholder="Ej. Dirección General, Maestras">
                                 @error('puesto')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="horario" class="form-label">Horario</label>
+                                <input type="text" id="horario" name="horario"
+                                       class="form-control @error('horario') is-invalid @enderror"
+                                       value="{{ old('horario', $empleado->horario ?? '') }}"
+                                       placeholder="Ej. Lunes a Viernes 8:00 - 14:30">
+                                @error('horario')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-6">
@@ -85,6 +94,73 @@
                                        class="form-control @error('telefono') is-invalid @enderror"
                                        value="{{ old('telefono', $empleado->telefono ?? '') }}">
                                 @error('telefono')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="telefono_personal" class="form-label">Teléfono personal</label>
+                                <input type="text" id="telefono_personal" name="telefono_personal"
+                                       class="form-control @error('telefono_personal') is-invalid @enderror"
+                                       value="{{ old('telefono_personal', $empleado->telefono_personal ?? '') }}">
+                                @error('telefono_personal')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
+                                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento"
+                                       class="form-control @error('fecha_nacimiento') is-invalid @enderror"
+                                       value="{{ old('fecha_nacimiento', isset($empleado) && $empleado->fecha_nacimiento ? $empleado->fecha_nacimiento->format('Y-m-d') : '') }}">
+                                @error('fecha_nacimiento')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="tipo_sangre" class="form-label">Tipo de sangre</label>
+                                <input type="text" id="tipo_sangre" name="tipo_sangre"
+                                       class="form-control @error('tipo_sangre') is-invalid @enderror"
+                                       value="{{ old('tipo_sangre', $empleado->tipo_sangre ?? '') }}">
+                                @error('tipo_sangre')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="curp" class="form-label">CURP</label>
+                                <input type="text" id="curp" name="curp"
+                                       class="form-control @error('curp') is-invalid @enderror"
+                                       value="{{ old('curp', $empleado->curp ?? '') }}">
+                                @error('curp')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-12">
+                                <label for="direccion" class="form-label">Dirección</label>
+                                <textarea id="direccion" name="direccion" rows="2"
+                                          class="form-control @error('direccion') is-invalid @enderror">{{ old('direccion', $empleado->direccion ?? '') }}</textarea>
+                                @error('direccion')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="numeros_emergencia" class="form-label">Números de emergencias</label>
+                                <textarea id="numeros_emergencia" name="numeros_emergencia" rows="3"
+                                          class="form-control @error('numeros_emergencia') is-invalid @enderror">{{ old('numeros_emergencia', $empleado->numeros_emergencia ?? '') }}</textarea>
+                                @error('numeros_emergencia')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="enfermedad" class="form-label">Enfermedad</label>
+                                <textarea id="enfermedad" name="enfermedad" rows="3"
+                                          class="form-control @error('enfermedad') is-invalid @enderror">{{ old('enfermedad', $empleado->enfermedad ?? '') }}</textarea>
+                                @error('enfermedad')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="alergias" class="form-label">Alergias</label>
+                                <textarea id="alergias" name="alergias" rows="3"
+                                          class="form-control @error('alergias') is-invalid @enderror">{{ old('alergias', $empleado->alergias ?? '') }}</textarea>
+                                @error('alergias')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-12">
+                                <label for="medicamento" class="form-label">Medicamento</label>
+                                <textarea id="medicamento" name="medicamento" rows="2"
+                                          class="form-control @error('medicamento') is-invalid @enderror">{{ old('medicamento', $empleado->medicamento ?? '') }}</textarea>
+                                @error('medicamento')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-6">

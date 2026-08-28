@@ -3,23 +3,26 @@
 namespace Database\Factories;
 
 use App\Models\Escuela;
+use App\Models\Estatus;
+use App\Models\Sucursal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Escuela>
+ * @extends Factory<Sucursal>
  */
-class EscuelaFactory extends Factory
+class SucursalFactory extends Factory
 {
-    protected $model = Escuela::class;
+    protected $model = Sucursal::class;
 
     public function definition(): array
     {
         return [
-            'nombre' => fake()->company().' School',
-            'clave' => fake()->unique()->bothify('ESC-####'),
+            'escuela_id' => Escuela::factory(),
+            'nombre' => fake()->company(),
             'direccion' => fake()->address(),
             'telefono' => fake()->phoneNumber(),
             'email' => fake()->unique()->safeEmail(),
+            'estatus_id' => Estatus::ACTIVO,
         ];
     }
 }

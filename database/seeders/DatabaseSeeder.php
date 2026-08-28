@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             GradoEscolarSeeder::class,
             FormaPagoSeeder::class,
+            HorarioExtendidoSeeder::class,
         ]);
 
         $escuela = Escuela::create([
@@ -54,5 +55,6 @@ class DatabaseSeeder extends Seeder
             'empleado_id' => $empleado->id,
             'role_id' => $adminRol->id,
         ]);
+
     }
 }

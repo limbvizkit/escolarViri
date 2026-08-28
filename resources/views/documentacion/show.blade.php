@@ -43,8 +43,27 @@
                         $documento = $alumno->documentos->firstWhere('tipo', $tipo);
                     @endphp
                     <div class="col-md-6">
-                        <div class="d-flex justify-content-between align-items-center gap-2">
-                            <div>
+                        <div class="d-flex align-items-center gap-3">
+                            @if ($documento)
+                                @php
+                                    $extension = strtolower(pathinfo($documento->archivo, PATHINFO_EXTENSION));
+                                    $esImagen = in_array($extension, ['jpg', 'jpeg', 'png']);
+                                    $url = Storage::url($documento->archivo);
+                                @endphp
+                                @if ($esImagen)
+                                    <div class="ip-doc-thumb" data-bs-toggle="modal" data-bs-target="#documentoModal"
+                                         data-bs-src="{{ $url }}" data-bs-title="{{ $etiqueta }}"
+                                         role="button" tabindex="0" title="Ver {{ $etiqueta }}">
+                                        <img src="{{ $url }}" alt="{{ $etiqueta }}">
+                                    </div>
+                                @else
+                                    <a href="{{ $url }}" target="_blank" rel="noopener noreferrer"
+                                       class="ip-doc-thumb" title="Ver {{ $etiqueta }}">
+                                        <i class="bi bi-file-earmark-text ip-doc-icon"></i>
+                                    </a>
+                                @endif
+                            @endif
+                            <div class="flex-grow-1">
                                 <div class="fw-semibold">{{ $etiqueta }}</div>
                                 @if ($documento)
                                     <span class="badge ip-badge-active">OK</span>
@@ -73,6 +92,38 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="documentoModal" tabindex="-1" aria-labelledby="documentoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentoModalLabel">Vista previa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="documentoModalImg" class="img-fluid" alt="Vista previa">
+                </div>
+            </div>
+        </div>
+    </div>
+
+@push('scripts')
+    <script>
+        (function () {
+            var modal = document.getElementById('documentoModal');
+            if (!modal) return;
+
+            var img = document.getElementById('documentoModalImg');
+            var title = document.getElementById('documentoModalLabel');
+
+            modal.addEventListener('show.bs.modal', function (event) {
+                var trigger = event.relatedTarget;
+                img.src = trigger.getAttribute('data-bs-src');
+                title.textContent = trigger.getAttribute('data-bs-title');
+            });
+        })();
+    </script>
+@endpush
 
     <div class="ip-card">
         <div class="ip-card-header">

@@ -22,6 +22,7 @@ class Alumno extends Model
         'apellido_materno',
         'fecha_nacimiento',
         'horario',
+        'horario_extendido_id',
         'inscripcion',
         'reinscripcion',
         'entrevista_inicial',
@@ -57,6 +58,11 @@ class Alumno extends Model
         return $this->belongsTo(Sucursal::class);
     }
 
+    public function horarioExtendido(): BelongsTo
+    {
+        return $this->belongsTo(HorarioExtendido::class);
+    }
+
     public function pagos(): HasMany
     {
         return $this->hasMany(Pago::class);
@@ -65,6 +71,11 @@ class Alumno extends Model
     public function documentos(): HasMany
     {
         return $this->hasMany(Documento::class);
+    }
+
+    public function archivos(): HasMany
+    {
+        return $this->hasMany(AlumnoArchivo::class);
     }
 
     public function talleres(): BelongsToMany

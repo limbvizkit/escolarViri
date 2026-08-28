@@ -21,8 +21,25 @@ class Empleado extends Model
         'email',
         'telefono',
         'puesto',
+        'horario',
+        'fecha_nacimiento',
+        'numeros_emergencia',
+        'tipo_sangre',
+        'enfermedad',
+        'alergias',
+        'medicamento',
+        'direccion',
+        'telefono_personal',
+        'curp',
         'estatus_id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'fecha_nacimiento' => 'date',
+        ];
+    }
 
     public function sucursal(): BelongsTo
     {
@@ -53,7 +70,9 @@ class Empleado extends Model
                 ->orWhere('apellido_materno', 'like', $like)
                 ->orWhere('email', 'like', $like)
                 ->orWhere('telefono', 'like', $like)
-                ->orWhere('puesto', 'like', $like);
+                ->orWhere('telefono_personal', 'like', $like)
+                ->orWhere('puesto', 'like', $like)
+                ->orWhere('curp', 'like', $like);
         });
     }
 }

@@ -7,7 +7,7 @@
         <p class="ip-muted mb-0">Gestión de alumnos por grado escolar</p>
         <div class="d-flex gap-2">
             @php
-                $exportQuery = array_filter(request()->only(['q', 'grado_escolar_id', 'sucursal_id', 'estatus', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
+                $exportQuery = array_filter(request()->only(['q', 'grado_escolar_id', 'sucursal_id', 'horario_extendido_id', 'estatus', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
             @endphp
             <a href="{{ route('alumnos.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i>PDF
@@ -48,6 +48,7 @@
                         <th>Sucursal</th>
                         <x-sortable field="fecha_nacimiento" label="Fecha nacimiento" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="horario" label="Horario" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="horario_extendido_id" label="Horario extendido" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="inscripcion" label="Inscripción" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="reinscripcion" label="Re/Inscripción" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="entrevista_inicial" label="Entrevista" :current="request('sort')" :direction="request('direction')" />
@@ -148,6 +149,24 @@
                                        value="{{ $alumno->horario }}" data-original="{{ $alumno->horario }}">
                             </td>
 
+                            <td>
+                                <div class="cell-view">
+                                    <span class="badge ip-badge-horario-extendido" data-target="horario_extendido_id">
+                                        {{ $alumno->horarioExtendido->nombre ?? '—' }}
+                                    </span>
+                                </div>
+                                <select name="horario_extendido_id" form="{{ $formId }}" data-key="horario_extendido_id" data-format="grado_escolar"
+                                        class="form-select form-select-sm cell-edit d-none"
+                                        data-original="{{ $alumno->horario_extendido_id }}">
+                                    <option value="">— Sin horario extendido —</option>
+                                    @foreach ($horariosExtendidos as $horarioExtendido)
+                                        <option value="{{ $horarioExtendido->id }}" {{ $alumno->horario_extendido_id == $horarioExtendido->id ? 'selected' : '' }}>
+                                            {{ $horarioExtendido->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+
                             @foreach ($montos as $campo => $monto)
                                 <td>
                                     <div class="cell-view" data-target="{{ $campo }}">
@@ -232,7 +251,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="17" class="text-center ip-muted py-4">
+                            <td colspan="18" class="text-center ip-muted py-4">
                                 No hay alumnos registrados.
                                 <a href="{{ route('alumnos.create') }}" class="d-block mt-2">Crear el primero</a>
                             </td>
