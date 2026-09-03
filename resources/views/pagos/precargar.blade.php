@@ -5,9 +5,10 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="ip-muted mb-0">
-            Se toma como base <span class="fw-semibold">{{ $etiquetaMesActual }}</span> y el destino es
+            La tabla superior muestra los pagos ya registrados para
             <span class="fw-semibold">{{ $etiquetaMesSiguiente }}</span>.
-            Marca las filas, edita lo que necesites y guarda.
+            Las tablas inferiores permiten precargar desde
+            <span class="fw-semibold">{{ $etiquetaMesActual }}</span> o desde meses anteriores.
         </p>
         <a href="{{ route('pagos.index') }}" class="btn ip-btn-outline">
             <i class="bi bi-arrow-left me-1"></i>Volver
@@ -161,9 +162,9 @@
         </div>
     @endif
 
-    <div class="ip-card">
+    <div class="ip-card mb-3">
         <div class="ip-card-header">
-            <h5 class="ip-card-title">Pagos de {{ $etiquetaMesActual }}</h5>
+            <h5 class="ip-card-title">Pagos de {{ $etiquetaMesActual }} para precargar</h5>
         </div>
 
         @if ($pagosActuales->isEmpty())
@@ -171,7 +172,7 @@
                 No hay pagos registrados en {{ $etiquetaMesActual }} para precargar.
             </div>
         @else
-            <form id="form-precargar" method="POST" action="{{ route('pagos.precargar.store') }}">
+            <form id="form-precargar-actuales" method="POST" action="{{ route('pagos.precargar.store') }}" class="js-form-precargar">
                 @csrf
 
                 <div class="ip-form-actions ip-form-actions-top border-bottom-0 mb-0 pb-2">
@@ -183,94 +184,220 @@
 
                 <div class="ip-table-scroll">
                     <table class="table ip-table ip-table-zebra mb-0" id="pagos-actuales-table">
-                            <thead>
+                        <thead>
+                            <tr>
+                                <th class="text-center">
+                                    <input type="checkbox" class="form-check-input js-check-all" aria-label="Seleccionar todos los pagos">
+                                </th>
+                                <th>Alumno</th>
+                                <th>Mes</th>
+                                <th>Fecha</th>
+                                <th>Entrada 8AM</th>
+                                <th>Pronto pago</th>
+                                <th>Pago normal</th>
+                                <th>Talleres</th>
+                                <th>Lunch</th>
+                                <th>Forma de pago</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($pagosActuales as $pago)
+                                @php
+                                    $i = $pago->id;
+                                    $mesDefault = \Carbon\Carbon::createFromFormat('Y-m', $pago->mes)->startOfMonth()->addMonthNoOverflow()->format('Y-m');
+                                @endphp
                                 <tr>
-                                    <th class="text-center">
-                                        <input type="checkbox" id="check-all" class="form-check-input" aria-label="Seleccionar todos los pagos">
-                                    </th>
-                                    <th>Alumno</th>
-                                    <th>Mes</th>
-                                    <th>Fecha</th>
-                                    <th>Entrada 8AM</th>
-                                    <th>Pronto pago</th>
-                                    <th>Pago normal</th>
-                                    <th>Talleres</th>
-                                    <th>Lunch</th>
-                                    <th>Forma de pago</th>
+                                    <td class="text-center">
+                                        <input type="checkbox" name="seleccionados[]" value="{{ $i }}"
+                                               class="js-row-check form-check-input"
+                                               aria-label="Seleccionar el pago de {{ $pago->alumno->nombre_completo }}">
+                                    </td>
+
+                                    <td>
+                                        <a href="{{ route('alumnos.show', $pago->alumno) }}" class="fw-semibold ip-link">{{ $pago->alumno->nombre_completo }}</a>
+                                        <span class="badge text-bg-light ms-1">{{ $pago->alumno->gradoEscolar->nombre ?? '—' }}</span>
+                                    </td>
+
+                                    <td>
+                                        <input type="month" name="pagos[{{ $i }}][mes]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.mes', $mesDefault) }}" required>
+                                    </td>
+
+                                    <td>
+                                        <input type="date" name="pagos[{{ $i }}][fecha]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.fecha', $pago->fecha?->copy()->addMonthNoOverflow()?->format('Y-m-d')) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][entrada_8am]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.entrada_8am', $pago->entrada_8am) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][pronto_pago]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.pronto_pago', $pago->pronto_pago) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][pago_normal]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.pago_normal', $pago->pago_normal) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][talleres]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.talleres', $pago->talleres) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][lunch]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.lunch', $pago->lunch) }}">
+                                    </td>
+
+                                    <td>
+                                        <select name="pagos[{{ $i }}][forma_pago_id]" class="form-select form-select-sm">
+                                            <option value="">— Sin forma —</option>
+                                            @foreach ($formasPago as $forma)
+                                                <option value="{{ $forma->id }}" {{ old('pagos.'.$i.'.forma_pago_id', $pago->forma_pago_id) == $forma->id ? 'selected' : '' }}>
+                                                    {{ $forma->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($pagosActuales as $pago)
-                                    @php
-                                        $i = $pago->id;
-                                    @endphp
-                                    <tr>
-                                        <td class="text-center">
-                                            <input type="checkbox" name="seleccionados[]" value="{{ $i }}"
-                                                   class="js-row-check form-check-input"
-                                                   aria-label="Seleccionar el pago de {{ $pago->alumno->nombre_completo }}">
-                                        </td>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-                                        <td>
-                                            <a href="{{ route('alumnos.show', $pago->alumno) }}" class="fw-semibold ip-link">{{ $pago->alumno->nombre_completo }}</a>
-                                            <span class="badge text-bg-light ms-1">{{ $pago->alumno->gradoEscolar->nombre ?? '—' }}</span>
-                                        </td>
+                <div class="ip-form-actions">
+                    <span class="ip-muted me-auto js-resumen-seleccion">0 seleccionado(s)</span>
+                    <a href="{{ route('pagos.index') }}" class="btn ip-btn-outline">Cancelar</a>
+                    <button type="submit" class="btn ip-btn-success js-btn-guardar" disabled>
+                        <i class="bi bi-save me-1"></i>Guardar seleccionados
+                    </button>
+                </div>
+            </form>
+        @endif
+    </div>
 
-                                        <td>
-                                            <input type="month" name="pagos[{{ $i }}][mes]"
-                                                   class="form-control form-control-sm"
-                                                   value="{{ old('pagos.'.$i.'.mes', $mesSiguiente) }}" required>
-                                        </td>
+    <div class="ip-card">
+        <div class="ip-card-header">
+            <h5 class="ip-card-title">Pagos de meses anteriores para precargar</h5>
+        </div>
 
-                                        <td>
-                                            <input type="date" name="pagos[{{ $i }}][fecha]"
-                                                   class="form-control form-control-sm"
-                                                   value="{{ old('pagos.'.$i.'.fecha', $pago->fecha?->copy()->addMonthNoOverflow()?->format('Y-m-d')) }}">
-                                        </td>
+        @if ($pagosAnteriores->isEmpty())
+            <div class="ip-card-body ip-muted py-4 text-center">
+                No hay pagos de los dos meses anteriores para precargar.
+            </div>
+        @else
+            <form id="form-precargar-anteriores" method="POST" action="{{ route('pagos.precargar.store') }}" class="js-form-precargar">
+                @csrf
 
-                                        <td>
-                                            <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][entrada_8am]"
-                                                   class="form-control form-control-sm"
-                                                   value="{{ old('pagos.'.$i.'.entrada_8am', $pago->entrada_8am) }}">
-                                        </td>
+                <div class="ip-form-actions ip-form-actions-top border-bottom-0 mb-0 pb-2">
+                    <span class="ip-muted js-resumen-seleccion">0 seleccionado(s)</span>
+                    <button type="submit" class="btn ip-btn-success js-btn-guardar" disabled>
+                        <i class="bi bi-save me-1"></i>Guardar seleccionados
+                    </button>
+                </div>
 
-                                        <td>
-                                            <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][pronto_pago]"
-                                                   class="form-control form-control-sm"
-                                                   value="{{ old('pagos.'.$i.'.pronto_pago', $pago->pronto_pago) }}">
-                                        </td>
+                <div class="ip-table-scroll">
+                    <table class="table ip-table ip-table-zebra mb-0" id="pagos-anteriores-table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">
+                                    <input type="checkbox" class="form-check-input js-check-all" aria-label="Seleccionar todos los pagos">
+                                </th>
+                                <th>Alumno</th>
+                                <th>Mes</th>
+                                <th>Fecha</th>
+                                <th>Entrada 8AM</th>
+                                <th>Pronto pago</th>
+                                <th>Pago normal</th>
+                                <th>Talleres</th>
+                                <th>Lunch</th>
+                                <th>Forma de pago</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($pagosAnteriores as $pago)
+                                @php
+                                    $i = $pago->id;
+                                    $mesDefault = \Carbon\Carbon::createFromFormat('Y-m', $pago->mes)->startOfMonth()->addMonthNoOverflow()->format('Y-m');
+                                @endphp
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox" name="seleccionados[]" value="{{ $i }}"
+                                               class="js-row-check form-check-input"
+                                               aria-label="Seleccionar el pago de {{ $pago->alumno->nombre_completo }}">
+                                    </td>
 
-                                        <td>
-                                            <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][pago_normal]"
-                                                   class="form-control form-control-sm"
-                                                   value="{{ old('pagos.'.$i.'.pago_normal', $pago->pago_normal) }}">
-                                        </td>
+                                    <td>
+                                        <a href="{{ route('alumnos.show', $pago->alumno) }}" class="fw-semibold ip-link">{{ $pago->alumno->nombre_completo }}</a>
+                                        <span class="badge text-bg-light ms-1">{{ $pago->alumno->gradoEscolar->nombre ?? '—' }}</span>
+                                    </td>
 
-                                        <td>
-                                            <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][talleres]"
-                                                   class="form-control form-control-sm"
-                                                   value="{{ old('pagos.'.$i.'.talleres', $pago->talleres) }}">
-                                        </td>
+                                    <td>
+                                        <input type="month" name="pagos[{{ $i }}][mes]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.mes', $mesDefault) }}" required>
+                                    </td>
 
-                                        <td>
-                                            <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][lunch]"
-                                                   class="form-control form-control-sm"
-                                                   value="{{ old('pagos.'.$i.'.lunch', $pago->lunch) }}">
-                                        </td>
+                                    <td>
+                                        <input type="date" name="pagos[{{ $i }}][fecha]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.fecha', $pago->fecha?->copy()->addMonthNoOverflow()?->format('Y-m-d')) }}">
+                                    </td>
 
-                                        <td>
-                                            <select name="pagos[{{ $i }}][forma_pago_id]" class="form-select form-select-sm">
-                                                <option value="">— Sin forma —</option>
-                                                @foreach ($formasPago as $forma)
-                                                    <option value="{{ $forma->id }}" {{ old('pagos.'.$i.'.forma_pago_id', $pago->forma_pago_id) == $forma->id ? 'selected' : '' }}>
-                                                        {{ $forma->nombre }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][entrada_8am]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.entrada_8am', $pago->entrada_8am) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][pronto_pago]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.pronto_pago', $pago->pronto_pago) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][pago_normal]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.pago_normal', $pago->pago_normal) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][talleres]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.talleres', $pago->talleres) }}">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][lunch]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old('pagos.'.$i.'.lunch', $pago->lunch) }}">
+                                    </td>
+
+                                    <td>
+                                        <select name="pagos[{{ $i }}][forma_pago_id]" class="form-select form-select-sm">
+                                            <option value="">— Sin forma —</option>
+                                            @foreach ($formasPago as $forma)
+                                                <option value="{{ $forma->id }}" {{ old('pagos.'.$i.'.forma_pago_id', $pago->forma_pago_id) == $forma->id ? 'selected' : '' }}>
+                                                    {{ $forma->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
                     </table>
                 </div>
 
@@ -454,13 +581,15 @@
                 });
             }
 
-            const form = document.getElementById('form-precargar');
-            const checkAll = document.getElementById('check-all');
-            const resumenes = Array.from(form?.querySelectorAll('.js-resumen-seleccion') ?? []);
-            const btnsGuardar = Array.from(form?.querySelectorAll('.js-btn-guardar') ?? []);
-
-            if (form && checkAll && btnsGuardar.length) {
+            document.querySelectorAll('.js-form-precargar').forEach(function (form) {
+                const checkAll = form.querySelector('.js-check-all');
+                const resumenes = Array.from(form.querySelectorAll('.js-resumen-seleccion'));
+                const btnsGuardar = Array.from(form.querySelectorAll('.js-btn-guardar'));
                 const checks = Array.from(form.querySelectorAll('.js-row-check'));
+
+                if (!checkAll || btnsGuardar.length === 0 || checks.length === 0) {
+                    return;
+                }
 
                 function contarSeleccionadas() {
                     return checks.filter(function (c) { return c.checked; }).length;
@@ -497,7 +626,7 @@
                 });
 
                 sincronizar();
-            }
+            });
         })();
     </script>
 @endpush

@@ -7,6 +7,7 @@ use App\Models\Alumno;
 use App\Models\FormaPago;
 use App\Models\Pago;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -147,23 +148,38 @@ class PagoController extends Controller
         $mesActual = now()->format('Y-m');
         $mesSiguiente = now()->startOfMonth()->addMonthNoOverflow()->format('Y-m');
 
-        $pagosActuales = $this->pagosDelMes($mesActual);
         $pagosSiguientes = $this->pagosDelMes($mesSiguiente);
-        $formasPago = FormaPago::active()->orderBy('nombre')->get();
-
         $alumnosConPagoSiguiente = $pagosSiguientes->pluck('alumno_id')->all();
-        $pagosActuales = $pagosActuales
-            ->reject(fn ($pago) => in_array($pago->alumno_id, $alumnosConPagoSiguiente, true))
+
+        $todos = $this->pagosParaPrecargar();
+        $alumnosConPagoActual = $todos
+            ->where('mes', $mesActual)
+            ->pluck('alumno_id')
+            ->all();
+
+        $pagosActuales = $todos
+            ->where('mes', $mesActual)
+            ->whereNotIn('alumno_id', $alumnosConPagoSiguiente)
             ->values();
+
+        $pagosAnteriores = $todos
+            ->where('mes', '!=', $mesActual)
+            ->whereNotIn('alumno_id', $alumnosConPagoActual)
+            ->whereNotIn('alumno_id', $alumnosConPagoSiguiente)
+            ->values();
+
+        $formasPago = FormaPago::active()->orderBy('nombre')->get();
 
         $etiquetaMesActual = Pago::mesLabel($mesActual);
         $etiquetaMesSiguiente = Pago::mesLabel($mesSiguiente);
 
         return view('pagos.precargar', compact(
+            'mesActual',
             'mesSiguiente',
             'etiquetaMesActual',
             'etiquetaMesSiguiente',
             'pagosActuales',
+            'pagosAnteriores',
             'pagosSiguientes',
             'formasPago',
         ));
@@ -174,12 +190,16 @@ class PagoController extends Controller
         $validated = $request->validate([
             'seleccionados' => ['required', 'array', 'min:1'],
             'seleccionados.*' => ['exists:pagos,id'],
+            'pagos' => ['required', 'array'],
+            'pagos.*.mes' => ['required', 'regex:/^\d{4}-\d{2}$/'],
         ], [
             'seleccionados.required' => 'Selecciona al menos un pago para precargar.',
             'seleccionados.min' => 'Selecciona al menos un pago para precargar.',
+            'pagos.required' => 'Faltan los datos de los pagos seleccionados.',
+            'pagos.*.mes.required' => 'Indica el mes del pago.',
+            'pagos.*.mes.regex' => 'El formato del mes es inválido.',
         ]);
 
-        $mesSiguiente = now()->startOfMonth()->addMonthNoOverflow()->format('Y-m');
         $seleccionados = array_map('intval', $validated['seleccionados']);
         $filas = (array) $request->input('pagos', []);
         $origenes = Pago::with('alumno')->whereIn('id', $seleccionados)->get()->keyBy('id');
@@ -203,7 +223,7 @@ class PagoController extends Controller
         }
 
         try {
-            [$creados, $omitidos] = DB::transaction(function () use ($filas, $mesSiguiente, $origenes, $seleccionados) {
+            [$creados, $omitidos] = DB::transaction(function () use ($filas, $origenes, $seleccionados) {
                 $creados = 0;
                 $omitidos = [];
 
@@ -214,7 +234,7 @@ class PagoController extends Controller
                         continue;
                     }
 
-                    $datos = $this->datosParaNuevoPago($origen, $mesSiguiente, (array) ($filas[$id] ?? []));
+                    $datos = $this->datosParaNuevoPago($origen, (array) ($filas[$id] ?? []));
 
                     if (Pago::where('alumno_id', $origen->alumno_id)->where('mes', $datos['mes'])->exists()) {
                         $omitidos[] = $origen->alumno->nombre_completo;
@@ -240,7 +260,7 @@ class PagoController extends Controller
                 ->with('error', 'No se crearon pagos nuevos. Se omitieron '.count($omitidos).': '.implode(', ', $omitidos).'.');
         }
 
-        $mensaje = "Se crearon {$creados} pagos para ".Pago::mesLabel($mesSiguiente).'.';
+        $mensaje = "Se crearon {$creados} pagos.";
 
         if ($omitidos !== []) {
             $mensaje .= ' Se omitieron '.count($omitidos).': '.implode(', ', $omitidos).'.';
@@ -258,16 +278,35 @@ class PagoController extends Controller
             ->values();
     }
 
+    private function pagosParaPrecargar()
+    {
+        $meses = [
+            now()->format('Y-m'),
+            now()->startOfMonth()->subMonthNoOverflow()->format('Y-m'),
+            now()->startOfMonth()->subMonthsNoOverflow(2)->format('Y-m'),
+        ];
+
+        return Pago::with(['alumno.gradoEscolar', 'formaPago'])
+            ->whereIn('mes', $meses)
+            ->get()
+            ->sortByDesc('mes')
+            ->unique('alumno_id')
+            ->sortBy(fn ($pago) => [$pago->alumno->apellido_paterno, $pago->alumno->nombre])
+            ->values();
+    }
+
     private function reglasPrecarga(): array
     {
         return collect($this->reglas())->except('alumno_id')->all();
     }
 
-    private function datosParaNuevoPago(Pago $origen, string $mesSiguiente, array $fila): array
+    private function datosParaNuevoPago(Pago $origen, array $fila): array
     {
+        $mesDestino = $fila['mes'] ?? $this->mesSiguienteDe($origen->mes);
+
         $datos = [
             'alumno_id' => $origen->alumno_id,
-            'mes' => $mesSiguiente,
+            'mes' => $mesDestino,
             'fecha' => $origen->fecha?->copy()->addMonthNoOverflow(),
             'entrada_8am' => $origen->entrada_8am,
             'pronto_pago' => $origen->pronto_pago,
@@ -287,6 +326,11 @@ class PagoController extends Controller
         }
 
         return $datos;
+    }
+
+    private function mesSiguienteDe(string $mes): string
+    {
+        return Carbon::createFromFormat('Y-m', $mes)->startOfMonth()->addMonthNoOverflow()->format('Y-m');
     }
 
     private function filteredQuery(Request $request): Builder
