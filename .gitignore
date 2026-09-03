@@ -28,6 +28,7 @@ Thumbs.db
 # Local AI runtime state
 .atl/
 opencode.json
+.codegraph/
 
 # Sensitive data exports
 alumnosViri.csv
