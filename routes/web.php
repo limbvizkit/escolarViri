@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::put('talleres/inscripciones/{tallerAlumno}/monto', [TallerController::class, 'montoUpdate'])->name('talleres.inscripcion.monto.update');
     Route::get('talleres/{taller}/alumnos/create', [TallerController::class, 'alumnoCreate'])->name('talleres.alumnos.create');
     Route::post('talleres/{taller}/alumnos', [TallerController::class, 'alumnoStore'])->name('talleres.alumnos.store');
+    Route::post('talleres/{taller}/alumnos/bulk', [TallerController::class, 'alumnosStoreBulk'])->name('talleres.alumnos.bulk.store');
     Route::delete('talleres/{taller}/alumnos/{alumno}', [TallerController::class, 'alumnoDestroy'])->name('talleres.alumnos.destroy');
     Route::resource('talleres', TallerController::class)->parameters(['talleres' => 'taller'])->except(['show']);
     Route::get('documentacion', [DocumentacionController::class, 'index'])->name('documentacion.index');
