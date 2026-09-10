@@ -8,6 +8,8 @@ use App\Models\TallerAlumno;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class TallerController extends Controller
@@ -94,6 +96,56 @@ class TallerController extends Controller
             ->with('success', 'Alumno agregado al taller correctamente.');
     }
 
+    public function alumnosStoreBulk(Request $request, Taller $taller): RedirectResponse
+    {
+        $alumnosDisponiblesIds = Alumno::active()
+            ->whereNotIn('id', $taller->alumnos()->pluck('alumnos.id'))
+            ->pluck('id')
+            ->map(fn ($id) => (string) $id)
+            ->all();
+
+        $seleccionados = array_filter(
+            array_map('intval', (array) $request->input('seleccionados', [])),
+            fn ($id) => $id > 0
+        );
+
+        $rules = [
+            'seleccionados' => ['required', 'array', 'min:1'],
+            'seleccionados.*' => ['integer', Rule::in($alumnosDisponiblesIds)],
+        ];
+
+        foreach ($seleccionados as $id) {
+            $prefix = 'alumnos.'.$id;
+            $rules[$prefix.'.hora_inicio'] = ['required', 'date_format:H:i'];
+            $rules[$prefix.'.hora_fin'] = ['required', 'date_format:H:i', 'after:'.$prefix.'.hora_inicio'];
+            $rules[$prefix.'.monto_pagado'] = ['nullable', 'numeric', 'min:0'];
+        }
+
+        $validated = $request->validate($rules, $this->mensajesAlumnosBulk());
+
+        try {
+            DB::transaction(function () use ($taller, $validated) {
+                foreach ($validated['seleccionados'] as $alumnoId) {
+                    $datos = $validated['alumnos'][$alumnoId] ?? [];
+
+                    TallerAlumno::create([
+                        'taller_id' => $taller->id,
+                        'alumno_id' => $alumnoId,
+                        'hora_inicio' => $datos['hora_inicio'],
+                        'hora_fin' => $datos['hora_fin'],
+                        'monto_pagado' => $datos['monto_pagado'] ?? null,
+                    ]);
+                }
+            });
+        } catch (QueryException) {
+            return redirect()->route('talleres.alumnos.create', $taller)
+                ->with('error', 'No se pudieron guardar las inscripciones. Verifica que ningún alumno ya esté inscrito.');
+        }
+
+        return redirect()->route('talleres.index')
+            ->with('success', 'Alumnos inscritos al taller correctamente.');
+    }
+
     public function alumnoDestroy(Taller $taller, Alumno $alumno): RedirectResponse
     {
         TallerAlumno::where('taller_id', $taller->id)
@@ -156,6 +208,20 @@ class TallerController extends Controller
             'hora_inicio.required' => 'Indica la hora de inicio.',
             'hora_fin.required' => 'Indica la hora de fin.',
             'hora_fin.after' => 'La hora de fin debe ser posterior a la hora de inicio.',
+        ];
+    }
+
+    private function mensajesAlumnosBulk(): array
+    {
+        return [
+            'seleccionados.required' => 'Selecciona al menos un alumno para inscribir.',
+            'seleccionados.min' => 'Selecciona al menos un alumno para inscribir.',
+            'seleccionados.*.in' => 'Uno de los alumnos seleccionados no está disponible para este taller.',
+            'alumnos.*.hora_inicio.required' => 'La hora de inicio es obligatoria.',
+            'alumnos.*.hora_fin.required' => 'La hora de fin es obligatoria.',
+            'alumnos.*.hora_fin.after' => 'La hora de fin debe ser posterior a la hora de inicio.',
+            'alumnos.*.monto_pagado.numeric' => 'El monto pagado debe ser numérico.',
+            'alumnos.*.monto_pagado.min' => 'El monto pagado no puede ser negativo.',
         ];
     }
 }
