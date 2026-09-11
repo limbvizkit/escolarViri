@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\PagoExport;
 use App\Models\Alumno;
 use App\Models\FormaPago;
+use App\Models\GradoEscolar;
 use App\Models\Pago;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -32,6 +33,7 @@ class PagoController extends Controller
 
         $alumnos = Alumno::with('gradoEscolar')->orderBy('apellido_paterno')->get();
         $formasPago = FormaPago::active()->orderBy('nombre')->get();
+        $gradosEscolares = GradoEscolar::active()->orderBy('nombre')->pluck('nombre', 'id')->all();
 
         $meses = Pago::query()->distinct()->orderByDesc('mes')->pluck('mes')->all();
         $mesOptions = array_combine(
@@ -41,6 +43,7 @@ class PagoController extends Controller
 
         $filtros = [
             ['name' => 'mes', 'label' => 'Mes', 'options' => $mesOptions],
+            ['name' => 'grado_escolar_id', 'label' => 'Grado escolar', 'options' => $gradosEscolares],
             ['name' => 'forma_pago_id', 'label' => 'Forma de pago', 'options' => FormaPago::orderBy('nombre')->pluck('nombre', 'id')->all()],
         ];
 
@@ -347,6 +350,10 @@ class PagoController extends Controller
 
         if ($request->filled('forma_pago_id')) {
             $query->where('pagos.forma_pago_id', $request->input('forma_pago_id'));
+        }
+
+        if ($request->filled('grado_escolar_id')) {
+            $query->whereHas('alumno', fn ($q) => $q->where('alumnos.grado_escolar_id', $request->input('grado_escolar_id')));
         }
 
         return $query;
