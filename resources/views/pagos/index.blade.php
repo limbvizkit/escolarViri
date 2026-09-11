@@ -7,7 +7,7 @@
         <p class="ip-muted mb-0">Pagos mensuales por alumno</p>
         <div class="d-flex gap-2">
             @php
-                $exportQuery = array_filter(request()->only(['q', 'mes', 'forma_pago_id', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
+                $exportQuery = array_filter(request()->only(['q', 'mes', 'grado_escolar_id', 'forma_pago_id', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
             @endphp
             <a href="{{ route('pagos.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i>PDF
@@ -45,6 +45,7 @@
                     <tr>
                         <x-sortable field="id" label="#" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="alumno_id" label="Alumno" :current="request('sort')" :direction="request('direction')" />
+                        <th>Grado escolar</th>
                         <x-sortable field="mes" label="Mes" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="fecha" label="Fecha" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="entrada_8am" label="Entrada 8AM" :current="request('sort')" :direction="request('direction')" />
@@ -72,8 +73,11 @@
                             <td>
                                 <div class="cell-view" data-target="alumno_id">
                                     <a href="{{ route('alumnos.show', $pago->alumno) }}" class="fw-semibold ip-link">{{ $pago->alumno->nombre_completo }}</a>
-                                    <span class="badge ms-1" style="background:#eaf1ff;color:var(--ip-primary);font-weight:600;">{{ $pago->alumno->gradoEscolar->nombre ?? '—' }}</span>
                                 </div>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary">{{ $pago->alumno->gradoEscolar->nombre ?? '—' }}</span>
                             </td>
 
                             <td>
@@ -181,7 +185,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="text-center ip-muted py-4">
+                            <td colspan="12" class="text-center ip-muted py-4">
                                 No hay pagos registrados.
                                 <a href="{{ route('pagos.create') }}" class="d-block mt-2">Registrar el primero</a>
                             </td>
