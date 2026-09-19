@@ -69,6 +69,9 @@
             <a href="{{ route('documentacion.index') }}" class="{{ request()->routeIs('documentacion.*') ? 'active' : '' }}">
                 <i class="bi bi-folder2-open"></i><span>Documentación</span>
             </a>
+            <a href="{{ route('academic-documents.index') }}" class="{{ request()->routeIs('academic-documents.*') ? 'active' : '' }}">
+                <i class="bi bi-journal-text"></i><span>Documentación Académica</span>
+            </a>
 
             <div class="ip-nav-title">Acceso</div>
             <a href="{{ route('usuarios.index') }}" class="{{ request()->routeIs('usuarios.*') ? 'active' : '' }}">

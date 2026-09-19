@@ -78,6 +78,11 @@ class Alumno extends Model
         return $this->hasMany(AlumnoArchivo::class);
     }
 
+    public function academicDocuments(): HasMany
+    {
+        return $this->hasMany(AcademicDocument::class);
+    }
+
     public function talleres(): BelongsToMany
     {
         return $this->belongsToMany(Taller::class, 'taller_alumno')
