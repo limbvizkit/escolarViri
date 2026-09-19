@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AdeudoExport;
 use App\Models\Adeudo;
 use App\Models\AdeudoAbono;
 use App\Models\Alumno;
 use App\Models\Estatus;
 use App\Models\FormaPago;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdeudoController extends Controller
 {
@@ -23,7 +26,7 @@ class AdeudoController extends Controller
         $adeudos = $this->paginateOrdered(
             $query,
             $request,
-            ['id', 'alumno_id', 'concepto', 'monto', 'monto_pagado', 'estatus'],
+            $this->allowedSorts(),
             'id',
         );
 
@@ -36,6 +39,25 @@ class AdeudoController extends Controller
         ];
 
         return view('adeudos.index', compact('adeudos', 'filtros'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $adeudos = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request))
+            ->get();
+
+        $pdf = Pdf::loadView('adeudos.pdf', compact('adeudos'))->setPaper('a4', 'landscape');
+
+        return $pdf->download('adeudos-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $query = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request));
+
+        return Excel::download(new AdeudoExport($query), 'adeudos-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function create(): View
@@ -186,6 +208,11 @@ class AdeudoController extends Controller
                 ? Adeudo::ESTATUS_PAGADO
                 : ($pagado > 0 ? Adeudo::ESTATUS_PARCIAL : Adeudo::ESTATUS_PENDIENTE),
         ]);
+    }
+
+    private function allowedSorts(): array
+    {
+        return ['id', 'alumno_id', 'concepto', 'monto', 'monto_pagado', 'estatus'];
     }
 
     private function filteredQuery(Request $request): Builder

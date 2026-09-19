@@ -2,35 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\EmpleadoExport;
 use App\Models\Empleado;
 use App\Models\Estatus;
 use App\Models\Sucursal;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EmpleadoController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Empleado::with('sucursal');
-
-        if ($request->filled('q')) {
-            $query->search($request->input('q'));
-        }
-
-        if ($request->filled('estatus')) {
-            $query->where('empleados.estatus_id', $request->input('estatus'));
-        }
-
-        if ($request->filled('sucursal_id')) {
-            $query->where('empleados.sucursal_id', $request->input('sucursal_id'));
-        }
+        $query = $this->filteredQuery($request);
 
         $empleados = $this->paginateOrdered(
             $query,
             $request,
-            ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'email', 'puesto', 'horario', 'fecha_nacimiento', 'tipo_sangre', 'curp', 'estatus_id'],
+            $this->allowedSorts(),
             'apellido_paterno',
         );
 
@@ -40,6 +32,25 @@ class EmpleadoController extends Controller
         ];
 
         return view('empleados.index', compact('empleados', 'filtros'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $empleados = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'apellido_paterno'), $this->sortDirection($request))
+            ->get();
+
+        $pdf = Pdf::loadView('empleados.pdf', compact('empleados'))->setPaper('a4', 'landscape');
+
+        return $pdf->download('empleados-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $query = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'apellido_paterno'), $this->sortDirection($request));
+
+        return Excel::download(new EmpleadoExport($query), 'empleados-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function create(): View
@@ -89,6 +100,30 @@ class EmpleadoController extends Controller
 
         return redirect()->route('empleados.index')
             ->with('success', 'Empleado eliminado correctamente.');
+    }
+
+    private function filteredQuery(Request $request): Builder
+    {
+        $query = Empleado::with('sucursal');
+
+        if ($request->filled('q')) {
+            $query->search($request->input('q'));
+        }
+
+        if ($request->filled('estatus')) {
+            $query->where('empleados.estatus_id', $request->input('estatus'));
+        }
+
+        if ($request->filled('sucursal_id')) {
+            $query->where('empleados.sucursal_id', $request->input('sucursal_id'));
+        }
+
+        return $query;
+    }
+
+    private function allowedSorts(): array
+    {
+        return ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'email', 'puesto', 'horario', 'fecha_nacimiento', 'tipo_sangre', 'curp', 'estatus_id'];
     }
 
     /**

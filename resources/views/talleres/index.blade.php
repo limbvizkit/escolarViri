@@ -5,9 +5,17 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="ip-heading mb-0">Talleres</h2>
-        <a href="{{ route('talleres.create') }}" class="btn ip-btn">
-            <i class="bi bi-plus-lg me-1"></i>Nuevo taller
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('talleres.export.pdf') }}" class="btn ip-btn-danger btn-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+            </a>
+            <a href="{{ route('talleres.export.excel') }}" class="btn ip-btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel me-1"></i>Excel
+            </a>
+            <a href="{{ route('talleres.create') }}" class="btn ip-btn">
+                <i class="bi bi-plus-lg me-1"></i>Nuevo taller
+            </a>
+        </div>
     </div>
 
     @forelse ($talleres as $taller)
