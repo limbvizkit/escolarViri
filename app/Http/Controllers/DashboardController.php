@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Adeudo;
 use App\Models\Alumno;
 use App\Models\Empleado;
 use App\Models\Escuela;
@@ -26,13 +27,6 @@ class DashboardController extends Controller
             'gradosEscolares' => GradoEscolar::count(),
         ];
 
-        $recientes = [
-            'escuelas' => Escuela::latest()->take(5)->get(),
-            'sucursales' => Sucursal::with('escuela')->latest()->take(5)->get(),
-            'empleados' => Empleado::with('sucursal')->latest()->take(5)->get(),
-            'alumnos' => Alumno::with('gradoEscolar')->latest()->take(5)->get(),
-        ];
-
         $montoTotal = 'COALESCE(pago_normal, pronto_pago, 0) + COALESCE(talleres, 0) + COALESCE(entrada_8am, 0)';
 
         $alumnosPorGradoEscolar = GradoEscolar::withCount('alumnos')
@@ -51,13 +45,32 @@ class DashboardController extends Controller
             ->with('formaPago')
             ->get();
 
-        $topPagosPorAlumno = Pago::select('alumno_id')
-            ->selectRaw("SUM({$montoTotal}) as total")
-            ->groupBy('alumno_id')
-            ->orderByDesc('total')
-            ->limit(8)
-            ->with('alumno')
+        $saldoPendiente = 'SUM(adeudos.monto - adeudos.monto_pagado)';
+
+        $adeudosPorGrado = Adeudo::active()
+            ->select('grados_escolares.id', 'grados_escolares.nombre')
+            ->selectRaw("{$saldoPendiente} as saldo")
+            ->join('alumnos', 'alumnos.id', '=', 'adeudos.alumno_id')
+            ->join('grados_escolares', 'grados_escolares.id', '=', 'alumnos.grado_escolar_id')
+            ->whereColumn('adeudos.monto', '>', 'adeudos.monto_pagado')
+            ->groupBy('grados_escolares.id', 'grados_escolares.nombre')
+            ->orderByDesc('saldo')
             ->get();
+
+        $adeudosPorAlumno = Adeudo::active()
+            ->select('adeudos.alumno_id')
+            ->selectRaw("{$saldoPendiente} as saldo")
+            ->join('alumnos', 'alumnos.id', '=', 'adeudos.alumno_id')
+            ->whereColumn('adeudos.monto', '>', 'adeudos.monto_pagado')
+            ->groupBy('adeudos.alumno_id')
+            ->orderByDesc('saldo')
+            ->limit(8)
+            ->get();
+
+        $alumnosPorId = Alumno::whereIn(
+            'id',
+            $adeudosPorAlumno->pluck('alumno_id')->filter()->all()
+        )->get()->keyBy('id');
 
         $charts = [
             'alumnosPorGradoEscolar' => [
@@ -72,12 +85,18 @@ class DashboardController extends Controller
                 'labels' => $pagosPorFormaPago->map(fn ($pago) => $pago->formaPago->nombre ?? 'Sin forma')->all(),
                 'data' => $pagosPorFormaPago->pluck('total')->map(fn ($t) => (float) $t)->all(),
             ],
-            'topPagosPorAlumno' => [
-                'labels' => $topPagosPorAlumno->map(fn ($pago) => $pago->alumno->nombre_completo ?? 'Sin alumno')->all(),
-                'data' => $topPagosPorAlumno->pluck('total')->map(fn ($t) => (float) $t)->all(),
+            'adeudosPorGrado' => [
+                'labels' => $adeudosPorGrado->pluck('nombre')->all(),
+                'data' => $adeudosPorGrado->pluck('saldo')->map(fn ($s) => (float) $s)->all(),
+            ],
+            'adeudosPorAlumno' => [
+                'labels' => $adeudosPorAlumno
+                    ->map(fn ($adeudo) => $alumnosPorId[$adeudo->alumno_id]->nombre_completo ?? 'Sin alumno')
+                    ->all(),
+                'data' => $adeudosPorAlumno->pluck('saldo')->map(fn ($s) => (float) $s)->all(),
             ],
         ];
 
-        return view('dashboard', compact('stats', 'recientes', 'charts'));
+        return view('dashboard', compact('stats', 'charts'));
     }
 }

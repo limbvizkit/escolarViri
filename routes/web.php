@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('escuelas', EscuelaController::class);
     Route::resource('sucursales', SucursalController::class)->parameters(['sucursales' => 'sucursal']);
+    Route::get('empleados/exportar/pdf', [EmpleadoController::class, 'exportPdf'])->name('empleados.export.pdf');
+    Route::get('empleados/exportar/excel', [EmpleadoController::class, 'exportExcel'])->name('empleados.export.excel');
     Route::resource('empleados', EmpleadoController::class);
     Route::resource('roles', RolController::class)->parameters(['roles' => 'rol']);
     Route::resource('usuarios', UsuarioController::class);
@@ -45,6 +47,8 @@ Route::middleware('auth')->group(function () {
     Route::post('pagos/precargar', [PagoController::class, 'precargarStore'])->name('pagos.precargar.store');
     Route::resource('pagos', PagoController::class)->parameters(['pagos' => 'pago']);
     Route::put('pagos/{pago}/inline-update', [PagoController::class, 'inlineUpdate'])->name('pagos.inline-update');
+    Route::get('talleres/exportar/pdf', [TallerController::class, 'exportPdf'])->name('talleres.export.pdf');
+    Route::get('talleres/exportar/excel', [TallerController::class, 'exportExcel'])->name('talleres.export.excel');
     Route::put('talleres/inscripciones/{tallerAlumno}/monto', [TallerController::class, 'montoUpdate'])->name('talleres.inscripcion.monto.update');
     Route::get('talleres/{taller}/alumnos/create', [TallerController::class, 'alumnoCreate'])->name('talleres.alumnos.create');
     Route::post('talleres/{taller}/alumnos', [TallerController::class, 'alumnoStore'])->name('talleres.alumnos.store');
@@ -63,6 +67,8 @@ Route::middleware('auth')->group(function () {
     Route::get('documentacion-academica/{academicDocument}/editar', [AcademicDocumentController::class, 'edit'])->name('academic-documents.edit');
     Route::put('documentacion-academica/{academicDocument}', [AcademicDocumentController::class, 'update'])->name('academic-documents.update');
     Route::delete('documentacion-academica/{academicDocument}', [AcademicDocumentController::class, 'destroy'])->name('academic-documents.destroy');
+    Route::get('adeudos/exportar/pdf', [AdeudoController::class, 'exportPdf'])->name('adeudos.export.pdf');
+    Route::get('adeudos/exportar/excel', [AdeudoController::class, 'exportExcel'])->name('adeudos.export.excel');
     Route::get('adeudos', [AdeudoController::class, 'index'])->name('adeudos.index');
     Route::get('adeudos/crear', [AdeudoController::class, 'create'])->name('adeudos.create');
     Route::post('adeudos', [AdeudoController::class, 'store'])->name('adeudos.store');

@@ -126,117 +126,23 @@
         <div class="col-lg-6">
             <div class="ip-card">
                 <div class="ip-card-header">
-                    <h5 class="ip-card-title">Top pagos por alumno</h5>
-                </div>
-                <div class="ip-card-body">
-                    <div class="ip-chart">
-                        <canvas id="chartTopAlumnos"></canvas>
+                    <h5 class="ip-card-title">Adeudos pendientes</h5>
+                    <div>
+                        <label for="adeudosModo" class="visually-hidden">Modo del gráfico</label>
+                        <select id="adeudosModo" class="form-select form-select-sm">
+                            <option value="grado">Por grado escolar</option>
+                            <option value="alumno">Por alumno</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="ip-card">
-                <div class="ip-card-header">
-                    <h5 class="ip-card-title">Escuelas recientes</h5>
-                    <a href="{{ route('escuelas.index') }}" class="ip-action" title="Ver todas">
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
+                <div class="ip-card-body">
+                    <div id="adeudosChartWrap" class="ip-chart">
+                        <canvas id="chartAdeudosPendientes"></canvas>
+                    </div>
+                    <div id="adeudosEmpty" class="text-center ip-muted py-5 d-none">
+                        No hay adeudos pendientes por <span id="adeudosEmptyMode">grado escolar</span>.
+                    </div>
                 </div>
-                <ul class="list-group list-group-flush">
-                    @forelse ($recientes['escuelas'] as $escuela)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-semibold">{{ $escuela->nombre }}</div>
-                                <small class="ip-muted">{{ $escuela->clave }}</small>
-                            </div>
-                            <span class="badge ip-badge-{{ $escuela->estatus_badge }}">
-                                {{ $escuela->estatus_es_activo ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </li>
-                    @empty
-                        <li class="list-group-item ip-muted">Sin escuelas registradas.</li>
-                    @endforelse
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="ip-card">
-                <div class="ip-card-header">
-                    <h5 class="ip-card-title">Sucursales recientes</h5>
-                    <a href="{{ route('sucursales.index') }}" class="ip-action" title="Ver todas">
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-                <ul class="list-group list-group-flush">
-                    @forelse ($recientes['sucursales'] as $sucursal)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-semibold">{{ $sucursal->nombre }}</div>
-                                <small class="ip-muted">{{ $sucursal->escuela->nombre ?? 'Sin escuela' }}</small>
-                            </div>
-                            <span class="badge ip-badge-{{ $sucursal->estatus_badge }}">
-                                {{ $sucursal->estatus_es_activo ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </li>
-                    @empty
-                        <li class="list-group-item ip-muted">Sin sucursales registradas.</li>
-                    @endforelse
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="ip-card">
-                <div class="ip-card-header">
-                    <h5 class="ip-card-title">Empleados recientes</h5>
-                    <a href="{{ route('empleados.index') }}" class="ip-action" title="Ver todos">
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-                <ul class="list-group list-group-flush">
-                    @forelse ($recientes['empleados'] as $empleado)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-semibold">{{ $empleado->nombre_completo }}</div>
-                                <small class="ip-muted">{{ $empleado->sucursal->nombre ?? 'Sin sucursal' }}</small>
-                            </div>
-                        </li>
-                    @empty
-                        <li class="list-group-item ip-muted">Sin empleados registrados.</li>
-                    @endforelse
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="ip-card">
-                <div class="ip-card-header">
-                    <h5 class="ip-card-title">Alumnos recientes</h5>
-                    <a href="{{ route('alumnos.index') }}" class="ip-action" title="Ver todos">
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-                <ul class="list-group list-group-flush">
-                    @forelse ($recientes['alumnos'] as $alumno)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-semibold">{{ $alumno->nombre_completo }}</div>
-                                <small class="ip-muted">{{ $alumno->gradoEscolar->nombre ?? 'Sin grado escolar' }}</small>
-                            </div>
-                            <span class="badge"
-                                  style="background:#eaf1ff;color:var(--ip-primary);font-weight:600;">
-                                {{ $alumno->horario ?? '—' }}
-                            </span>
-                        </li>
-                    @empty
-                        <li class="list-group-item ip-muted">Sin alumnos registrados.</li>
-                    @endforelse
-                </ul>
             </div>
         </div>
     </div>
@@ -246,7 +152,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
         (function () {
-            const charts = @json($charts);
+            const charts = @json($charts, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 
             const formatMoney = (value) =>
                 '$' + value.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -340,37 +246,88 @@
                 },
             });
 
-            new Chart(document.getElementById('chartTopAlumnos'), {
-                type: 'bar',
-                data: {
-                    labels: charts.topPagosPorAlumno.labels,
-                    datasets: [{
-                        label: 'Total',
-                        data: charts.topPagosPorAlumno.data,
-                        backgroundColor: colors[2],
-                        borderRadius: 6,
-                    }],
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => ' ' + formatMoney(context.parsed.x),
+            (function () {
+                const wrap = document.getElementById('adeudosChartWrap');
+                const empty = document.getElementById('adeudosEmpty');
+                const emptyMode = document.getElementById('adeudosEmptyMode');
+                const select = document.getElementById('adeudosModo');
+                const ctx = document.getElementById('chartAdeudosPendientes').getContext('2d');
+
+                let chart = null;
+
+                const datasets = {
+                    grado: {
+                        labels: charts.adeudosPorGrado.labels,
+                        data: charts.adeudosPorGrado.data,
+                        label: 'Saldo pendiente',
+                        axis: 'x',
+                    },
+                    alumno: {
+                        labels: charts.adeudosPorAlumno.labels,
+                        data: charts.adeudosPorAlumno.data,
+                        label: 'Saldo pendiente',
+                        axis: 'y',
+                    },
+                };
+
+                const render = (modo) => {
+                    const dataset = datasets[modo];
+
+                    if (chart) {
+                        chart.destroy();
+                        chart = null;
+                    }
+
+                    if (dataset.data.length === 0) {
+                        wrap.classList.add('d-none');
+                        empty.classList.remove('d-none');
+                        emptyMode.textContent = modo === 'alumno' ? 'alumno' : 'grado escolar';
+
+                        return;
+                    }
+
+                    wrap.classList.remove('d-none');
+                    empty.classList.add('d-none');
+
+                    const isHorizontal = modo === 'alumno';
+
+                    chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: dataset.labels,
+                            datasets: [{
+                                label: dataset.label,
+                                data: dataset.data,
+                                backgroundColor: colors[5],
+                                borderRadius: 6,
+                            }],
+                        },
+                        options: {
+                            indexAxis: isHorizontal ? 'y' : 'x',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => ' ' + formatMoney(isHorizontal ? context.parsed.x : context.parsed.y),
+                                    },
+                                },
+                            },
+                            scales: {
+                                [isHorizontal ? 'x' : 'y']: {
+                                    beginAtZero: true,
+                                    ticks: { callback: (value) => formatMoney(value) },
+                                },
                             },
                         },
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            ticks: { callback: (value) => formatMoney(value) },
-                        },
-                    },
-                },
-            });
+                    });
+                };
+
+                select.addEventListener('change', (event) => render(event.target.value));
+
+                render(select.value);
+            })();
         })();
     </script>
 @endpush

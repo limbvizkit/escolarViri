@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TallerAlumnoExport;
 use App\Models\Alumno;
 use App\Models\Taller;
 use App\Models\TallerAlumno;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TallerController extends Controller
 {
@@ -18,11 +22,25 @@ class TallerController extends Controller
     {
         $talleres = Taller::orderBy('nombre')->get();
 
-        $inscripciones = TallerAlumno::with(['alumno.gradoEscolar', 'taller'])
-            ->orderBy('hora_inicio')
-            ->get();
+        $inscripciones = $this->inscripcionesQuery()->get();
 
         return view('talleres.index', compact('talleres', 'inscripciones'));
+    }
+
+    public function exportPdf()
+    {
+        $inscripciones = $this->inscripcionesQuery()->get();
+
+        $pdf = Pdf::loadView('talleres.pdf', compact('inscripciones'))->setPaper('a4', 'landscape');
+
+        return $pdf->download('talleres-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    public function exportExcel()
+    {
+        $query = $this->inscripcionesQuery();
+
+        return Excel::download(new TallerAlumnoExport($query), 'talleres-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function create(): View
@@ -173,6 +191,12 @@ class TallerController extends Controller
             'mensaje' => 'Cambios guardados.',
             'valor' => $tallerAlumno->fresh()->monto_pagado,
         ]);
+    }
+
+    private function inscripcionesQuery(): Builder
+    {
+        return TallerAlumno::with(['alumno.gradoEscolar', 'taller'])
+            ->orderBy('hora_inicio');
     }
 
     private function reglas(): array
