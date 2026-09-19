@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AcademicDocumentController;
 use App\Http\Controllers\AdeudoController;
 use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\DashboardController;
@@ -55,6 +56,13 @@ Route::middleware('auth')->group(function () {
     Route::get('documentacion/{alumno}', [DocumentacionController::class, 'show'])->name('documentacion.show');
     Route::post('documentacion/{alumno}', [DocumentacionController::class, 'store'])->name('documentacion.store');
     Route::delete('documentacion/{documento}', [DocumentacionController::class, 'destroy'])->name('documentacion.destroy');
+    Route::get('documentacion-academica', [AcademicDocumentController::class, 'index'])->name('academic-documents.index');
+    Route::get('documentacion-academica/alumnos/{alumno}', [AcademicDocumentController::class, 'show'])->name('academic-documents.show');
+    Route::get('documentacion-academica/alumnos/{alumno}/crear', [AcademicDocumentController::class, 'create'])->name('academic-documents.create');
+    Route::post('documentacion-academica/alumnos/{alumno}', [AcademicDocumentController::class, 'store'])->name('academic-documents.store');
+    Route::get('documentacion-academica/{academicDocument}/editar', [AcademicDocumentController::class, 'edit'])->name('academic-documents.edit');
+    Route::put('documentacion-academica/{academicDocument}', [AcademicDocumentController::class, 'update'])->name('academic-documents.update');
+    Route::delete('documentacion-academica/{academicDocument}', [AcademicDocumentController::class, 'destroy'])->name('academic-documents.destroy');
     Route::get('adeudos', [AdeudoController::class, 'index'])->name('adeudos.index');
     Route::get('adeudos/crear', [AdeudoController::class, 'create'])->name('adeudos.create');
     Route::post('adeudos', [AdeudoController::class, 'store'])->name('adeudos.store');
