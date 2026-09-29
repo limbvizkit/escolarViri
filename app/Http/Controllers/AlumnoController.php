@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -35,6 +36,7 @@ class AlumnoController extends Controller
             ['name' => 'grado_escolar_id', 'label' => 'Grado Escolar', 'options' => GradoEscolar::orderBy('nombre')->pluck('nombre', 'id')->all()],
             ['name' => 'sucursal_id', 'label' => 'Sucursal', 'options' => Sucursal::active()->orderBy('nombre')->pluck('nombre', 'id')->all()],
             ['name' => 'horario_extendido_id', 'label' => 'Horario extendido', 'options' => HorarioExtendido::active()->orderBy('nombre')->pluck('nombre', 'id')->all()],
+            ['name' => 'sexo', 'label' => 'Sexo', 'options' => Alumno::opcionesSexo()],
             ['name' => 'estatus', 'label' => 'Estatus', 'options' => [Estatus::ACTIVO => 'Activo', Estatus::INACTIVO => 'Inactivo']],
         ];
 
@@ -235,6 +237,10 @@ class AlumnoController extends Controller
             $query->where('alumnos.horario_extendido_id', $request->input('horario_extendido_id'));
         }
 
+        if ($request->filled('sexo')) {
+            $query->where('alumnos.sexo', $request->input('sexo'));
+        }
+
         if ($request->filled('estatus')) {
             $query->where('alumnos.estatus_id', $request->input('estatus'));
         }
@@ -244,7 +250,7 @@ class AlumnoController extends Controller
 
     private function allowedSorts(): array
     {
-        return ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'fecha_nacimiento', 'horario',
+        return ['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'sexo', 'fecha_nacimiento', 'horario',
             'horario_extendido_id', 'inscripcion', 'reinscripcion', 'entrevista_inicial', 'nat_geo', 'cuota_materiales',
             'fecha_ingreso', 'cuota_mensual', 'estatus_id', 'sucursal_id'];
     }
@@ -278,6 +284,7 @@ class AlumnoController extends Controller
             'nombre' => ['required', 'string', 'max:255'],
             'apellido_paterno' => ['required', 'string', 'max:255'],
             'apellido_materno' => ['nullable', 'string', 'max:255'],
+            'sexo' => ['required', 'string', Rule::in([Alumno::SEXO_NINO, Alumno::SEXO_NINA])],
             'fecha_nacimiento' => ['nullable', 'date', 'before_or_equal:today'],
             'horario' => ['nullable', 'string', 'max:50'],
             'horario_extendido_id' => ['nullable', 'exists:horarios_extendidos,id'],
@@ -314,6 +321,8 @@ class AlumnoController extends Controller
             'grado_escolar_id.required' => 'Selecciona un grado escolar.',
             'nombre.required' => 'El nombre es obligatorio.',
             'apellido_paterno.required' => 'El apellido paterno es obligatorio.',
+            'sexo.required' => 'Selecciona el sexo del alumno.',
+            'sexo.in' => 'El sexo debe ser Niño o Niña.',
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
         ];
     }

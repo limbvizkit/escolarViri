@@ -14,12 +14,17 @@ class Alumno extends Model
     use ConEstatus;
     use HasFactory;
 
+    public const SEXO_NINO = 'niño';
+
+    public const SEXO_NINA = 'niña';
+
     protected $fillable = [
         'grado_escolar_id',
         'sucursal_id',
         'nombre',
         'apellido_paterno',
         'apellido_materno',
+        'sexo',
         'fecha_nacimiento',
         'horario',
         'horario_extendido_id',
@@ -93,6 +98,23 @@ class Alumno extends Model
     public function getNombreCompletoAttribute(): string
     {
         return trim($this->nombre.' '.$this->apellido_paterno.' '.$this->apellido_materno);
+    }
+
+    public function getSexoLabelAttribute(): ?string
+    {
+        if ($this->sexo === null) {
+            return null;
+        }
+
+        return self::opcionesSexo()[$this->sexo] ?? ucfirst($this->sexo);
+    }
+
+    public static function opcionesSexo(): array
+    {
+        return [
+            self::SEXO_NINO => 'Niño',
+            self::SEXO_NINA => 'Niña',
+        ];
     }
 
     public function scopeSearch($query, ?string $busqueda)
