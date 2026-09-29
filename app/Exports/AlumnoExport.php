@@ -20,7 +20,7 @@ class AlumnoExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
     public function headings(): array
     {
         return [
-            '#', 'Nombre', 'Apellido paterno', 'Apellido materno', 'Grado Escolar', 'Sucursal', 'Fecha nacimiento',
+            '#', 'Nombre', 'Apellido paterno', 'Apellido materno', 'Sexo', 'Grado Escolar', 'Sucursal', 'Fecha nacimiento',
             'Horario', 'Inscripción', 'Re/Inscripción', 'Entrevista', 'Nat Geo', 'Cuota materiales',
             'Fecha ingreso', 'Cuota mensual', 'Estatus',
         ];
@@ -33,6 +33,7 @@ class AlumnoExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
             $alumno->nombre,
             $alumno->apellido_paterno,
             $alumno->apellido_materno ?? '',
+            $alumno->sexo_label ?? '',
             $alumno->gradoEscolar->nombre ?? '',
             $alumno->sucursal->nombre ?? '',
             $alumno->fecha_nacimiento?->format('d/m/Y') ?? '',

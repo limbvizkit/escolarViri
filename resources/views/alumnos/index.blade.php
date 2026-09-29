@@ -7,7 +7,7 @@
         <p class="ip-muted mb-0">Gestión de alumnos por grado escolar</p>
         <div class="d-flex gap-2">
             @php
-                $exportQuery = array_filter(request()->only(['q', 'grado_escolar_id', 'sucursal_id', 'horario_extendido_id', 'estatus', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
+                $exportQuery = array_filter(request()->only(['q', 'grado_escolar_id', 'sucursal_id', 'horario_extendido_id', 'sexo', 'estatus', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
             @endphp
             <a href="{{ route('alumnos.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i>PDF
@@ -44,6 +44,7 @@
                         <x-sortable field="nombre" label="Nombre" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="apellido_paterno" label="Apellido paterno" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="apellido_materno" label="Apellido materno" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="sexo" label="Sexo" :current="request('sort')" :direction="request('direction')" />
                         <th>Grado Escolar</th>
                         <th>Sucursal</th>
                         <x-sortable field="fecha_nacimiento" label="Fecha nacimiento" :current="request('sort')" :direction="request('direction')" />
@@ -94,6 +95,22 @@
                                 <input type="text" name="apellido_materno" form="{{ $formId }}" data-key="apellido_materno" data-format="text"
                                        class="form-control form-control-sm cell-edit d-none"
                                        value="{{ $alumno->apellido_materno }}" data-original="{{ $alumno->apellido_materno }}">
+                            </td>
+
+                            <td>
+                                <div class="cell-view">
+                                    <span class="badge" data-target="sexo" style="background:#eaf1ff;color:var(--ip-primary);font-weight:600;">
+                                        {{ $alumno->sexo_label ?? '—' }}
+                                    </span>
+                                </div>
+                                <select name="sexo" form="{{ $formId }}" data-key="sexo" data-format="sexo"
+                                        class="form-select form-select-sm cell-edit d-none"
+                                        data-original="{{ $alumno->sexo }}">
+                                    <option value="">— Sin sexo —</option>
+                                    @foreach (\App\Models\Alumno::opcionesSexo() as $valor => $etiqueta)
+                                        <option value="{{ $valor }}" @selected($alumno->sexo == $valor)>{{ $etiqueta }}</option>
+                                    @endforeach
+                                </select>
                             </td>
 
                             <td>
@@ -251,7 +268,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="18" class="text-center ip-muted py-4">
+                            <td colspan="19" class="text-center ip-muted py-4">
                                 No hay alumnos registrados.
                                 <a href="{{ route('alumnos.create') }}" class="d-block mt-2">Crear el primero</a>
                             </td>
@@ -317,6 +334,8 @@
                     } else if (fmt === 'money') {
                         view.textContent = val === '' || val === null ? 'NA' : '$' + Number(val).toFixed(2);
                     } else if (fmt === 'grado_escolar') {
+                        view.textContent = inp.options[inp.selectedIndex].text;
+                    } else if (fmt === 'sexo') {
                         view.textContent = inp.options[inp.selectedIndex].text;
                     } else if (fmt === 'estatus_id') {
                         const activo = val === '1';

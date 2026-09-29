@@ -22,6 +22,7 @@ class AlumnoFactory extends Factory
             'nombre' => fake()->firstName(),
             'apellido_paterno' => fake()->lastName(),
             'apellido_materno' => fake()->lastName(),
+            'sexo' => fake()->randomElement([Alumno::SEXO_NINO, Alumno::SEXO_NINA]),
             'fecha_nacimiento' => fake()->date(),
             'horario' => fake()->optional()->word(),
             'inscripcion' => fake()->optional()->randomFloat(2, 100, 5000),

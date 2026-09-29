@@ -112,6 +112,7 @@
                 <th>Nombre completo</th>
                 <th>Grado Escolar</th>
                 <th>Sucursal</th>
+                <th>Sexo</th>
                 <th>Fecha nacimiento</th>
                 <th>Horario</th>
                 <th class="num">Inscripción</th>
@@ -129,6 +130,7 @@
                     <td>{{ $alumno->nombre_completo }}</td>
                     <td>{{ $alumno->gradoEscolar->nombre ?? '—' }}</td>
                     <td>{{ $alumno->sucursal->nombre ?? '—' }}</td>
+                    <td>{{ $alumno->sexo_label ?? '—' }}</td>
                     <td>{{ $alumno->fecha_nacimiento?->format('d/m/Y') ?? '—' }}</td>
                     <td>{{ $alumno->horario ?? '—' }}</td>
                     <td class="num">{{ $alumno->inscripcion ? '$' . number_format((float) $alumno->inscripcion, 2) : 'NA' }}</td>
@@ -140,7 +142,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="12" class="empty">Sin registros</td>
+                    <td colspan="13" class="empty">Sin registros</td>
                 </tr>
             @endforelse
         </tbody>

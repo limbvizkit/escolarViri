@@ -33,6 +33,7 @@ class AlumnoArchivosTest extends TestCase
                 'grado_escolar_id' => Alumno::factory()->make()->grado_escolar_id,
                 'nombre' => 'Juan',
                 'apellido_paterno' => 'Pérez',
+                'sexo' => Alumno::SEXO_NINO,
                 'archivos' => [$imagen, $pdf],
             ]);
 
@@ -64,6 +65,7 @@ class AlumnoArchivosTest extends TestCase
                 'grado_escolar_id' => $alumno->grado_escolar_id,
                 'nombre' => $alumno->nombre,
                 'apellido_paterno' => $alumno->apellido_paterno,
+                'sexo' => $alumno->sexo ?? Alumno::SEXO_NINO,
                 'archivos' => [$nuevoArchivo],
             ]);
 
@@ -169,6 +171,7 @@ class AlumnoArchivosTest extends TestCase
                 'grado_escolar_id' => Alumno::factory()->make()->grado_escolar_id,
                 'nombre' => 'María',
                 'apellido_paterno' => 'García',
+                'sexo' => Alumno::SEXO_NINA,
                 'archivo' => $pdf,
             ]);
 

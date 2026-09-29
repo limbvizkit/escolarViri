@@ -208,6 +208,23 @@
                             </div>
                         </div>
 
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="sexo" class="form-label">Sexo <span class="ip-required">*</span></label>
+                                <select id="sexo" name="sexo"
+                                        class="form-select @error('sexo') is-invalid @enderror" required>
+                                    <option value="">— Seleccionar sexo —</option>
+                                    @foreach (\App\Models\Alumno::opcionesSexo() as $valor => $etiqueta)
+                                        <option value="{{ $valor }}"
+                                            {{ old('sexo', $alumno->sexo ?? '') == $valor ? 'selected' : '' }}>
+                                            {{ $etiqueta }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('sexo')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
                         {{-- Fechas --}}
                         <h6 class="fw-semibold text-uppercase small text-secondary mb-3">
                             <i class="bi bi-calendar-event me-1"></i>Fechas

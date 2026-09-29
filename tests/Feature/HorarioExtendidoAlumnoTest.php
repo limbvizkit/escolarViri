@@ -44,6 +44,7 @@ class HorarioExtendidoAlumnoTest extends TestCase
                 'grado_escolar_id' => Alumno::factory()->make()->grado_escolar_id,
                 'nombre' => 'Juan',
                 'apellido_paterno' => 'Pérez',
+                'sexo' => Alumno::SEXO_NINO,
                 'horario_extendido_id' => $horario->id,
             ]);
 
@@ -65,6 +66,7 @@ class HorarioExtendidoAlumnoTest extends TestCase
                 'grado_escolar_id' => $alumno->grado_escolar_id,
                 'nombre' => $alumno->nombre,
                 'apellido_paterno' => $alumno->apellido_paterno,
+                'sexo' => $alumno->sexo ?? Alumno::SEXO_NINO,
                 'horario_extendido_id' => $horario->id,
             ]);
 
@@ -117,6 +119,7 @@ class HorarioExtendidoAlumnoTest extends TestCase
                 'grado_escolar_id' => Alumno::factory()->make()->grado_escolar_id,
                 'nombre' => 'Juan',
                 'apellido_paterno' => 'Pérez',
+                'sexo' => Alumno::SEXO_NINO,
                 'horario_extendido_id' => 9999,
             ]);
 
