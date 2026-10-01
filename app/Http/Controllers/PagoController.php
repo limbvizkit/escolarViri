@@ -52,10 +52,13 @@ class PagoController extends Controller
 
     public function inlineUpdate(Request $request, Pago $pago)
     {
-        $datos = $request->only(array_keys($this->reglas()));
+        $this->authorize('update', $pago);
+
+        $camposEditables = array_diff_key($this->reglas(), ['alumno_id' => true]);
+        $datos = $request->only(array_keys($camposEditables));
 
         if ($datos !== []) {
-            $reglas = collect($this->reglas())->only(array_keys($datos))->all();
+            $reglas = collect($camposEditables)->only(array_keys($datos))->all();
             $datos = $request->validate($reglas, $this->mensajes());
         }
 
@@ -96,6 +99,8 @@ class PagoController extends Controller
 
     public function show(Pago $pago): View
     {
+        $this->authorize('view', $pago);
+
         $pago->load(['alumno.gradoEscolar', 'formaPago']);
 
         return view('pagos.show', compact('pago'));
@@ -103,6 +108,8 @@ class PagoController extends Controller
 
     public function edit(Pago $pago): View
     {
+        $this->authorize('update', $pago);
+
         $alumnos = Alumno::with('gradoEscolar')->orderBy('apellido_paterno')->get();
         $formasPago = FormaPago::active()->orderBy('nombre')->get();
 
@@ -111,6 +118,8 @@ class PagoController extends Controller
 
     public function update(Request $request, Pago $pago): RedirectResponse
     {
+        $this->authorize('update', $pago);
+
         $validated = $request->validate($this->reglas(), $this->mensajes());
 
         $pago->update($validated);
@@ -121,6 +130,8 @@ class PagoController extends Controller
 
     public function destroy(Pago $pago): RedirectResponse
     {
+        $this->authorize('delete', $pago);
+
         $pago->delete();
 
         return redirect()->route('pagos.index')

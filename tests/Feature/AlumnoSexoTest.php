@@ -13,7 +13,7 @@ class AlumnoSexoTest extends TestCase
 
     public function test_puede_crear_alumno_guardando_sexo(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this
             ->actingAs($user)
@@ -34,7 +34,7 @@ class AlumnoSexoTest extends TestCase
 
     public function test_validacion_rechaza_sexo_invalido(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this
             ->actingAs($user)
@@ -61,7 +61,7 @@ class AlumnoSexoTest extends TestCase
 
     public function test_index_filtra_por_sexo(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         Alumno::factory()->count(2)->create(['sexo' => Alumno::SEXO_NINO]);
         Alumno::factory()->count(3)->create(['sexo' => Alumno::SEXO_NINA]);
@@ -78,7 +78,7 @@ class AlumnoSexoTest extends TestCase
 
     public function test_inline_update_actualiza_sexo(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create(['sexo' => Alumno::SEXO_NINO]);
 
         $response = $this

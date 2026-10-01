@@ -16,7 +16,7 @@ class DashboardTest extends TestCase
 
     public function test_dashboard_displays_aggregated_adeudos_data(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $grado = GradoEscolar::factory()->create(['nombre' => '3ro Primaria']);
 
         $alumnoConMayorSaldo = Alumno::factory()->create([
@@ -76,7 +76,7 @@ class DashboardTest extends TestCase
 
     public function test_dashboard_adeudos_chart_has_both_modes(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this
             ->actingAs($user)
@@ -92,7 +92,7 @@ class DashboardTest extends TestCase
 
     public function test_dashboard_hides_recent_sections(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this
             ->actingAs($user)

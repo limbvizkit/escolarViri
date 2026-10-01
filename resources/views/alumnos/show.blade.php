@@ -110,7 +110,7 @@
                 <div class="row g-4">
                     @foreach ($archivosExistentes as $archivoItem)
                         @php
-                            $urlArchivo = Storage::url($archivoItem->archivo);
+                            $urlArchivo = route('alumnos.archivos.download', [$alumno, $archivoItem]);
                             $imagenArchivo = $esImagen($archivoItem->archivo);
                             $nombreArchivo = $archivoItem->nombre_original ?? basename($archivoItem->archivo);
                         @endphp
@@ -144,7 +144,7 @@
 
                     @if ($archivoLegacy)
                         @php
-                            $urlLegacy = Storage::url($archivoLegacy);
+                            $urlLegacy = route('alumnos.archivo.download', $alumno);
                             $imagenLegacy = $esImagen($archivoLegacy);
                             $nombreLegacy = basename($archivoLegacy);
                         @endphp

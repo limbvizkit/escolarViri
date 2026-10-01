@@ -59,7 +59,7 @@ class AdeudoEditarDetalleTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('adeudos.show', $adeudo));
 
         $response->assertOk();
@@ -81,7 +81,7 @@ class AdeudoEditarDetalleTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->put(route('adeudos.update', $adeudo), [
                 'alumno_id' => $nuevoAlumno->id,
                 'concepto' => 'Inscripción',
@@ -116,7 +116,7 @@ class AdeudoEditarDetalleTest extends TestCase
         ]);
 
         $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->put(route('adeudos.update', $adeudo), [
                 'alumno_id' => $nuevoAlumno->id,
                 'concepto' => 'Otro concepto',
@@ -137,7 +137,7 @@ class AdeudoEditarDetalleTest extends TestCase
         $adeudo = $this->crearAdeudo();
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->from(route('adeudos.show', $adeudo))
             ->put(route('adeudos.update', $adeudo), [
                 'alumno_id' => '',
@@ -155,7 +155,7 @@ class AdeudoEditarDetalleTest extends TestCase
         $adeudo = $this->crearAdeudo();
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->from(route('adeudos.show', $adeudo))
             ->put(route('adeudos.update', $adeudo), [
                 'alumno_id' => 99999,
@@ -177,7 +177,7 @@ class AdeudoEditarDetalleTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->from(route('adeudos.show', $adeudo))
             ->put(route('adeudos.update', $adeudo), [
                 'alumno_id' => $otroAlumno->id,

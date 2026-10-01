@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\DeletesStoredFiles;
 use App\Models\AcademicDocument;
 use App\Models\Alumno;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AcademicDocumentController extends Controller
 {
+    use DeletesStoredFiles;
+
     public function index(Request $request): View
     {
         $query = Alumno::with(['gradoEscolar'])
@@ -71,7 +74,7 @@ class AcademicDocumentController extends Controller
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $data['file'] = $file->store('academic-documents/'.$alumno->id, 'public');
+            $data['file'] = $file->store('academic-documents/'.$alumno->id, 'documents');
             $data['original_name'] = $file->getClientOriginalName();
             $data['mime_type'] = $file->getMimeType();
             $data['content'] = null;
@@ -85,6 +88,8 @@ class AcademicDocumentController extends Controller
 
     public function edit(AcademicDocument $academicDocument): View
     {
+        $this->authorize('update', $academicDocument);
+
         $academicDocument->load('alumno.gradoEscolar');
 
         return view('academic-documents.edit', [
@@ -95,6 +100,8 @@ class AcademicDocumentController extends Controller
 
     public function update(Request $request, AcademicDocument $academicDocument): RedirectResponse
     {
+        $this->authorize('update', $academicDocument);
+
         $validated = $request->validate(
             $this->rules(),
             $this->messages(),
@@ -112,10 +119,10 @@ class AcademicDocumentController extends Controller
             $file = $request->file('file');
 
             if ($academicDocument->isFile() && $academicDocument->file !== null) {
-                Storage::disk('public')->delete($academicDocument->file);
+                $this->deleteStoredFile($academicDocument->file);
             }
 
-            $data['file'] = $file->store('academic-documents/'.$academicDocument->alumno_id, 'public');
+            $data['file'] = $file->store('academic-documents/'.$academicDocument->alumno_id, 'documents');
             $data['original_name'] = $file->getClientOriginalName();
             $data['mime_type'] = $file->getMimeType();
             $data['content'] = null;
@@ -129,16 +136,30 @@ class AcademicDocumentController extends Controller
 
     public function destroy(AcademicDocument $academicDocument): RedirectResponse
     {
+        $this->authorize('delete', $academicDocument);
+
         $alumno = $academicDocument->alumno;
 
         if ($academicDocument->isFile() && $academicDocument->file !== null) {
-            Storage::disk('public')->delete($academicDocument->file);
+            $this->deleteStoredFile($academicDocument->file);
         }
 
         $academicDocument->delete();
 
         return redirect()->route('academic-documents.show', $alumno)
             ->with('success', 'Documento académico eliminado correctamente.');
+    }
+
+    public function descargar(AcademicDocument $academicDocument): StreamedResponse
+    {
+        $this->authorize('view', $academicDocument);
+
+        abort_unless($academicDocument->isFile(), 404);
+
+        return $this->downloadStoredFile(
+            $academicDocument->file,
+            $academicDocument->original_name ?? basename($academicDocument->file)
+        );
     }
 
     private function rules(): array

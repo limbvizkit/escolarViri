@@ -69,7 +69,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->post(route('pagos.precargar.store'), [
                 'seleccionados' => [$pagoA->id, $pagoB->id],
                 'pagos' => [
@@ -133,7 +133,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->post(route('pagos.precargar.store'), [
                 'seleccionados' => [$pagoA->id, $pagoB->id],
                 'pagos' => [
@@ -178,7 +178,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.precargar'));
 
         $response->assertOk();
@@ -212,7 +212,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.precargar'));
 
         $response->assertOk();
@@ -250,7 +250,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->post(route('pagos.precargar.store'), [
                 'seleccionados' => [$pago->id],
                 'pagos' => [
@@ -299,7 +299,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.precargar'));
 
         $response->assertOk();
@@ -343,7 +343,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.precargar'));
 
         $response->assertOk();
@@ -373,7 +373,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.precargar'));
 
         $response->assertOk();
@@ -410,7 +410,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.precargar'));
 
         $response->assertOk();
@@ -450,7 +450,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->put(route('pagos.inline-update', $pago), [
                 'mes' => $this->mesSiguiente,
                 'fecha' => '2026-09-20',
@@ -497,7 +497,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->put(route('pagos.inline-update', $pagoActual), [
                 'mes' => $this->mesSiguiente,
                 'pronto_pago' => '200',
@@ -530,7 +530,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->putJson(route('pagos.inline-update', $pago), ['mes' => 'no-valido']);
 
         $response->assertStatus(422);
@@ -578,7 +578,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.precargar'));
 
         $response->assertOk();
@@ -630,7 +630,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.precargar'));
 
         $response->assertOk();
@@ -670,7 +670,7 @@ class PrecargarPagosTest extends TestCase
             ->format('Y-m');
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->post(route('pagos.precargar.store'), [
                 'seleccionados' => [$pago->id],
                 'pagos' => [
@@ -712,7 +712,7 @@ class PrecargarPagosTest extends TestCase
             ->format('Y-m');
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->post(route('pagos.precargar.store'), [
                 'seleccionados' => [$pago->id],
                 'pagos' => [
@@ -746,7 +746,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->post(route('pagos.precargar.store'), [
                 'seleccionados' => [$pago->id],
                 'pagos' => [
@@ -781,7 +781,7 @@ class PrecargarPagosTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->post(route('pagos.precargar.store'), [
                 'seleccionados' => [$pago->id],
                 'pagos' => [

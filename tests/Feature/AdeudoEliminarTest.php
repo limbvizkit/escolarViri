@@ -53,7 +53,7 @@ class AdeudoEliminarTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('adeudos.index'));
 
         $response->assertOk();
@@ -66,7 +66,7 @@ class AdeudoEliminarTest extends TestCase
         $adeudo = $this->crearAdeudo();
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->delete(route('adeudos.destroy', $adeudo));
 
         $response->assertRedirect(route('adeudos.index'));
@@ -88,7 +88,7 @@ class AdeudoEliminarTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->delete(route('adeudos.destroy', $adeudo));
 
         $response->assertRedirect(route('adeudos.index'));
@@ -118,7 +118,7 @@ class AdeudoEliminarTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('adeudos.index', ['estatus' => Adeudo::ESTATUS_PENDIENTE]));
 
         $response->assertOk();

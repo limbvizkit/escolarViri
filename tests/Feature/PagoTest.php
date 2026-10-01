@@ -29,7 +29,7 @@ class PagoTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.index'));
 
         $response->assertOk();
@@ -68,7 +68,7 @@ class PagoTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.index', ['grado_escolar_id' => $gradoPrimaria->id]));
 
         $response->assertOk();
@@ -92,7 +92,7 @@ class PagoTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.index'));
 
         $response->assertOk();
@@ -122,7 +122,7 @@ class PagoTest extends TestCase
         ]);
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('pagos.index', ['grado_escolar_id' => $grado->id]));
 
         $response->assertOk();

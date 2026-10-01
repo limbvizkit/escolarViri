@@ -20,7 +20,7 @@ class EmpleadoCrudTest extends TestCase
 
     public function test_puede_ver_listado_de_empleados_con_todas_las_columnas(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $empleado = Empleado::factory()->create([
             'nombre' => 'Zafiro',
             'apellido_paterno' => 'Zúñiga',
@@ -59,7 +59,7 @@ class EmpleadoCrudTest extends TestCase
 
     public function test_puede_crear_un_empleado_con_todos_los_campos_nuevos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $sucursal = $this->sucursalCentro();
 
         $response = $this
@@ -112,7 +112,7 @@ class EmpleadoCrudTest extends TestCase
 
     public function test_puede_actualizar_un_empleado_con_los_nuevos_campos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $empleado = Empleado::factory()->create();
         $sucursal = $this->sucursalCentro();
 
@@ -156,7 +156,7 @@ class EmpleadoCrudTest extends TestCase
 
     public function test_la_vista_show_muestra_los_nuevos_campos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $empleado = Empleado::factory()->create([
             'puesto' => 'Maestras',
             'horario' => 'Lunes a Viernes 8:00 - 14:30',
@@ -177,7 +177,7 @@ class EmpleadoCrudTest extends TestCase
 
     public function test_puede_eliminar_un_empleado_marcandolo_como_eliminado(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $empleado = Empleado::factory()->create();
 
         $response = $this
@@ -195,7 +195,7 @@ class EmpleadoCrudTest extends TestCase
 
     public function test_valida_campos_requeridos_al_crear(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this
             ->actingAs($user)
@@ -220,7 +220,7 @@ class EmpleadoCrudTest extends TestCase
 
     public function test_puede_buscar_por_curp_y_telefono_personal(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $empleado = Empleado::factory()->create([
             'curp' => 'QUVM841016MDFRLR00',
             'telefono_personal' => '55-3664-8489',
@@ -236,7 +236,7 @@ class EmpleadoCrudTest extends TestCase
 
     public function test_puede_ordenar_por_nuevas_columnas(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this
             ->actingAs($user)

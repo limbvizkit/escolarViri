@@ -35,7 +35,7 @@ class HorarioExtendidoAlumnoTest extends TestCase
 
     public function test_puede_crear_alumno_con_horario_extendido(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $horario = HorarioExtendido::where('nombre', '4')->first();
 
         $response = $this
@@ -56,7 +56,7 @@ class HorarioExtendidoAlumnoTest extends TestCase
 
     public function test_puede_actualizar_alumno_con_horario_extendido(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $horario = HorarioExtendido::where('nombre', '5')->first();
 
@@ -78,7 +78,7 @@ class HorarioExtendidoAlumnoTest extends TestCase
 
     public function test_index_filtra_por_horario_extendido(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $horarioTres = HorarioExtendido::where('nombre', '3')->first();
         $horarioCuatro = HorarioExtendido::where('nombre', '4')->first();
 
@@ -95,7 +95,7 @@ class HorarioExtendidoAlumnoTest extends TestCase
 
     public function test_index_muestra_columna_horario_extendido(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $horario = HorarioExtendido::where('nombre', '6')->first();
         Alumno::factory()->create(['horario_extendido_id' => $horario->id]);
 
@@ -111,7 +111,7 @@ class HorarioExtendidoAlumnoTest extends TestCase
 
     public function test_horario_extendido_id_invalido_falla_validacion(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this
             ->actingAs($user)

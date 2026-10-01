@@ -16,7 +16,7 @@ class AdeudoExportTest extends TestCase
 
     public function test_los_links_de_exportacion_incluyen_los_filtros_activos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $grado = GradoEscolar::factory()->create();
         $alumno = Alumno::factory()->create(['grado_escolar_id' => $grado->id]);
         Adeudo::create([
@@ -48,7 +48,7 @@ class AdeudoExportTest extends TestCase
 
     public function test_puede_descargar_pdf_de_adeudos_filtrado(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $grado = GradoEscolar::factory()->create();
         $alumno = Alumno::factory()->create(['grado_escolar_id' => $grado->id]);
         Adeudo::create([
@@ -70,7 +70,7 @@ class AdeudoExportTest extends TestCase
 
     public function test_puede_descargar_excel_de_adeudos_filtrado(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $grado = GradoEscolar::factory()->create();
         $alumno = Alumno::factory()->create(['grado_escolar_id' => $grado->id]);
         Adeudo::create([

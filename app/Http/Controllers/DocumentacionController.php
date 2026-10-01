@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\DeletesStoredFiles;
 use App\Models\Alumno;
 use App\Models\Documento;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DocumentacionController extends Controller
 {
+    use DeletesStoredFiles;
+
     public function index(Request $request): View
     {
         $query = Alumno::with(['documentos', 'gradoEscolar']);
@@ -52,10 +54,10 @@ class DocumentacionController extends Controller
                 ->where('tipo', $tipo)
                 ->first();
 
-            $ruta = $archivo->store('documentos/'.$alumno->id, 'public');
+            $ruta = $archivo->store('documentos/'.$alumno->id, 'documents');
 
             if ($existente && $existente->archivo !== $ruta) {
-                Storage::disk('public')->delete($existente->archivo);
+                $this->deleteStoredFile($existente->archivo);
             }
 
             Documento::updateOrCreate(
@@ -70,14 +72,21 @@ class DocumentacionController extends Controller
 
     public function descargar(Documento $documento)
     {
-        return Storage::disk('public')->download($documento->archivo);
+        $this->authorize('view', $documento);
+
+        return $this->downloadStoredFile(
+            $documento->archivo,
+            basename($documento->archivo)
+        );
     }
 
     public function destroy(Documento $documento): RedirectResponse
     {
+        $this->authorize('delete', $documento);
+
         $alumno = $documento->alumno;
 
-        Storage::disk('public')->delete($documento->archivo);
+        $this->deleteStoredFile($documento->archivo);
 
         $documento->delete();
 

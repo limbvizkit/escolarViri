@@ -48,7 +48,7 @@
                                 @php
                                     $extension = strtolower(pathinfo($documento->archivo, PATHINFO_EXTENSION));
                                     $esImagen = in_array($extension, ['jpg', 'jpeg', 'png']);
-                                    $url = Storage::url($documento->archivo);
+                                    $url = route('documentacion.descargar', $documento);
                                 @endphp
                                 @if ($esImagen)
                                     <div class="ip-doc-thumb" data-bs-toggle="modal" data-bs-target="#documentoModal"

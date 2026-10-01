@@ -18,12 +18,13 @@ class AlumnoArchivosTest extends TestCase
     {
         parent::setUp();
 
+        Storage::fake('documents');
         Storage::fake('public');
     }
 
     public function test_puede_crear_alumno_con_multiples_archivos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $imagen = UploadedFile::fake()->image('foto.jpg');
         $pdf = UploadedFile::fake()->create('documento.pdf', 100, 'application/pdf');
 
@@ -42,12 +43,12 @@ class AlumnoArchivosTest extends TestCase
 
         $alumno = Alumno::latest('id')->first();
         $this->assertCount(2, $alumno->archivos);
-        $this->assertTrue(Storage::disk('public')->exists($alumno->archivos->first()->archivo));
+        $this->assertTrue(Storage::disk('documents')->exists($alumno->archivos->first()->archivo));
     }
 
     public function test_al_actualizar_se_preservan_los_archivos_existentes_y_se_agregan_nuevos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
 
         $archivoOriginal = UploadedFile::fake()->image('original.jpg');
@@ -78,7 +79,7 @@ class AlumnoArchivosTest extends TestCase
 
     public function test_eliminar_archivo_borra_registro_y_archivo_de_disco(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $archivoItem = AlumnoArchivo::factory()->for($alumno)->create();
 
@@ -98,12 +99,12 @@ class AlumnoArchivosTest extends TestCase
 
     public function test_la_vista_show_muestra_miniaturas_de_imagenes_y_modal(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $imagen = UploadedFile::fake()->image('perfil.jpg');
         $ruta = $imagen->store('alumnos', 'public');
 
-        AlumnoArchivo::create([
+        $archivoItem = AlumnoArchivo::create([
             'alumno_id' => $alumno->id,
             'archivo' => $ruta,
             'nombre_original' => 'perfil.jpg',
@@ -114,7 +115,7 @@ class AlumnoArchivosTest extends TestCase
             ->get(route('alumnos.show', $alumno));
 
         $response->assertOk();
-        $response->assertSee(Storage::url($ruta));
+        $response->assertSee(route('alumnos.archivos.download', [$alumno, $archivoItem]));
         $response->assertSee('data-bs-toggle="modal"', false);
         $response->assertSee('id="archivoModal"', false);
         $response->assertSee('id="archivoModalImg"', false);
@@ -122,12 +123,12 @@ class AlumnoArchivosTest extends TestCase
 
     public function test_la_vista_show_muestra_archivos_no_imagen_con_enlace_nueva_pestania(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $pdf = UploadedFile::fake()->create('constancia.pdf', 100, 'application/pdf');
         $ruta = $pdf->store('alumnos', 'public');
 
-        AlumnoArchivo::create([
+        $archivoItem = AlumnoArchivo::create([
             'alumno_id' => $alumno->id,
             'archivo' => $ruta,
             'nombre_original' => 'constancia.pdf',
@@ -138,14 +139,14 @@ class AlumnoArchivosTest extends TestCase
             ->get(route('alumnos.show', $alumno));
 
         $response->assertOk();
-        $response->assertSee(Storage::url($ruta));
+        $response->assertSee(route('alumnos.archivos.download', [$alumno, $archivoItem]));
         $response->assertSee('target="_blank"', false);
         $response->assertSee('rel="noopener noreferrer"', false);
     }
 
     public function test_la_vista_show_muestra_el_archivo_legacy(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $pdf = UploadedFile::fake()->create('legacy.pdf', 100, 'application/pdf');
         $ruta = $pdf->store('alumnos', 'public');
 
@@ -156,13 +157,13 @@ class AlumnoArchivosTest extends TestCase
             ->get(route('alumnos.show', $alumno));
 
         $response->assertOk();
-        $response->assertSee(Storage::url($ruta));
+        $response->assertSee(route('alumnos.archivo.download', $alumno));
         $response->assertSee('Histórico');
     }
 
     public function test_el_campo_singular_archivo_sigue_funcionando(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $pdf = UploadedFile::fake()->create('unico.pdf', 100, 'application/pdf');
 
         $response = $this
@@ -179,15 +180,15 @@ class AlumnoArchivosTest extends TestCase
 
         $alumno = Alumno::latest('id')->first();
         $this->assertNotNull($alumno->archivo);
-        $this->assertTrue(Storage::disk('public')->exists($alumno->archivo));
+        $this->assertTrue(Storage::disk('documents')->exists($alumno->archivo));
     }
 
     public function test_puede_descargar_un_archivo_normalizado(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $pdf = UploadedFile::fake()->create('reporte.pdf', 100, 'application/pdf');
-        $ruta = $pdf->store('alumnos', 'public');
+        $ruta = $pdf->store('alumnos', 'documents');
 
         $archivoItem = AlumnoArchivo::create([
             'alumno_id' => $alumno->id,

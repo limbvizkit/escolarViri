@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -41,5 +42,37 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function withRole(string $slug): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role_id' => Rol::factory()->state(['slug' => $slug]),
+        ]);
+    }
+
+    public function superAdmin(): static
+    {
+        return $this->withRole('super-admin');
+    }
+
+    public function admin(): static
+    {
+        return $this->withRole('admin');
+    }
+
+    public function director(): static
+    {
+        return $this->withRole('director');
+    }
+
+    public function profesor(): static
+    {
+        return $this->withRole('profesor');
+    }
+
+    public function recepcion(): static
+    {
+        return $this->withRole('recepcion');
     }
 }

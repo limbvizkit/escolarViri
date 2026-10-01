@@ -25,13 +25,14 @@ class DocumentacionShowTest extends TestCase
             'apellido_paterno' => 'García',
         ]);
 
+        Storage::fake('documents');
         Storage::fake('public');
 
         $imagen = UploadedFile::fake()->image('acta.jpg');
-        $rutaImagen = $imagen->store('documentos/'.$alumno->id, 'public');
+        $rutaImagen = $imagen->store('documentos/'.$alumno->id, 'documents');
 
         $pdf = UploadedFile::fake()->create('curp.pdf', 100, 'application/pdf');
-        $rutaPdf = $pdf->store('documentos/'.$alumno->id, 'public');
+        $rutaPdf = $pdf->store('documentos/'.$alumno->id, 'documents');
 
         Documento::create([
             'alumno_id' => $alumno->id,
@@ -54,11 +55,11 @@ class DocumentacionShowTest extends TestCase
         $documento = $alumno->documentos->firstWhere('tipo', 'acta_nacimiento');
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('documentacion.show', $alumno));
 
         $response->assertOk();
-        $response->assertSee(Storage::url($documento->archivo));
+        $response->assertSee(route('documentacion.descargar', $documento));
         $response->assertSee('data-bs-toggle="modal"', false);
         $response->assertSee('id="documentoModal"', false);
         $response->assertSee('id="documentoModalImg"', false);
@@ -70,11 +71,11 @@ class DocumentacionShowTest extends TestCase
         $documento = $alumno->documentos->firstWhere('tipo', 'curp');
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('documentacion.show', $alumno));
 
         $response->assertOk();
-        $response->assertSee(Storage::url($documento->archivo));
+        $response->assertSee(route('documentacion.descargar', $documento));
         $response->assertSee('target="_blank"', false);
         $response->assertSee('rel="noopener noreferrer"', false);
     }
@@ -85,7 +86,7 @@ class DocumentacionShowTest extends TestCase
         $documento = $alumno->documentos->firstWhere('tipo', 'acta_nacimiento');
 
         $response = $this
-            ->actingAs(User::factory()->create())
+            ->actingAs(User::factory()->admin()->create())
             ->get(route('documentacion.show', $alumno));
 
         $response->assertOk();
