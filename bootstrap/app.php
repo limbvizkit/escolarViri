@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\AuthorizeRole;
+use App\Http\Middleware\EnsurePortalPasswordChangeCompleted;
+use App\Http\Middleware\EnsurePortalPasswordChangeRequired;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +16,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
-        $middleware->redirectGuestsTo(fn (Request $request) => route('login'));
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('portal*') ? route('portal.login') : route('login'));
+
+        $middleware->validateCsrfTokens(except: [
+            'openpay/webhook',
+        ]);
+
+        $middleware->alias([
+            'role' => AuthorizeRole::class,
+            'portal.password.change' => EnsurePortalPasswordChangeRequired::class,
+            'portal.password.changed' => EnsurePortalPasswordChangeCompleted::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

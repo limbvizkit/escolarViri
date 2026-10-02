@@ -29,6 +29,8 @@ Thumbs.db
 .atl/
 opencode.json
 .codegraph/
+/.agents/skills/
+skills-lock.json
 
 # Sensitive data exports
 alumnosViri.csv

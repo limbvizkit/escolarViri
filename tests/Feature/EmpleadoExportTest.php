@@ -15,7 +15,7 @@ class EmpleadoExportTest extends TestCase
 
     public function test_los_links_de_exportacion_incluyen_los_filtros_activos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $sucursal = Sucursal::factory()->create();
         Empleado::factory()->create([
             'sucursal_id' => $sucursal->id,
@@ -48,7 +48,7 @@ class EmpleadoExportTest extends TestCase
 
     public function test_puede_descargar_pdf_de_empleados_filtrado(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         Empleado::factory()->create(['estatus_id' => Estatus::ACTIVO]);
 
         $response = $this
@@ -61,7 +61,7 @@ class EmpleadoExportTest extends TestCase
 
     public function test_puede_descargar_excel_de_empleados_filtrado(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         Empleado::factory()->create(['estatus_id' => Estatus::ACTIVO]);
 
         $response = $this

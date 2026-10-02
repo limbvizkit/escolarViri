@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 abstract class Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Devuelve el campo de orden permitido o el valor por defecto.
      */

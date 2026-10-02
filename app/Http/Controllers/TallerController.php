@@ -176,6 +176,8 @@ class TallerController extends Controller
 
     public function montoUpdate(Request $request, TallerAlumno $tallerAlumno)
     {
+        $this->authorize('update', $tallerAlumno);
+
         $datos = $request->validate(['monto_pagado' => ['nullable', 'numeric', 'min:0']]);
 
         try {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\AlumnoExport;
+use App\Http\Controllers\Concerns\DeletesStoredFiles;
 use App\Models\Alumno;
 use App\Models\AlumnoArchivo;
 use App\Models\Estatus;
@@ -13,7 +14,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,6 +21,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AlumnoController extends Controller
 {
+    use DeletesStoredFiles;
+
     public function index(Request $request): View
     {
         $query = $this->filteredQuery($request);
@@ -89,7 +91,7 @@ class AlumnoController extends Controller
         $datos = $validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)];
 
         if ($request->hasFile('archivo')) {
-            $datos['archivo'] = $request->file('archivo')->store('alumnos', 'public');
+            $datos['archivo'] = $request->file('archivo')->store('alumnos', 'documents');
         }
 
         $alumno = Alumno::create($datos);
@@ -127,11 +129,9 @@ class AlumnoController extends Controller
         $datos = $validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)];
 
         if ($request->hasFile('archivo')) {
-            if ($alumno->archivo) {
-                Storage::disk('public')->delete($alumno->archivo);
-            }
+            $this->deleteStoredFile($alumno->archivo);
 
-            $datos['archivo'] = $request->file('archivo')->store('alumnos', 'public');
+            $datos['archivo'] = $request->file('archivo')->store('alumnos', 'documents');
         }
 
         $alumno->update($datos);
@@ -183,7 +183,7 @@ class AlumnoController extends Controller
     {
         abort_unless($archivo->alumno_id === $alumno->id, 404);
 
-        Storage::disk('public')->delete($archivo->archivo);
+        $this->deleteStoredFile($archivo->archivo);
 
         $archivo->delete();
 
@@ -195,9 +195,19 @@ class AlumnoController extends Controller
     {
         abort_unless($archivo->alumno_id === $alumno->id, 404);
 
-        return Storage::disk('public')->download(
+        return $this->downloadStoredFile(
             $archivo->archivo,
             $archivo->nombre_original ?? basename($archivo->archivo)
+        );
+    }
+
+    public function downloadLegacyArchivo(Alumno $alumno): StreamedResponse
+    {
+        abort_if($alumno->archivo === null || $alumno->archivo === '', 404);
+
+        return $this->downloadStoredFile(
+            $alumno->archivo,
+            basename($alumno->archivo)
         );
     }
 
@@ -208,7 +218,7 @@ class AlumnoController extends Controller
         }
 
         foreach ($request->file('archivos') as $archivo) {
-            $ruta = $archivo->store('alumnos', 'public');
+            $ruta = $archivo->store('alumnos', 'documents');
 
             $alumno->archivos()->create([
                 'archivo' => $ruta,

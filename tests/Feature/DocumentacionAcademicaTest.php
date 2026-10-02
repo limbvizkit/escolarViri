@@ -18,6 +18,7 @@ class DocumentacionAcademicaTest extends TestCase
     {
         parent::setUp();
 
+        Storage::fake('documents');
         Storage::fake('public');
     }
 
@@ -30,7 +31,7 @@ class DocumentacionAcademicaTest extends TestCase
 
     public function test_lista_alumnos_con_conteo_de_documentos_academicos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         AcademicDocument::factory()->for($alumno)->count(2)->create();
 
@@ -46,7 +47,7 @@ class DocumentacionAcademicaTest extends TestCase
 
     public function test_puede_crear_documento_de_texto(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
 
         $response = $this
@@ -70,7 +71,7 @@ class DocumentacionAcademicaTest extends TestCase
 
     public function test_puede_crear_documento_con_archivo(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $pdf = UploadedFile::fake()->create('reporte.pdf', 100, 'application/pdf');
 
@@ -88,17 +89,17 @@ class DocumentacionAcademicaTest extends TestCase
         $document = AcademicDocument::where('alumno_id', $alumno->id)->first();
         $this->assertNotNull($document);
         $this->assertTrue($document->isFile());
-        $this->assertTrue(Storage::disk('public')->exists($document->file));
+        $this->assertTrue(Storage::disk('documents')->exists($document->file));
         $this->assertSame('reporte.pdf', $document->original_name);
         $this->assertNull($document->content);
     }
 
     public function test_la_vista_show_muestra_miniatura_de_imagen_y_enlace_en_nueva_pestania(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $imagen = UploadedFile::fake()->image('trabajo.jpg');
-        $ruta = $imagen->store('academic-documents/'.$alumno->id, 'public');
+        $ruta = $imagen->store('academic-documents/'.$alumno->id, 'documents');
 
         $document = AcademicDocument::create([
             'alumno_id' => $alumno->id,
@@ -114,19 +115,19 @@ class DocumentacionAcademicaTest extends TestCase
 
         $response->assertOk();
         $response->assertSee($document->title);
-        $response->assertSee(Storage::url($ruta));
+        $response->assertSee(route('academic-documents.descargar', $document));
         $response->assertSee('target="_blank"', false);
         $response->assertSee('rel="noopener noreferrer"', false);
     }
 
     public function test_la_vista_show_muestra_archivo_no_imagen_con_enlace_nueva_pestania(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $pdf = UploadedFile::fake()->create('constancia.pdf', 100, 'application/pdf');
-        $ruta = $pdf->store('academic-documents/'.$alumno->id, 'public');
+        $ruta = $pdf->store('academic-documents/'.$alumno->id, 'documents');
 
-        AcademicDocument::create([
+        $document = AcademicDocument::create([
             'alumno_id' => $alumno->id,
             'title' => 'Constancia',
             'file' => $ruta,
@@ -139,14 +140,14 @@ class DocumentacionAcademicaTest extends TestCase
             ->get(route('academic-documents.show', $alumno));
 
         $response->assertOk();
-        $response->assertSee(Storage::url($ruta));
+        $response->assertSee(route('academic-documents.descargar', $document));
         $response->assertSee('target="_blank"', false);
         $response->assertSee('rel="noopener noreferrer"', false);
     }
 
     public function test_puede_editar_metadatos_de_documento_de_texto(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $document = AcademicDocument::factory()->for($alumno)->asText('Contenido original')->create();
 
@@ -169,10 +170,10 @@ class DocumentacionAcademicaTest extends TestCase
 
     public function test_puede_reemplazar_archivo_en_documento_existente(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $original = UploadedFile::fake()->create('original.pdf', 100, 'application/pdf');
-        $rutaOriginal = $original->store('academic-documents/'.$alumno->id, 'public');
+        $rutaOriginal = $original->store('academic-documents/'.$alumno->id, 'documents');
 
         $document = AcademicDocument::create([
             'alumno_id' => $alumno->id,
@@ -196,16 +197,16 @@ class DocumentacionAcademicaTest extends TestCase
         $document->refresh();
         $this->assertTrue($document->isFile());
         $this->assertSame('nuevo.jpg', $document->original_name);
-        $this->assertFalse(Storage::disk('public')->exists($rutaOriginal));
-        $this->assertTrue(Storage::disk('public')->exists($document->file));
+        $this->assertFalse(Storage::disk('documents')->exists($rutaOriginal));
+        $this->assertTrue(Storage::disk('documents')->exists($document->file));
     }
 
     public function test_eliminar_documento_borra_registro_y_archivo_de_disco(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $pdf = UploadedFile::fake()->create('borrar.pdf', 100, 'application/pdf');
-        $ruta = $pdf->store('academic-documents/'.$alumno->id, 'public');
+        $ruta = $pdf->store('academic-documents/'.$alumno->id, 'documents');
 
         $document = AcademicDocument::create([
             'alumno_id' => $alumno->id,
@@ -215,7 +216,7 @@ class DocumentacionAcademicaTest extends TestCase
             'mime_type' => 'application/pdf',
         ]);
 
-        $this->assertTrue(Storage::disk('public')->exists($ruta));
+        $this->assertTrue(Storage::disk('documents')->exists($ruta));
 
         $response = $this
             ->actingAs($user)
@@ -225,12 +226,12 @@ class DocumentacionAcademicaTest extends TestCase
         $response->assertSessionHas('success');
 
         $this->assertModelMissing($document);
-        $this->assertFalse(Storage::disk('public')->exists($ruta));
+        $this->assertFalse(Storage::disk('documents')->exists($ruta));
     }
 
     public function test_valida_titulo_obligatorio(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
 
         $response = $this
@@ -246,7 +247,7 @@ class DocumentacionAcademicaTest extends TestCase
 
     public function test_valida_que_debe_haber_contenido_o_archivo(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
 
         $response = $this
@@ -263,7 +264,7 @@ class DocumentacionAcademicaTest extends TestCase
 
     public function test_valida_tipo_de_archivo_permitido(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $alumno = Alumno::factory()->create();
         $archivo = UploadedFile::fake()->create('malware.exe', 100, 'application/x-msdownload');
 
@@ -280,7 +281,7 @@ class DocumentacionAcademicaTest extends TestCase
 
     public function test_la_busqueda_filtra_alumnos(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $buscado = Alumno::factory()->create([
             'nombre' => 'Zara',
             'apellido_paterno' => 'López',

@@ -82,6 +82,8 @@ class AdeudoController extends Controller
 
     public function show(Adeudo $adeudo): View
     {
+        $this->authorize('view', $adeudo);
+
         $adeudo->load([
             'alumno.gradoEscolar',
             'abonos' => fn ($q) => $q->orderByDesc('fecha')->orderByDesc('id'),
@@ -96,6 +98,8 @@ class AdeudoController extends Controller
 
     public function update(Request $request, Adeudo $adeudo): RedirectResponse
     {
+        $this->authorize('update', $adeudo);
+
         $validated = $request->validate($this->reglasActualizacion(), $this->mensajesActualizacion());
 
         $adeudo->update($validated);
@@ -106,6 +110,8 @@ class AdeudoController extends Controller
 
     public function destroy(Adeudo $adeudo): RedirectResponse
     {
+        $this->authorize('delete', $adeudo);
+
         if ($adeudo->abonos()->exists()) {
             return redirect()->route('adeudos.index')
                 ->with('error', 'No es posible eliminar este adeudo porque tiene abonos registrados.');
@@ -119,6 +125,8 @@ class AdeudoController extends Controller
 
     public function abonar(Request $request, Adeudo $adeudo): RedirectResponse
     {
+        $this->authorize('abonar', $adeudo);
+
         if ($adeudo->estatus === Adeudo::ESTATUS_PAGADO) {
             return redirect()->back()
                 ->with('error', 'El adeudo ya está liquidado.');
@@ -150,6 +158,8 @@ class AdeudoController extends Controller
 
     public function abonoUpdate(Request $request, Adeudo $adeudo, AdeudoAbono $abono): JsonResponse
     {
+        $this->authorize('updateAbono', [$adeudo, $abono]);
+
         abort_unless($abono->adeudo_id === $adeudo->id, 404);
 
         // Solo se validan los campos que el usuario envió: el JS inline

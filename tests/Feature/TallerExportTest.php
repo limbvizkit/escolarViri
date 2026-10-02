@@ -15,7 +15,7 @@ class TallerExportTest extends TestCase
 
     public function test_el_listado_muestra_links_de_exportacion(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $taller = Taller::create(['nombre' => 'Pintura', 'costo' => 500]);
         $alumno = Alumno::factory()->create();
         TallerAlumno::create([
@@ -40,7 +40,7 @@ class TallerExportTest extends TestCase
 
     public function test_puede_descargar_pdf_de_talleres(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $taller = Taller::create(['nombre' => 'Pintura', 'costo' => 500]);
         $alumno = Alumno::factory()->create();
         TallerAlumno::create([
@@ -61,7 +61,7 @@ class TallerExportTest extends TestCase
 
     public function test_puede_descargar_excel_de_talleres(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $taller = Taller::create(['nombre' => 'Pintura', 'costo' => 500]);
         $alumno = Alumno::factory()->create();
         TallerAlumno::create([

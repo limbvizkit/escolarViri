@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class AcademicDocument extends Model
 {
@@ -61,7 +60,7 @@ class AcademicDocument extends Model
             return null;
         }
 
-        return Storage::url($this->file);
+        return route('academic-documents.descargar', $this);
     }
 
     public function fileExtension(): ?string
