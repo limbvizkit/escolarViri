@@ -241,4 +241,41 @@ class PagoTest extends TestCase
             $html
         );
     }
+
+    public function test_el_formulario_de_pago_bloquea_los_campos_derivados(): void
+    {
+        $response = $this
+            ->actingAs(User::factory()->admin()->create())
+            ->get(route('pagos.create'));
+
+        $response->assertOk();
+        $response->assertSee('Desbloquear campos');
+        $response->assertSee('Desea desbloquear los campos?', false);
+        $response->assertSee('data-bloqueado="1"', false);
+    }
+
+    public function test_la_tabla_de_pagos_bloquea_los_campos_derivados(): void
+    {
+        $grado = GradoEscolar::create(['nombre' => 'Primaria', 'slug' => 'primaria']);
+        $alumno = Alumno::create([
+            'grado_escolar_id' => $grado->id,
+            'nombre' => 'Ana',
+            'apellido_paterno' => 'Garcia',
+        ]);
+
+        Pago::create([
+            'alumno_id' => $alumno->id,
+            'mes' => now()->format('Y-m'),
+            'talleres' => 120,
+        ]);
+
+        $response = $this
+            ->actingAs(User::factory()->admin()->create())
+            ->get(route('pagos.index'));
+
+        $response->assertOk();
+        $response->assertSee('Desbloquear campos');
+        $response->assertSee('Desea desbloquear los campos?', false);
+        $response->assertSee('data-bloqueado="1"', false);
+    }
 }

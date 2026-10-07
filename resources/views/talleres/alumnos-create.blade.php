@@ -47,17 +47,6 @@
                                 @error('hora_fin')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
 
-                            <div class="col-md-4">
-                                <label for="monto_pagado" class="form-label">Monto pagado</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" step="0.01" min="0" id="monto_pagado" name="monto_pagado"
-                                           class="form-control @error('monto_pagado') is-invalid @enderror"
-                                           value="{{ old('monto_pagado') }}">
-                                </div>
-                                @error('monto_pagado')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                                <div class="form-text">Opcional; puede ajustarse después en la tabla.</div>
-                            </div>
                         </div>
 
                         <div class="ip-form-actions">
@@ -116,7 +105,6 @@
                                             <th>Grado escolar</th>
                                             <th>Hora inicio <span class="ip-required">*</span></th>
                                             <th>Hora fin <span class="ip-required">*</span></th>
-                                            <th>Monto pagado</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -148,16 +136,6 @@
                                                            value="{{ old('alumnos.'.$alumno->id.'.hora_fin') }}"
                                                            @disabled(!$seleccionado) @required($seleccionado)>
                                                     @error('alumnos.'.$alumno->id.'.hora_fin')
-                                                        <div class="text-danger small mt-1">{{ $message }}</div>
-                                                    @enderror
-                                                </td>
-                                                <td>
-                                                    <input type="number" step="0.01" min="0" placeholder="0.00"
-                                                           name="alumnos[{{ $alumno->id }}][monto_pagado]"
-                                                           class="form-control form-control-sm bulk-input"
-                                                           value="{{ old('alumnos.'.$alumno->id.'.monto_pagado') }}"
-                                                           @disabled(!$seleccionado)>
-                                                    @error('alumnos.'.$alumno->id.'.monto_pagado')
                                                         <div class="text-danger small mt-1">{{ $message }}</div>
                                                     @enderror
                                                 </td>

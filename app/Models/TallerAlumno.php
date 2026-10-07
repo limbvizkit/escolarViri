@@ -17,15 +17,7 @@ class TallerAlumno extends Model
         'alumno_id',
         'hora_inicio',
         'hora_fin',
-        'monto_pagado',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'monto_pagado' => 'decimal:2',
-        ];
-    }
 
     public function taller(): BelongsTo
     {

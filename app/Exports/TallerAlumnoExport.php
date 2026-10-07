@@ -20,7 +20,7 @@ class TallerAlumnoExport implements FromQuery, ShouldAutoSize, WithHeadings, Wit
     public function headings(): array
     {
         return [
-            'Taller', 'Alumno', 'Grado Escolar', 'Horario', 'Costo', 'Monto pagado',
+            'Taller', 'Alumno', 'Grado Escolar', 'Horario', 'Costo',
         ];
     }
 
@@ -34,7 +34,6 @@ class TallerAlumnoExport implements FromQuery, ShouldAutoSize, WithHeadings, Wit
             $inscripcion->alumno->gradoEscolar->nombre ?? '',
             $horario,
             (float) ($inscripcion->taller->costo ?? 0),
-            $inscripcion->monto_pagado !== null ? (float) $inscripcion->monto_pagado : 'NA',
         ];
     }
 }

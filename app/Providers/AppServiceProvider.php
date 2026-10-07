@@ -6,13 +6,11 @@ use App\Models\AcademicDocument;
 use App\Models\Adeudo;
 use App\Models\Documento;
 use App\Models\Pago;
-use App\Models\TallerAlumno;
 use App\Models\User;
 use App\Policies\AcademicDocumentPolicy;
 use App\Policies\AdeudoPolicy;
 use App\Policies\DocumentoPolicy;
 use App\Policies\PagoPolicy;
-use App\Policies\TallerAlumnoPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -57,7 +55,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(AcademicDocument::class, AcademicDocumentPolicy::class);
         Gate::policy(Pago::class, PagoPolicy::class);
         Gate::policy(Adeudo::class, AdeudoPolicy::class);
-        Gate::policy(TallerAlumno::class, TallerAlumnoPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
     }
 }

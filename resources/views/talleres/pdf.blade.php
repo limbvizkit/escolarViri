@@ -109,7 +109,6 @@
                 <th>Grado Escolar</th>
                 <th>Horario</th>
                 <th class="num">Costo</th>
-                <th class="num">Monto pagado</th>
             </tr>
         </thead>
         <tbody>
@@ -123,13 +122,10 @@
                     <td>{{ $inscripcion->alumno->gradoEscolar->nombre ?? '—' }}</td>
                     <td>{{ $horario }}</td>
                     <td class="num">${{ number_format((float) ($inscripcion->taller->costo ?? 0), 2) }}</td>
-                    <td class="num">
-                        {{ $inscripcion->monto_pagado !== null ? '$' . number_format((float) $inscripcion->monto_pagado, 2) : 'NA' }}
-                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="empty">Sin registros</td>
+                    <td colspan="5" class="empty">Sin registros</td>
                 </tr>
             @endforelse
         </tbody>

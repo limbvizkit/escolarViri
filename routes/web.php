@@ -233,7 +233,6 @@ Route::middleware(['auth', 'role:admin|super-admin|director'])->group(function (
         ->parameters(['talleres' => 'taller'])
         ->except(['index', 'show']);
 
-    Route::put('talleres/inscripciones/{tallerAlumno}/monto', [TallerController::class, 'montoUpdate'])->name('talleres.inscripcion.monto.update');
     Route::get('talleres/{taller}/alumnos/create', [TallerController::class, 'alumnoCreate'])->name('talleres.alumnos.create');
     Route::post('talleres/{taller}/alumnos', [TallerController::class, 'alumnoStore'])->name('talleres.alumnos.store');
     Route::post('talleres/{taller}/alumnos/bulk', [TallerController::class, 'alumnosStoreBulk'])->name('talleres.alumnos.bulk.store');
