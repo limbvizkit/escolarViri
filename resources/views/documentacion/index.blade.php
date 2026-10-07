@@ -8,7 +8,7 @@
     </div>
 
     @include('partials.table-filters', [
-        'filters' => [],
+        'filters' => $filtros,
         'placeholder' => 'Buscar por nombre, apellidos, horario...',
     ])
 

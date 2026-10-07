@@ -5,6 +5,7 @@ use App\Http\Controllers\AdeudoController;
 use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DatoFacturacionController;
 use App\Http\Controllers\DocumentacionController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\EscuelaController;
@@ -242,6 +243,23 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
     Route::delete('adeudos/{adeudo}', [AdeudoController::class, 'destroy'])->name('adeudos.destroy');
     Route::post('adeudos/{adeudo}/abonar', [AdeudoController::class, 'abonar'])->name('adeudos.abonar');
     Route::put('adeudos/{adeudo}/abonos/{abono}', [AdeudoController::class, 'abonoUpdate'])->name('adeudos.abonos.update')->scopeBindings();
+});
+
+/*
+|--------------------------------------------------------------------------
+| Datos Facturacion
+|
+| Allowed for admin, super-admin, director and recepcion.
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+    Route::get('datos-facturacion', [DatoFacturacionController::class, 'index'])->name('datos-facturacion.index');
+    Route::get('datos-facturacion/crear', [DatoFacturacionController::class, 'create'])->name('datos-facturacion.create');
+    Route::post('datos-facturacion', [DatoFacturacionController::class, 'store'])->name('datos-facturacion.store');
+    Route::get('datos-facturacion/descargar/{datoFacturacion}', [DatoFacturacionController::class, 'descargar'])->name('datos-facturacion.descargar');
+    Route::get('datos-facturacion/alumnos/{alumno}', [DatoFacturacionController::class, 'show'])->name('datos-facturacion.show');
+    Route::delete('datos-facturacion/{datoFacturacion}', [DatoFacturacionController::class, 'destroy'])->name('datos-facturacion.destroy');
 });
 
 /*

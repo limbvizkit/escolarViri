@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\DeletesStoredFiles;
 use App\Models\Alumno;
 use App\Models\Documento;
+use App\Models\GradoEscolar;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,6 +22,10 @@ class DocumentacionController extends Controller
             $query->search($request->input('q'));
         }
 
+        if ($request->filled('grado_escolar_id')) {
+            $query->where('grado_escolar_id', $request->input('grado_escolar_id'));
+        }
+
         $alumnos = $this->paginateOrdered(
             $query,
             $request,
@@ -28,8 +33,13 @@ class DocumentacionController extends Controller
             'id',
         );
 
+        $filtros = [
+            ['name' => 'grado_escolar_id', 'label' => 'Grado', 'options' => GradoEscolar::orderBy('nombre')->pluck('nombre', 'id')->all()],
+        ];
+
         return view('documentacion.index', [
             'alumnos' => $alumnos,
+            'filtros' => $filtros,
             'tipos' => Documento::TIPOS,
             'shortLabels' => $this->shortLabels(),
         ]);
