@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Alumno;
 use App\Models\GradoEscolar;
 use App\Models\Pago;
+use App\Models\Sucursal;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -36,6 +37,108 @@ class PagoTest extends TestCase
         $response->assertSee('Grado escolar');
         $response->assertSee($grado->nombre);
         $response->assertSee($alumno->nombre_completo);
+    }
+
+    public function test_muestra_la_columna_sucursal_en_la_tabla(): void
+    {
+        $sucursal = Sucursal::factory()->create(['nombre' => 'Sucursal Centro']);
+        $grado = GradoEscolar::create(['nombre' => 'Primaria', 'slug' => 'primaria']);
+        $alumno = Alumno::create([
+            'grado_escolar_id' => $grado->id,
+            'sucursal_id' => $sucursal->id,
+            'nombre' => 'Ana',
+            'apellido_paterno' => 'Garcia',
+        ]);
+
+        Pago::create([
+            'alumno_id' => $alumno->id,
+            'mes' => now()->format('Y-m'),
+            'pronto_pago' => 120,
+        ]);
+
+        $response = $this
+            ->actingAs(User::factory()->admin()->create())
+            ->get(route('pagos.index'));
+
+        $response->assertOk();
+        $response->assertSee('Sucursal');
+        $response->assertSee($sucursal->nombre);
+    }
+
+    public function test_filtro_por_sucursal_muestra_solo_los_pagos_de_esa_sucursal(): void
+    {
+        $sucursalCentro = Sucursal::factory()->create(['nombre' => 'Sucursal Centro']);
+        $sucursalNorte = Sucursal::factory()->create(['nombre' => 'Sucursal Norte']);
+        $grado = GradoEscolar::create(['nombre' => 'Primaria', 'slug' => 'primaria']);
+
+        $alumnoCentro = Alumno::create([
+            'grado_escolar_id' => $grado->id,
+            'sucursal_id' => $sucursalCentro->id,
+            'nombre' => 'Ana',
+            'apellido_paterno' => 'Garcia',
+        ]);
+
+        $alumnoNorte = Alumno::create([
+            'grado_escolar_id' => $grado->id,
+            'sucursal_id' => $sucursalNorte->id,
+            'nombre' => 'Bruno',
+            'apellido_paterno' => 'Lopez',
+        ]);
+
+        Pago::create([
+            'alumno_id' => $alumnoCentro->id,
+            'mes' => now()->format('Y-m'),
+            'pronto_pago' => 120,
+        ]);
+
+        Pago::create([
+            'alumno_id' => $alumnoNorte->id,
+            'mes' => now()->format('Y-m'),
+            'pronto_pago' => 130,
+        ]);
+
+        $response = $this
+            ->actingAs(User::factory()->admin()->create())
+            ->get(route('pagos.index', ['sucursal_id' => $sucursalCentro->id]));
+
+        $response->assertOk();
+        $response->assertSee($alumnoCentro->nombre_completo);
+        $response->assertDontSee($alumnoNorte->nombre_completo);
+    }
+
+    public function test_los_links_de_exportacion_incluyen_el_filtro_de_sucursal(): void
+    {
+        $sucursal = Sucursal::factory()->create(['nombre' => 'Sucursal Centro']);
+        $grado = GradoEscolar::create(['nombre' => 'Primaria', 'slug' => 'primaria']);
+        $alumno = Alumno::create([
+            'grado_escolar_id' => $grado->id,
+            'sucursal_id' => $sucursal->id,
+            'nombre' => 'Ana',
+            'apellido_paterno' => 'Garcia',
+        ]);
+
+        Pago::create([
+            'alumno_id' => $alumno->id,
+            'mes' => now()->format('Y-m'),
+            'pronto_pago' => 120,
+        ]);
+
+        $response = $this
+            ->actingAs(User::factory()->admin()->create())
+            ->get(route('pagos.index', ['sucursal_id' => $sucursal->id]));
+
+        $response->assertOk();
+
+        $html = $response->getContent();
+
+        $this->assertStringContainsString(
+            route('pagos.export.pdf', ['sucursal_id' => $sucursal->id]),
+            $html
+        );
+        $this->assertStringContainsString(
+            route('pagos.export.excel', ['sucursal_id' => $sucursal->id]),
+            $html
+        );
     }
 
     public function test_filtro_por_grado_escolar_muestra_solo_los_pagos_de_ese_grado(): void
