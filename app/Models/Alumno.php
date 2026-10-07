@@ -100,6 +100,11 @@ class Alumno extends Model
         return $this->hasMany(AcademicDocument::class);
     }
 
+    public function datosFacturacion(): HasMany
+    {
+        return $this->hasMany(DatoFacturacion::class);
+    }
+
     public function talleres(): BelongsToMany
     {
         return $this->belongsToMany(Taller::class, 'taller_alumno')

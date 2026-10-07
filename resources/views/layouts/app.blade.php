@@ -62,6 +62,9 @@
             <a href="{{ route('pagos-horarios-extendidos.index') }}" class="{{ request()->routeIs('pagos-horarios-extendidos.*') ? 'active' : '' }}">
                 <i class="bi bi-clock-history"></i><span>Pagos horario extendido</span>
             </a>
+             <a href="{{ route('datos-facturacion.index') }}" class="{{ request()->routeIs('datos-facturacion.*') ? 'active' : '' }}">
+                <i class="bi bi-receipt"></i><span>Datos Facturación</span>
+            </a>
             <a href="{{ route('online-payments.index') }}" class="{{ request()->routeIs('online-payments.*') ? 'active' : '' }}">
                 <i class="bi bi-credit-card"></i><span>Pagos en línea</span>
             </a>
