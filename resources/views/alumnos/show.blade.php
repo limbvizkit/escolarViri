@@ -73,26 +73,12 @@
                     <div class="ip-detail-label">Fecha de ingreso</div>
                     <div class="ip-detail-value">{{ $alumno->fecha_ingreso?->format('d/m/Y') ?? '—' }}</div>
                 </div>
-                <div class="col-md-4">
-                    <div class="ip-detail-label">Inscripción</div>
-                    <div class="ip-detail-value">{{ $alumno->inscripcion ? '$' . number_format($alumno->inscripcion, 2) : 'NA' }}</div>
-                </div>
-                <div class="col-md-4">
-                    <div class="ip-detail-label">Re/Inscripción</div>
-                    <div class="ip-detail-value">{{ $alumno->reinscripcion ? '$' . number_format($alumno->reinscripcion, 2) : 'NA' }}</div>
-                </div>
-                <div class="col-md-4">
-                    <div class="ip-detail-label">Entrevista inicial</div>
-                    <div class="ip-detail-value">{{ $alumno->entrevista_inicial ? '$' . number_format($alumno->entrevista_inicial, 2) : 'NA' }}</div>
-                </div>
-                <div class="col-md-4">
-                    <div class="ip-detail-label">Nat Geo</div>
-                    <div class="ip-detail-value">{{ $alumno->nat_geo ? '$' . number_format($alumno->nat_geo, 2) : 'NA' }}</div>
-                </div>
-                <div class="col-md-4">
-                    <div class="ip-detail-label">Cuota de materiales</div>
-                    <div class="ip-detail-value">{{ $alumno->cuota_materiales ? '$' . number_format($alumno->cuota_materiales, 2) : 'NA' }}</div>
-                </div>
+                @foreach (['inscripcion' => 'Inscripción', 'reinscripcion' => 'Re/Inscripción', 'entrevista_inicial' => 'Entrevista inicial', 'nat_geo' => 'Nat Geo', 'cuota_materiales' => 'Cuota de materiales'] as $campo => $etiqueta)
+                    <div class="col-md-4">
+                        <div class="ip-detail-label">{{ $etiqueta }}</div>
+                        <div class="ip-detail-value">{{ $alumno->$campo ?: '—' }}</div>
+                    </div>
+                @endforeach
                 <div class="col-md-4">
                     <div class="ip-detail-label">Cuota mensual</div>
                     <div class="ip-detail-value">{{ $alumno->cuota_mensual ? '$' . number_format($alumno->cuota_mensual, 2) : 'NA' }}</div>

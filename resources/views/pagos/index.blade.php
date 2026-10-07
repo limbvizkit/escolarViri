@@ -3,11 +3,24 @@
 @section('title', 'Pagos')
 
 @section('content')
+    @php
+        $conceptosExtra = [
+            'cursos' => 'Cursos',
+            'fotos' => 'Fotos',
+            'horario_extendido' => 'Horario extendido',
+            'inscripcion' => 'Inscripción',
+            'reinscripcion' => 'Re/Inscripción',
+            'materiales' => 'Materiales',
+            'natgeo' => 'NatGeo',
+            'entrevista' => 'Entrevista',
+        ];
+    @endphp
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="ip-muted mb-0">Pagos mensuales por alumno</p>
         <div class="d-flex gap-2">
             @php
-                $exportQuery = array_filter(request()->only(['q', 'mes', 'grado_escolar_id', 'forma_pago_id', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
+                $exportQuery = array_filter(request()->only(['q', 'mes', 'grado_escolar_id', 'sucursal_id', 'forma_pago_id', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
             @endphp
             <a href="{{ route('pagos.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i>PDF
@@ -46,6 +59,7 @@
                         <x-sortable field="id" label="#" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="alumno_id" label="Alumno" :current="request('sort')" :direction="request('direction')" />
                         <th>Grado escolar</th>
+                        <th>Sucursal</th>
                         <x-sortable field="mes" label="Mes" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="fecha" label="Fecha" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="entrada_8am" label="Entrada 8AM" :current="request('sort')" :direction="request('direction')" />
@@ -54,6 +68,9 @@
                         <th>Forma de pago</th>
                         <x-sortable field="talleres" label="Talleres" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="lunch" label="Lunch" :current="request('sort')" :direction="request('direction')" />
+                        @foreach ($conceptosExtra as $campo => $etiqueta)
+                            <x-sortable :field="$campo" :label="$etiqueta" :current="request('sort')" :direction="request('direction')" />
+                        @endforeach
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -78,6 +95,10 @@
 
                             <td>
                                 <span class="badge bg-primary-subtle text-primary">{{ $pago->alumno->gradoEscolar->nombre ?? '—' }}</span>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-secondary-subtle text-secondary">{{ $pago->alumno->sucursal->nombre ?? '—' }}</span>
                             </td>
 
                             <td>
@@ -151,6 +172,20 @@
                                 </div>
                             </td>
 
+                            @foreach ($conceptosExtra as $campo => $etiqueta)
+                                <td>
+                                    <div class="cell-view" data-target="{{ $campo }}">
+                                        {{ $pago->$campo !== null ? '$' . number_format((float) $pago->$campo, 2) : '—' }}
+                                    </div>
+                                    <div class="input-group input-group-sm cell-edit d-none">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="0" name="{{ $campo }}" form="{{ $formId }}"
+                                               data-key="{{ $campo }}" data-format="money"
+                                               class="form-control" value="{{ $pago->$campo }}" data-original="{{ $pago->$campo }}">
+                                    </div>
+                                </td>
+                            @endforeach
+
                             <td class="text-end">
                                 <form id="{{ $formId }}" method="POST" action="{{ route('pagos.inline-update', $pago) }}">
                                     @csrf
@@ -185,7 +220,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="12" class="text-center ip-muted py-4">
+                            <td colspan="21" class="text-center ip-muted py-4">
                                 No hay pagos registrados.
                                 <a href="{{ route('pagos.create') }}" class="d-block mt-2">Registrar el primero</a>
                             </td>

@@ -19,6 +19,14 @@ class Pago extends Model
         'pago_normal',
         'talleres',
         'lunch',
+        'cursos',
+        'fotos',
+        'horario_extendido',
+        'inscripcion',
+        'reinscripcion',
+        'materiales',
+        'natgeo',
+        'entrevista',
         'forma_pago_id',
     ];
 
@@ -31,6 +39,14 @@ class Pago extends Model
             'pago_normal' => 'decimal:2',
             'talleres' => 'decimal:2',
             'lunch' => 'decimal:2',
+            'cursos' => 'decimal:2',
+            'fotos' => 'decimal:2',
+            'horario_extendido' => 'decimal:2',
+            'inscripcion' => 'decimal:2',
+            'reinscripcion' => 'decimal:2',
+            'materiales' => 'decimal:2',
+            'natgeo' => 'decimal:2',
+            'entrevista' => 'decimal:2',
         ];
     }
 

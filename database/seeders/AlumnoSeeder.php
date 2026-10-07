@@ -73,11 +73,11 @@ class AlumnoSeeder extends Seeder
                 [
                     'fecha_nacimiento' => $this->parseFecha($row[2] ?? ''),
                     'horario' => $this->parseHorario($row[3] ?? ''),
-                    'inscripcion' => $this->parseMonto($row[4] ?? ''),
-                    'reinscripcion' => $this->parseMonto($row[5] ?? ''),
-                    'entrevista_inicial' => $this->parseMonto($row[6] ?? ''),
-                    'nat_geo' => $this->parseMonto($row[7] ?? ''),
-                    'cuota_materiales' => $this->parseMonto($row[8] ?? ''),
+                    'inscripcion' => $this->estadoConcepto($row[4] ?? ''),
+                    'reinscripcion' => $this->estadoConcepto($row[5] ?? ''),
+                    'entrevista_inicial' => $this->estadoConcepto($row[6] ?? ''),
+                    'nat_geo' => $this->estadoConcepto($row[7] ?? ''),
+                    'cuota_materiales' => $this->estadoConcepto($row[8] ?? ''),
                     'fecha_ingreso' => $this->parseFecha($row[9] ?? ''),
                     'cuota_mensual' => $this->parseMonto($row[10] ?? ''),
                     'estatus_id' => 1,
@@ -161,5 +161,12 @@ class AlumnoSeeder extends Seeder
         }
 
         return round((float) $limpio, 2);
+    }
+
+    private function estadoConcepto(string $valor): string
+    {
+        return $this->parseMonto($valor) !== null
+            ? Alumno::CONCEPTO_SI
+            : Alumno::CONCEPTO_NO_APLICA;
     }
 }

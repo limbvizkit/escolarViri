@@ -37,6 +37,20 @@
                 <i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
             </a>
 
+            <div class="ip-nav-title">Administrativo</div>
+            <a href="{{ route('pagos.index') }}" class="{{ request()->routeIs('pagos.*') ? 'active' : '' }}">
+                <i class="bi bi-cash-coin"></i><span>Pagos</span>
+            </a>
+            <a href="{{ route('adeudos.index') }}" class="{{ request()->routeIs('adeudos.*') ? 'active' : '' }}">
+                <i class="bi bi-cash-stack"></i><span>Adeudos</span>
+            </a>
+            <a href="{{ route('talleres.index') }}" class="{{ request()->routeIs('talleres.*') ? 'active' : '' }}">
+                <i class="bi bi-easel"></i><span>Talleres</span>
+            </a>
+            <a href="{{ route('online-payments.index') }}" class="{{ request()->routeIs('online-payments.*') ? 'active' : '' }}">
+                <i class="bi bi-credit-card"></i><span>Pagos en línea</span>
+            </a>
+
             <div class="ip-nav-title">Catálogos</div>
             <a href="{{ route('escuelas.index') }}" class="{{ request()->routeIs('escuelas.*') ? 'active' : '' }}">
                 <i class="bi bi-buildings-fill"></i><span>Escuelas</span>
@@ -49,23 +63,6 @@
             </a>
             <a href="{{ route('grados-escolares.index') }}" class="{{ request()->routeIs('grados-escolares.*') ? 'active' : '' }}">
                 <i class="bi bi-layers-fill"></i><span>Grados Escolares</span>
-            </a>
-
-            <div class="ip-nav-title">Académico</div>
-            <a href="{{ route('alumnos.index') }}" class="{{ request()->routeIs('alumnos.*') ? 'active' : '' }}">
-                <i class="bi bi-person-lines-fill"></i><span>Alumnos</span>
-            </a>
-            <a href="{{ route('pagos.index') }}" class="{{ request()->routeIs('pagos.*') ? 'active' : '' }}">
-                <i class="bi bi-cash-coin"></i><span>Pagos</span>
-            </a>
-            <a href="{{ route('online-payments.index') }}" class="{{ request()->routeIs('online-payments.*') ? 'active' : '' }}">
-                <i class="bi bi-credit-card"></i><span>Pagos en línea</span>
-            </a>
-            <a href="{{ route('adeudos.index') }}" class="{{ request()->routeIs('adeudos.*') ? 'active' : '' }}">
-                <i class="bi bi-cash-stack"></i><span>Adeudos</span>
-            </a>
-            <a href="{{ route('talleres.index') }}" class="{{ request()->routeIs('talleres.*') ? 'active' : '' }}">
-                <i class="bi bi-easel"></i><span>Talleres</span>
             </a>
 
             <div class="ip-nav-title">Documentación</div>
@@ -82,6 +79,11 @@
             </a>
             <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'active' : '' }}">
                 <i class="bi bi-shield-lock-fill"></i><span>Roles</span>
+            </a>
+
+            <div class="ip-nav-title">Académico</div>
+            <a href="{{ route('alumnos.index') }}" class="{{ request()->routeIs('alumnos.*') ? 'active' : '' }}">
+                <i class="bi bi-person-lines-fill"></i><span>Alumnos</span>
             </a>
         </nav>
     </aside>

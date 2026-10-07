@@ -9,6 +9,14 @@
     $archivosExistentes = $editing ? $alumno->archivos : collect();
     $archivoLegacy = $editing && $alumno->archivo ? $alumno->archivo : null;
 
+    $estadosFinancieros = [
+        'inscripcion' => 'Inscripción',
+        'reinscripcion' => 'Re/Inscripción',
+        'entrevista_inicial' => 'Entrevista inicial',
+        'nat_geo' => 'Nat Geo',
+        'cuota_materiales' => 'Cuota materiales',
+    ];
+
     $esImagen = function (string $ruta): bool {
         return in_array(strtolower(pathinfo($ruta, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp', 'gif'], true);
     };
@@ -252,41 +260,45 @@
                             <i class="bi bi-cash-coin me-1"></i>Información financiera
                         </h6>
                         <div class="row g-3 mb-4">
-                            @php
-                                $montos = [
-                                    'inscripcion' => 'Inscripción',
-                                    'reinscripcion' => 'Re/Inscripción',
-                                    'entrevista_inicial' => 'Entrevista inicial',
-                                    'nat_geo' => 'Nat Geo',
-                                    'cuota_materiales' => 'Cuota materiales',
-                                    'cuota_mensual' => 'Cuota mensual',
-                                ];
-                            @endphp
-                            @foreach ($montos as $campo => $etiqueta)
-                                @php
-                                    $na = (bool) old($campo . '_na', $alumno ? $alumno->{$campo} === null : false);
-                                @endphp
+                            @foreach ($estadosFinancieros as $campo => $etiqueta)
                                 <div class="col-md-4">
                                     <label for="{{ $campo }}" class="form-label">{{ $etiqueta }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">$</span>
-                                        <input type="number" step="0.01" min="0" id="{{ $campo }}" name="{{ $campo }}"
-                                               class="form-control @error($campo) is-invalid @enderror"
-                                               value="{{ old($campo, $alumno->$campo ?? '') }}"
-                                               @if ($na) disabled @endif>
-                                        <span class="input-group-text">
-                                            <div class="form-check mb-0">
-                                                <input class="form-check-input js-na-checkbox" type="checkbox"
-                                                       id="{{ $campo }}_na" name="{{ $campo }}_na" value="1"
-                                                       data-na-target="{{ $campo }}" title="No aplica"
-                                                       {{ $na ? 'checked' : '' }}>
-                                                <label class="form-check-label small" for="{{ $campo }}_na">NA</label>
-                                            </div>
-                                        </span>
-                                    </div>
+                                    <select id="{{ $campo }}" name="{{ $campo }}"
+                                            class="form-select @error($campo) is-invalid @enderror">
+                                        <option value="">— Seleccionar —</option>
+                                        @foreach (\App\Models\Alumno::opcionesConcepto() as $valor => $etiquetaOpcion)
+                                            <option value="{{ $valor }}" @selected(old($campo, $alumno->$campo ?? '') === $valor)>
+                                                {{ $etiquetaOpcion }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     @error($campo)<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                                 </div>
                             @endforeach
+
+                            @php
+                                $naMensual = (bool) old('cuota_mensual_na', $alumno ? $alumno->cuota_mensual === null : false);
+                            @endphp
+                            <div class="col-md-4">
+                                <label for="cuota_mensual" class="form-label">Cuota mensual</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" min="0" id="cuota_mensual" name="cuota_mensual"
+                                           class="form-control @error('cuota_mensual') is-invalid @enderror"
+                                           value="{{ old('cuota_mensual', $alumno->cuota_mensual ?? '') }}"
+                                           @if ($naMensual) disabled @endif>
+                                    <span class="input-group-text">
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input js-na-checkbox" type="checkbox"
+                                                   id="cuota_mensual_na" name="cuota_mensual_na" value="1"
+                                                   data-na-target="cuota_mensual" title="No aplica"
+                                                   {{ $naMensual ? 'checked' : '' }}>
+                                            <label class="form-check-label small" for="cuota_mensual_na">NA</label>
+                                        </div>
+                                    </span>
+                                </div>
+                                @error('cuota_mensual')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
                         </div>
 
                         {{-- Archivo adjunto --}}

@@ -100,19 +100,6 @@
         <div class="col-lg-6">
             <div class="ip-card">
                 <div class="ip-card-header">
-                    <h5 class="ip-card-title">Ingresos por mes</h5>
-                </div>
-                <div class="ip-card-body">
-                    <div class="ip-chart">
-                        <canvas id="chartIngresosMes"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="ip-card">
-                <div class="ip-card-header">
                     <h5 class="ip-card-title">Pagos por forma de pago</h5>
                 </div>
                 <div class="ip-card-body">
@@ -180,41 +167,6 @@
                         y: {
                             beginAtZero: true,
                             ticks: { precision: 0 },
-                        },
-                    },
-                },
-            });
-
-            new Chart(document.getElementById('chartIngresosMes'), {
-                type: 'line',
-                data: {
-                    labels: charts.ingresosPorMes.labels,
-                    datasets: [{
-                        label: 'Ingresos',
-                        data: charts.ingresosPorMes.data,
-                        borderColor: colors[0],
-                        backgroundColor: 'rgba(13, 110, 253, 0.12)',
-                        fill: true,
-                        tension: 0.35,
-                        pointRadius: 4,
-                        pointBackgroundColor: colors[0],
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => ' ' + formatMoney(context.parsed.y),
-                            },
-                        },
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { callback: (value) => formatMoney(value) },
                         },
                     },
                 },
@@ -319,6 +271,14 @@
                                     beginAtZero: true,
                                     ticks: { callback: (value) => formatMoney(value) },
                                 },
+                                ...(isHorizontal
+                                    ? {
+                                        y: {
+                                            grid: { display: false },
+                                            ticks: { autoSkip: false, padding: 8 },
+                                        },
+                                    }
+                                    : {}),
                             },
                         },
                     });

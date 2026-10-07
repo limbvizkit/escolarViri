@@ -114,6 +114,9 @@
                 <th class="num">Pago normal</th>
                 <th class="num">Talleres</th>
                 <th class="num">Lunch</th>
+                @foreach (['cursos' => 'Cursos', 'fotos' => 'Fotos', 'horario_extendido' => 'Horario extendido', 'inscripcion' => 'Inscripción', 'reinscripcion' => 'Re/Inscripción', 'materiales' => 'Materiales', 'natgeo' => 'NatGeo', 'entrevista' => 'Entrevista'] as $etiqueta)
+                    <th class="num">{{ $etiqueta }}</th>
+                @endforeach
                 <th>Forma de pago</th>
             </tr>
         </thead>
@@ -130,11 +133,14 @@
                     <td class="num">{{ $pago->pago_normal !== null ? '$' . number_format((float) $pago->pago_normal, 2) : '—' }}</td>
                     <td class="num">{{ $pago->talleres !== null ? '$' . number_format((float) $pago->talleres, 2) : '—' }}</td>
                     <td class="num">{{ $pago->lunch !== null ? '$' . number_format((float) $pago->lunch, 2) : '—' }}</td>
+                    @foreach (['cursos', 'fotos', 'horario_extendido', 'inscripcion', 'reinscripcion', 'materiales', 'natgeo', 'entrevista'] as $campo)
+                        <td class="num">{{ $pago->$campo !== null ? '$' . number_format((float) $pago->$campo, 2) : '—' }}</td>
+                    @endforeach
                     <td>{{ $pago->formaPago->nombre ?? '—' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="11" class="empty">Sin registros</td>
+                    <td colspan="19" class="empty">Sin registros</td>
                 </tr>
             @endforelse
         </tbody>

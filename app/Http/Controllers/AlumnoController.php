@@ -276,7 +276,8 @@ class AlumnoController extends Controller
 
     private function camposFinancieros(): array
     {
-        return ['inscripcion', 'reinscripcion', 'entrevista_inicial', 'nat_geo', 'cuota_materiales', 'cuota_mensual'];
+        // Solo la cuota mensual conserva el monto con opción "NA".
+        return ['cuota_mensual'];
     }
 
     private function reglas(): array
@@ -298,11 +299,11 @@ class AlumnoController extends Controller
             'fecha_nacimiento' => ['nullable', 'date', 'before_or_equal:today'],
             'horario' => ['nullable', 'string', 'max:50'],
             'horario_extendido_id' => ['nullable', 'exists:horarios_extendidos,id'],
-            'inscripcion' => ['nullable', 'numeric', 'min:0'],
-            'reinscripcion' => ['nullable', 'numeric', 'min:0'],
-            'entrevista_inicial' => ['nullable', 'numeric', 'min:0'],
-            'nat_geo' => ['nullable', 'numeric', 'min:0'],
-            'cuota_materiales' => ['nullable', 'numeric', 'min:0'],
+            'inscripcion' => ['nullable', Rule::in(Alumno::CONCEPTOS_ESTADO)],
+            'reinscripcion' => ['nullable', Rule::in(Alumno::CONCEPTOS_ESTADO)],
+            'entrevista_inicial' => ['nullable', Rule::in(Alumno::CONCEPTOS_ESTADO)],
+            'nat_geo' => ['nullable', Rule::in(Alumno::CONCEPTOS_ESTADO)],
+            'cuota_materiales' => ['nullable', Rule::in(Alumno::CONCEPTOS_ESTADO)],
             'fecha_ingreso' => ['nullable', 'date'],
             'cuota_mensual' => ['nullable', 'numeric', 'min:0'],
             'estatus_id' => ['nullable', 'exists:estatus,id'],
@@ -334,6 +335,11 @@ class AlumnoController extends Controller
             'sexo.required' => 'Selecciona el sexo del alumno.',
             'sexo.in' => 'El sexo debe ser Niño o Niña.',
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+            'inscripcion.in' => 'La inscripción debe ser SI, NO APLICA o PENDIENTE.',
+            'reinscripcion.in' => 'La re/inscripción debe ser SI, NO APLICA o PENDIENTE.',
+            'entrevista_inicial.in' => 'La entrevista inicial debe ser SI, NO APLICA o PENDIENTE.',
+            'nat_geo.in' => 'Nat Geo debe ser SI, NO APLICA o PENDIENTE.',
+            'cuota_materiales.in' => 'La cuota de materiales debe ser SI, NO APLICA o PENDIENTE.',
         ];
     }
 
