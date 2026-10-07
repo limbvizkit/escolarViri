@@ -47,6 +47,12 @@
                     <div class="ip-detail-label">LUNCH</div>
                     <div class="ip-detail-value">{{ $pago->lunch !== null ? '$' . number_format((float) $pago->lunch, 2) : '—' }}</div>
                 </div>
+                @foreach (['cursos' => 'CURSOS', 'fotos' => 'FOTOS', 'horario_extendido' => 'HORARIO EXTENDIDO', 'inscripcion' => 'INSCRIPCIÓN', 'reinscripcion' => 'RE/INSCRIPCIÓN', 'materiales' => 'MATERIALES', 'natgeo' => 'NATGEO', 'entrevista' => 'ENTREVISTA'] as $campo => $etiqueta)
+                    <div class="col-md-3">
+                        <div class="ip-detail-label">{{ $etiqueta }}</div>
+                        <div class="ip-detail-value">{{ $pago->$campo !== null ? '$' . number_format((float) $pago->$campo, 2) : '—' }}</div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>

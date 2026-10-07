@@ -7,6 +7,7 @@ use App\Models\Alumno;
 use App\Models\FormaPago;
 use App\Models\GradoEscolar;
 use App\Models\Pago;
+use App\Models\Sucursal;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -34,6 +35,7 @@ class PagoController extends Controller
         $alumnos = Alumno::with('gradoEscolar')->orderBy('apellido_paterno')->get();
         $formasPago = FormaPago::active()->orderBy('nombre')->get();
         $gradosEscolares = GradoEscolar::active()->orderBy('nombre')->pluck('nombre', 'id')->all();
+        $sucursales = Sucursal::active()->orderBy('nombre')->pluck('nombre', 'id')->all();
 
         $meses = Pago::query()->distinct()->orderByDesc('mes')->pluck('mes')->all();
         $mesOptions = array_combine(
@@ -44,6 +46,7 @@ class PagoController extends Controller
         $filtros = [
             ['name' => 'mes', 'label' => 'Mes', 'options' => $mesOptions],
             ['name' => 'grado_escolar_id', 'label' => 'Grado escolar', 'options' => $gradosEscolares],
+            ['name' => 'sucursal_id', 'label' => 'Sucursal', 'options' => $sucursales],
             ['name' => 'forma_pago_id', 'label' => 'Forma de pago', 'options' => FormaPago::orderBy('nombre')->pluck('nombre', 'id')->all()],
         ];
 
@@ -327,6 +330,14 @@ class PagoController extends Controller
             'pago_normal' => $origen->pago_normal,
             'talleres' => $origen->talleres,
             'lunch' => $origen->lunch,
+            'cursos' => $origen->cursos,
+            'fotos' => $origen->fotos,
+            'horario_extendido' => $origen->horario_extendido,
+            'inscripcion' => $origen->inscripcion,
+            'reinscripcion' => $origen->reinscripcion,
+            'materiales' => $origen->materiales,
+            'natgeo' => $origen->natgeo,
+            'entrevista' => $origen->entrevista,
             'forma_pago_id' => $origen->forma_pago_id,
         ];
 
@@ -349,7 +360,7 @@ class PagoController extends Controller
 
     private function filteredQuery(Request $request): Builder
     {
-        $query = Pago::with(['alumno.gradoEscolar', 'formaPago']);
+        $query = Pago::with(['alumno.gradoEscolar', 'alumno.sucursal', 'formaPago']);
 
         if ($request->filled('q')) {
             $query->search($request->input('q'));
@@ -367,12 +378,16 @@ class PagoController extends Controller
             $query->whereHas('alumno', fn ($q) => $q->where('alumnos.grado_escolar_id', $request->input('grado_escolar_id')));
         }
 
+        if ($request->filled('sucursal_id')) {
+            $query->whereHas('alumno', fn ($q) => $q->where('alumnos.sucursal_id', $request->input('sucursal_id')));
+        }
+
         return $query;
     }
 
     private function allowedSorts(): array
     {
-        return ['id', 'alumno_id', 'mes', 'fecha', 'entrada_8am', 'pronto_pago', 'pago_normal', 'talleres', 'lunch', 'forma_pago_id'];
+        return ['id', 'alumno_id', 'mes', 'fecha', 'entrada_8am', 'pronto_pago', 'pago_normal', 'talleres', 'lunch', 'cursos', 'fotos', 'horario_extendido', 'inscripcion', 'reinscripcion', 'materiales', 'natgeo', 'entrevista', 'forma_pago_id'];
     }
 
     private function reglas(): array
@@ -386,6 +401,14 @@ class PagoController extends Controller
             'pago_normal' => ['nullable', 'numeric', 'min:0'],
             'talleres' => ['nullable', 'numeric', 'min:0'],
             'lunch' => ['nullable', 'numeric', 'min:0'],
+            'cursos' => ['nullable', 'numeric', 'min:0'],
+            'fotos' => ['nullable', 'numeric', 'min:0'],
+            'horario_extendido' => ['nullable', 'numeric', 'min:0'],
+            'inscripcion' => ['nullable', 'numeric', 'min:0'],
+            'reinscripcion' => ['nullable', 'numeric', 'min:0'],
+            'materiales' => ['nullable', 'numeric', 'min:0'],
+            'natgeo' => ['nullable', 'numeric', 'min:0'],
+            'entrevista' => ['nullable', 'numeric', 'min:0'],
             'forma_pago_id' => ['nullable', 'exists:formas_pago,id'],
         ];
     }

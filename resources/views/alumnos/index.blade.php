@@ -65,7 +65,7 @@
                     @forelse ($alumnos as $alumno)
                         @php
                             $formId = 'inline-' . $alumno->id;
-                            $montos = [
+                            $estados = [
                                 'inscripcion' => $alumno->inscripcion,
                                 'reinscripcion' => $alumno->reinscripcion,
                                 'entrevista_inicial' => $alumno->entrevista_inicial,
@@ -77,7 +77,9 @@
                             <td>{{ $alumno->id }}</td>
 
                             <td>
-                                <div class="cell-view fw-semibold" data-target="nombre">{{ $alumno->nombre }}</div>
+                                <div class="cell-view fw-semibold" data-target="nombre" data-href="{{ route('alumnos.show', $alumno) }}">
+                                    <a href="{{ route('alumnos.show', $alumno) }}" class="ip-link">{{ $alumno->nombre }}</a>
+                                </div>
                                 <input type="text" name="nombre" form="{{ $formId }}" data-key="nombre" data-format="text"
                                        class="form-control form-control-sm cell-edit d-none"
                                        value="{{ $alumno->nombre }}" data-original="{{ $alumno->nombre }}">
@@ -184,17 +186,17 @@
                                 </select>
                             </td>
 
-                            @foreach ($montos as $campo => $monto)
+                            @foreach ($estados as $campo => $valor)
                                 <td>
-                                    <div class="cell-view" data-target="{{ $campo }}">
-                                        {{ $monto ? '$' . number_format((float) $monto, 2) : 'NA' }}
-                                    </div>
-                                    <div class="input-group input-group-sm cell-edit d-none">
-                                        <span class="input-group-text">$</span>
-                                        <input type="number" step="0.01" min="0" name="{{ $campo }}" form="{{ $formId }}"
-                                               data-key="{{ $campo }}" data-format="money"
-                                               class="form-control" value="{{ $monto }}" data-original="{{ $monto }}">
-                                    </div>
+                                    <div class="cell-view" data-target="{{ $campo }}">{{ $valor ?: '—' }}</div>
+                                    <select name="{{ $campo }}" form="{{ $formId }}" data-key="{{ $campo }}" data-format="concepto"
+                                            class="form-select form-select-sm cell-edit d-none"
+                                            data-original="{{ $valor }}">
+                                        <option value="">— Sin estado —</option>
+                                        @foreach (\App\Models\Alumno::opcionesConcepto() as $opcion => $etiquetaOpcion)
+                                            <option value="{{ $opcion }}" @selected($valor === $opcion)>{{ $etiquetaOpcion }}</option>
+                                        @endforeach
+                                    </select>
                                 </td>
                             @endforeach
 
@@ -333,7 +335,7 @@
                         view.textContent = formatearFecha(val);
                     } else if (fmt === 'money') {
                         view.textContent = val === '' || val === null ? 'NA' : '$' + Number(val).toFixed(2);
-                    } else if (fmt === 'grado_escolar') {
+                    } else if (fmt === 'grado_escolar' || fmt === 'concepto') {
                         view.textContent = inp.options[inp.selectedIndex].text;
                     } else if (fmt === 'sexo') {
                         view.textContent = inp.options[inp.selectedIndex].text;
@@ -342,6 +344,19 @@
                         view.textContent = activo ? 'Activo' : 'Inactivo';
                         view.classList.toggle('ip-badge-active', activo);
                         view.classList.toggle('ip-badge-inactive', !activo);
+                    } else if (key === 'nombre') {
+                        const texto = val === '' || val === null ? '—' : val;
+                        const href = view.dataset.href;
+                        view.textContent = '';
+                        if (href) {
+                            const a = document.createElement('a');
+                            a.href = href;
+                            a.className = 'ip-link';
+                            a.textContent = texto;
+                            view.appendChild(a);
+                        } else {
+                            view.textContent = texto;
+                        }
                     } else {
                         view.textContent = val === '' || val === null ? '—' : val;
                     }

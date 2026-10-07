@@ -3,6 +3,19 @@
 @section('title', 'Precargar pagos')
 
 @section('content')
+    @php
+        $conceptosExtra = [
+            'cursos' => 'Cursos',
+            'fotos' => 'Fotos',
+            'horario_extendido' => 'Horario extendido',
+            'inscripcion' => 'Inscripción',
+            'reinscripcion' => 'Re/Inscripción',
+            'materiales' => 'Materiales',
+            'natgeo' => 'NatGeo',
+            'entrevista' => 'Entrevista',
+        ];
+    @endphp
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="ip-muted mb-0">
             La tabla superior muestra los pagos ya registrados para
@@ -37,6 +50,9 @@
                             <th>Pago normal</th>
                             <th>Talleres</th>
                             <th>Lunch</th>
+                            @foreach ($conceptosExtra as $etiqueta)
+                                <th>{{ $etiqueta }}</th>
+                            @endforeach
                             <th>Forma de pago</th>
                             <th class="text-end">Acciones</th>
                         </tr>
@@ -111,6 +127,20 @@
                                                class="form-control" value="{{ $pago->lunch }}" data-original="{{ $pago->lunch }}">
                                     </div>
                                 </td>
+
+                                @foreach ($conceptosExtra as $campo => $etiqueta)
+                                    <td>
+                                        <div class="cell-view" data-target="{{ $campo }}">
+                                            {{ $pago->$campo !== null ? '$' . number_format((float) $pago->$campo, 2) : '—' }}
+                                        </div>
+                                        <div class="input-group input-group-sm cell-edit d-none">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" step="0.01" min="0" name="{{ $campo }}" form="{{ $formId }}"
+                                                   data-key="{{ $campo }}" data-format="money"
+                                                   class="form-control" value="{{ $pago->$campo }}" data-original="{{ $pago->$campo }}">
+                                        </div>
+                                    </td>
+                                @endforeach
 
                                 <td>
                                     @php
@@ -197,6 +227,9 @@
                                 <th>Pago normal</th>
                                 <th>Talleres</th>
                                 <th>Lunch</th>
+                                @foreach ($conceptosExtra as $etiqueta)
+                                    <th>{{ $etiqueta }}</th>
+                                @endforeach
                                 <th>Forma de pago</th>
                             </tr>
                         </thead>
@@ -260,6 +293,14 @@
                                                value="{{ old('pagos.'.$i.'.lunch', $pago->lunch) }}">
                                     </td>
 
+                                    @foreach ($conceptosExtra as $campo => $etiqueta)
+                                        <td>
+                                            <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][{{ $campo }}]"
+                                                   class="form-control form-control-sm"
+                                                   value="{{ old('pagos.'.$i.'.'.$campo, $pago->$campo) }}">
+                                        </td>
+                                    @endforeach
+
                                     <td>
                                         <select name="pagos[{{ $i }}][forma_pago_id]" class="form-select form-select-sm">
                                             <option value="">— Sin forma —</option>
@@ -322,6 +363,9 @@
                                 <th>Pago normal</th>
                                 <th>Talleres</th>
                                 <th>Lunch</th>
+                                @foreach ($conceptosExtra as $etiqueta)
+                                    <th>{{ $etiqueta }}</th>
+                                @endforeach
                                 <th>Forma de pago</th>
                             </tr>
                         </thead>
@@ -384,6 +428,14 @@
                                                class="form-control form-control-sm"
                                                value="{{ old('pagos.'.$i.'.lunch', $pago->lunch) }}">
                                     </td>
+
+                                    @foreach ($conceptosExtra as $campo => $etiqueta)
+                                        <td>
+                                            <input type="number" step="0.01" min="0" name="pagos[{{ $i }}][{{ $campo }}]"
+                                                   class="form-control form-control-sm"
+                                                   value="{{ old('pagos.'.$i.'.'.$campo, $pago->$campo) }}">
+                                        </td>
+                                    @endforeach
 
                                     <td>
                                         <select name="pagos[{{ $i }}][forma_pago_id]" class="form-select form-select-sm">

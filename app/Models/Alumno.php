@@ -18,6 +18,23 @@ class Alumno extends Model
 
     public const SEXO_NINA = 'niña';
 
+    public const CONCEPTO_SI = 'SI';
+
+    public const CONCEPTO_NO_APLICA = 'NO APLICA';
+
+    public const CONCEPTO_PENDIENTE = 'PENDIENTE';
+
+    /**
+     * Estados posibles para los conceptos anuales/extraordinarios.
+     *
+     * @var array<int, string>
+     */
+    public const CONCEPTOS_ESTADO = [
+        self::CONCEPTO_SI,
+        self::CONCEPTO_NO_APLICA,
+        self::CONCEPTO_PENDIENTE,
+    ];
+
     protected $fillable = [
         'grado_escolar_id',
         'sucursal_id',
@@ -44,11 +61,6 @@ class Alumno extends Model
         return [
             'fecha_nacimiento' => 'date',
             'fecha_ingreso' => 'date',
-            'inscripcion' => 'decimal:2',
-            'reinscripcion' => 'decimal:2',
-            'entrevista_inicial' => 'decimal:2',
-            'nat_geo' => 'decimal:2',
-            'cuota_materiales' => 'decimal:2',
             'cuota_mensual' => 'decimal:2',
         ];
     }
@@ -114,6 +126,18 @@ class Alumno extends Model
         return [
             self::SEXO_NINO => 'Niño',
             self::SEXO_NINA => 'Niña',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function opcionesConcepto(): array
+    {
+        return [
+            self::CONCEPTO_SI => 'SI',
+            self::CONCEPTO_NO_APLICA => 'NO APLICA',
+            self::CONCEPTO_PENDIENTE => 'PENDIENTE',
         ];
     }
 

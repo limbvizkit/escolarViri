@@ -10,6 +10,16 @@
         'pago_normal' => 'Pago normal',
         'talleres' => 'Talleres',
         'lunch' => 'Lunch',
+        'horario_extendido' => 'Horario extendido',
+    ];
+    $montosAnuales = [
+        'inscripcion' => 'Inscripción',
+        'reinscripcion' => 'Re/Inscripción',
+        'materiales' => 'Materiales',
+        'entrevista' => 'Entrevista',
+        'natgeo' => 'NatGeo',
+        'fotos' => 'Fotos',
+        'cursos' => 'Cursos',
     ];
 @endphp
 
@@ -98,6 +108,25 @@
                         </h6>
                         <div class="row g-3 mb-4">
                             @foreach ($montos as $campo => $etiqueta)
+                                <div class="col-md-3">
+                                    <label for="{{ $campo }}" class="form-label">{{ $etiqueta }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="0" id="{{ $campo }}" name="{{ $campo }}"
+                                               class="form-control @error($campo) is-invalid @enderror"
+                                               value="{{ old($campo, $pago->$campo ?? '') }}">
+                                    </div>
+                                    @error($campo)<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Importes anuales o extraordinarios --}}
+                        <h6 class="fw-semibold text-uppercase small text-secondary mb-3">
+                            <i class="bi bi-calendar2-range me-1"></i>Importes anuales o extraordinarios
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            @foreach ($montosAnuales as $campo => $etiqueta)
                                 <div class="col-md-3">
                                     <label for="{{ $campo }}" class="form-label">{{ $etiqueta }}</label>
                                     <div class="input-group">
