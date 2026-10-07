@@ -5,9 +5,20 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="ip-muted mb-0">Pagos de lunch por alumno</p>
-        <a href="{{ route('pagos-lunch.create') }}" class="btn ip-btn">
-            <i class="bi bi-plus-lg me-1"></i>Nuevo pago de lunch
-        </a>
+        <div class="d-flex gap-2">
+            @php
+                $exportQuery = array_filter(request()->only(['q', 'mes', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
+            @endphp
+            <a href="{{ route('pagos-lunch.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+            </a>
+            <a href="{{ route('pagos-lunch.export.excel', $exportQuery) }}" class="btn ip-btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel me-1"></i>Excel
+            </a>
+            <a href="{{ route('pagos-lunch.create') }}" class="btn ip-btn">
+                <i class="bi bi-plus-lg me-1"></i>Nuevo pago de lunch
+            </a>
+        </div>
     </div>
 
     @include('partials.table-filters', [

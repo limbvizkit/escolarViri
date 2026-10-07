@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PagoTallerExport;
 use App\Models\Alumno;
 use App\Models\Pago;
 use App\Models\PagoTaller;
 use App\Models\Taller;
 use App\Models\TallerAlumno;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PagoTallerController extends Controller
 {
@@ -28,6 +31,25 @@ class PagoTallerController extends Controller
         ];
 
         return view('pagos-talleres.index', compact('pagos', 'filtros'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $pagos = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request))
+            ->get();
+
+        $pdf = Pdf::loadView('pagos-talleres.pdf', compact('pagos'))->setPaper('a4', 'landscape');
+
+        return $pdf->download('pagos-talleres-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $query = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request));
+
+        return Excel::download(new PagoTallerExport($query), 'pagos-talleres-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function create(): View

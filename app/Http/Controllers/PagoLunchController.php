@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PagoLunchExport;
 use App\Models\Alumno;
 use App\Models\Pago;
 use App\Models\PagoLunch;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PagoLunchController extends Controller
 {
@@ -24,6 +27,25 @@ class PagoLunchController extends Controller
         ];
 
         return view('pagos-lunch.index', compact('pagos', 'filtros'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $pagos = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request))
+            ->get();
+
+        $pdf = Pdf::loadView('pagos-lunch.pdf', compact('pagos'))->setPaper('a4', 'landscape');
+
+        return $pdf->download('pagos-lunch-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $query = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request));
+
+        return Excel::download(new PagoLunchExport($query), 'pagos-lunch-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function create(): View
