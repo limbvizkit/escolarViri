@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class TallerAlumnoExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
+class CursoAlumnoExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
 {
     public function __construct(private Builder $query) {}
 
@@ -20,20 +20,22 @@ class TallerAlumnoExport implements FromQuery, ShouldAutoSize, WithHeadings, Wit
     public function headings(): array
     {
         return [
-            'Taller', 'Alumno', 'Grado Escolar', 'Horario', 'Costo',
+            'Curso', 'Alumno', 'Grado Escolar', 'Fecha inicio', 'Fecha fin', 'Horario', 'Costo',
         ];
     }
 
     public function map($inscripcion): array
     {
-        $horario = substr($inscripcion->hora_inicio ?? '', 0, 5).' - '.substr($inscripcion->hora_fin ?? '', 0, 5);
+        $horario = substr((string) $inscripcion->curso?->hora_inicio, 0, 5).' - '.substr((string) $inscripcion->curso?->hora_fin, 0, 5);
 
         return [
-            $inscripcion->taller->nombre ?? '',
+            $inscripcion->curso->nombre ?? '',
             $inscripcion->alumno->nombre_completo ?? '',
             $inscripcion->alumno->gradoEscolar->nombre ?? '',
+            $inscripcion->curso?->fecha_inicio?->format('d/m/Y') ?? '',
+            $inscripcion->curso?->fecha_fin?->format('d/m/Y') ?? '',
             $horario,
-            (float) ($inscripcion->taller->costo ?? 0),
+            (float) ($inscripcion->curso->costo ?? 0),
         ];
     }
 }

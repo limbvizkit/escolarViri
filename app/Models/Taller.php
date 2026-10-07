@@ -27,7 +27,7 @@ class Taller extends Model
     public function alumnos(): BelongsToMany
     {
         return $this->belongsToMany(Alumno::class, 'taller_alumno')
-            ->withPivot('hora_inicio', 'hora_fin', 'monto_pagado')
+            ->withPivot('hora_inicio', 'hora_fin')
             ->withTimestamps();
     }
 }

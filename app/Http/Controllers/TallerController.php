@@ -103,7 +103,6 @@ class TallerController extends Controller
                 'alumno_id' => $validated['alumno_id'],
                 'hora_inicio' => $validated['hora_inicio'],
                 'hora_fin' => $validated['hora_fin'],
-                'monto_pagado' => $validated['monto_pagado'] ?? null,
             ]);
         } catch (QueryException) {
             return redirect()->route('talleres.alumnos.create', $taller)
@@ -136,7 +135,6 @@ class TallerController extends Controller
             $prefix = 'alumnos.'.$id;
             $rules[$prefix.'.hora_inicio'] = ['required', 'date_format:H:i'];
             $rules[$prefix.'.hora_fin'] = ['required', 'date_format:H:i', 'after:'.$prefix.'.hora_inicio'];
-            $rules[$prefix.'.monto_pagado'] = ['nullable', 'numeric', 'min:0'];
         }
 
         $validated = $request->validate($rules, $this->mensajesAlumnosBulk());
@@ -151,7 +149,6 @@ class TallerController extends Controller
                         'alumno_id' => $alumnoId,
                         'hora_inicio' => $datos['hora_inicio'],
                         'hora_fin' => $datos['hora_fin'],
-                        'monto_pagado' => $datos['monto_pagado'] ?? null,
                     ]);
                 }
             });
@@ -172,27 +169,6 @@ class TallerController extends Controller
 
         return redirect()->route('talleres.index')
             ->with('success', 'Alumno quitado del taller correctamente.');
-    }
-
-    public function montoUpdate(Request $request, TallerAlumno $tallerAlumno)
-    {
-        $this->authorize('update', $tallerAlumno);
-
-        $datos = $request->validate(['monto_pagado' => ['nullable', 'numeric', 'min:0']]);
-
-        try {
-            $tallerAlumno->update($datos);
-        } catch (QueryException) {
-            return response()->json([
-                'mensaje' => 'No se pudo guardar el monto pagado.',
-            ], 422);
-        }
-
-        return response()->json([
-            'success' => true,
-            'mensaje' => 'Cambios guardados.',
-            'valor' => $tallerAlumno->fresh()->monto_pagado,
-        ]);
     }
 
     private function inscripcionesQuery(): Builder
@@ -223,7 +199,6 @@ class TallerController extends Controller
             'alumno_id' => ['required', 'exists:alumnos,id'],
             'hora_inicio' => ['required', 'date_format:H:i'],
             'hora_fin' => ['required', 'date_format:H:i', 'after:hora_inicio'],
-            'monto_pagado' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 
@@ -246,8 +221,6 @@ class TallerController extends Controller
             'alumnos.*.hora_inicio.required' => 'La hora de inicio es obligatoria.',
             'alumnos.*.hora_fin.required' => 'La hora de fin es obligatoria.',
             'alumnos.*.hora_fin.after' => 'La hora de fin debe ser posterior a la hora de inicio.',
-            'alumnos.*.monto_pagado.numeric' => 'El monto pagado debe ser numérico.',
-            'alumnos.*.monto_pagado.min' => 'El monto pagado no puede ser negativo.',
         ];
     }
 }

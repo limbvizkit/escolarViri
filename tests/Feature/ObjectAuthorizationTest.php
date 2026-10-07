@@ -11,8 +11,6 @@ use App\Models\Alumno;
 use App\Models\Documento;
 use App\Models\Estatus;
 use App\Models\Pago;
-use App\Models\Taller;
-use App\Models\TallerAlumno;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -187,36 +185,6 @@ final class ObjectAuthorizationTest extends TestCase
         $this->actingAs($this->admin)
             ->put(route('adeudos.abonos.update', [$adeudoUno, $abonoDeDos]), [
                 'monto' => 200,
-            ])
-            ->assertNotFound();
-    }
-
-    public function test_taller_alumno_monto_update_requires_active_alumno(): void
-    {
-        $alumno = Alumno::factory()->create();
-        $taller = Taller::create([
-            'nombre' => 'Taller de prueba',
-            'costo' => 500,
-        ]);
-        $inscripcion = TallerAlumno::create([
-            'taller_id' => $taller->id,
-            'alumno_id' => $alumno->id,
-        ]);
-
-        $alumno->update(['estatus_id' => Estatus::ELIMINADO]);
-
-        $this->actingAs($this->admin)
-            ->put(route('talleres.inscripcion.monto.update', $inscripcion), [
-                'monto_pagado' => 100,
-            ])
-            ->assertForbidden();
-    }
-
-    public function test_taller_alumno_monto_update_for_nonexistent_record_returns_not_found(): void
-    {
-        $this->actingAs($this->admin)
-            ->put(route('talleres.inscripcion.monto.update', ['tallerAlumno' => 99999]), [
-                'monto_pagado' => 100,
             ])
             ->assertNotFound();
     }

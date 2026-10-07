@@ -23,7 +23,6 @@ class TallerExportTest extends TestCase
             'alumno_id' => $alumno->id,
             'hora_inicio' => '10:00',
             'hora_fin' => '12:00',
-            'monto_pagado' => 250,
         ]);
 
         $response = $this
@@ -48,7 +47,6 @@ class TallerExportTest extends TestCase
             'alumno_id' => $alumno->id,
             'hora_inicio' => '10:00',
             'hora_fin' => '12:00',
-            'monto_pagado' => 250,
         ]);
 
         $response = $this
@@ -69,7 +67,6 @@ class TallerExportTest extends TestCase
             'alumno_id' => $alumno->id,
             'hora_inicio' => '10:00',
             'hora_fin' => '12:00',
-            'monto_pagado' => 250,
         ]);
 
         $response = $this

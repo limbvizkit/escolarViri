@@ -21,6 +21,11 @@
         'fotos' => 'Fotos',
         'cursos' => 'Cursos',
     ];
+
+    // Campos que se capturan en sus respectivos módulos y quedan bloqueados
+    // aquí para no romper la consistencia.
+    $camposBloqueados = ['talleres', 'lunch', 'horario_extendido', 'cursos'];
+    $bloqueado = fn (string $campo): bool => in_array($campo, $camposBloqueados, true);
 @endphp
 
 @extends('layouts.app')
@@ -103,18 +108,30 @@
                         </div>
 
                         {{-- Montos --}}
-                        <h6 class="fw-semibold text-uppercase small text-secondary mb-3">
-                            <i class="bi bi-cash-coin me-1"></i>Importes del mes
-                        </h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-semibold text-uppercase small text-secondary mb-0">
+                                <i class="bi bi-cash-coin me-1"></i>Importes del mes
+                            </h6>
+                            <button type="button" id="btn-desbloquear-campos" class="btn ip-btn-outline btn-sm">
+                                <i class="bi bi-lock-fill me-1"></i>Desbloquear campos
+                            </button>
+                        </div>
+                        <div class="form-text mb-3">
+                            Talleres, Lunch, Horario extendido y Cursos se capturan en sus respectivos módulos y están bloqueados aquí para evitar inconsistencias.
+                        </div>
                         <div class="row g-3 mb-4">
                             @foreach ($montos as $campo => $etiqueta)
                                 <div class="col-md-3">
-                                    <label for="{{ $campo }}" class="form-label">{{ $etiqueta }}</label>
+                                    <label for="{{ $campo }}" class="form-label">
+                                        {{ $etiqueta }}
+                                        @if ($bloqueado($campo))<i class="bi bi-lock-fill text-secondary ms-1" title="Bloqueado"></i>@endif
+                                    </label>
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
                                         <input type="number" step="0.01" min="0" id="{{ $campo }}" name="{{ $campo }}"
                                                class="form-control @error($campo) is-invalid @enderror"
-                                               value="{{ old($campo, $pago->$campo ?? '') }}">
+                                               value="{{ old($campo, $pago->$campo ?? '') }}"
+                                               @disabled($bloqueado($campo)) @if ($bloqueado($campo)) data-bloqueado="1" @endif>
                                     </div>
                                     @error($campo)<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                                 </div>
@@ -128,12 +145,16 @@
                         <div class="row g-3 mb-4">
                             @foreach ($montosAnuales as $campo => $etiqueta)
                                 <div class="col-md-3">
-                                    <label for="{{ $campo }}" class="form-label">{{ $etiqueta }}</label>
+                                    <label for="{{ $campo }}" class="form-label">
+                                        {{ $etiqueta }}
+                                        @if ($bloqueado($campo))<i class="bi bi-lock-fill text-secondary ms-1" title="Bloqueado"></i>@endif
+                                    </label>
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
                                         <input type="number" step="0.01" min="0" id="{{ $campo }}" name="{{ $campo }}"
                                                class="form-control @error($campo) is-invalid @enderror"
-                                               value="{{ old($campo, $pago->$campo ?? '') }}">
+                                               value="{{ old($campo, $pago->$campo ?? '') }}"
+                                               @disabled($bloqueado($campo)) @if ($bloqueado($campo)) data-bloqueado="1" @endif>
                                     </div>
                                     @error($campo)<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                                 </div>
@@ -151,4 +172,56 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modalDesbloquearCampos" tabindex="-1" aria-labelledby="modalDesbloquearCamposLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalDesbloquearCamposLabel">Desbloquear campos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        Al modificar estos datos se perderá la consistencia de los mismos, favor de capturarlos en sus respectivos módulos. ¿Desea desbloquear los campos?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn ip-btn-outline" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn ip-btn-success" id="btn-si-desbloquear">Sí</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            'use strict';
+
+            const boton = document.getElementById('btn-desbloquear-campos');
+            const modalEl = document.getElementById('modalDesbloquearCampos');
+            if (!boton || !modalEl) return;
+
+            const modal = new bootstrap.Modal(modalEl);
+
+            boton.addEventListener('click', function () {
+                modal.show();
+            });
+
+            document.getElementById('btn-si-desbloquear').addEventListener('click', function () {
+                document.querySelectorAll('[data-bloqueado="1"]').forEach(function (campo) {
+                    campo.disabled = false;
+                    campo.removeAttribute('data-bloqueado');
+                });
+
+                boton.disabled = true;
+                boton.classList.remove('ip-btn-outline');
+                boton.classList.add('ip-btn-success');
+                boton.innerHTML = '<i class="bi bi-unlock-fill me-1"></i>Campos desbloqueados';
+
+                modal.hide();
+            });
+        })();
+    </script>
+@endpush

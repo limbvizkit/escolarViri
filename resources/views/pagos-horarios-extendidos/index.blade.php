@@ -1,0 +1,87 @@
+@extends('layouts.app')
+
+@section('title', 'Pagos horario extendido')
+
+@section('content')
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="ip-muted mb-0">Pagos de horario extendido por alumno</p>
+        <a href="{{ route('pagos-horarios-extendidos.create') }}" class="btn ip-btn">
+            <i class="bi bi-plus-lg me-1"></i>Nuevo pago de horario extendido
+        </a>
+    </div>
+
+    @include('partials.table-filters', [
+        'filters' => $filtros,
+        'placeholder' => 'Buscar por alumno u horario extendido...',
+    ])
+
+    <div class="ip-card">
+        <div class="ip-card-header">
+            <span class="ip-table-summary">Mostrando {{ $pagos->currentPage() }} de {{ $pagos->lastPage() }}</span>
+            <h5 class="ip-card-title">Listado de pagos de horario extendido</h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table ip-table mb-0" id="pagos-horarios-extendidos-table">
+                <thead>
+                    <tr>
+                        <x-sortable field="id" label="#" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="alumno_id" label="Alumno" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="horario_extendido_id" label="Horario extendido" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="mes" label="Mes" :current="request('sort')" :direction="request('direction')" />
+                        <x-sortable field="monto" label="Monto pagado" :current="request('sort')" :direction="request('direction')" />
+                        <th>Observaciones</th>
+                        <x-sortable field="created_at" label="Registrado" :current="request('sort')" :direction="request('direction')" />
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($pagos as $pago)
+                        <tr>
+                            <td>{{ $pago->id }}</td>
+                            <td>
+                                <a href="{{ route('alumnos.show', $pago->alumno) }}" class="fw-semibold ip-link">
+                                    {{ $pago->alumno->nombre_completo }}
+                                </a>
+                                <span class="badge ms-1" style="background:#eaf1ff;color:var(--ip-primary);font-weight:600;">
+                                    {{ $pago->alumno->gradoEscolar->nombre ?? '—' }}
+                                </span>
+                            </td>
+                            <td>{{ $pago->horarioExtendido->nombre ?? '—' }}</td>
+                            <td>{{ $pago->mes_label }}</td>
+                            <td class="text-end">{{ '$' . number_format((float) $pago->monto, 2) }}</td>
+                            <td class="ip-muted">{{ Str::limit($pago->observaciones ?? '', 60) ?: '—' }}</td>
+                            <td>{{ $pago->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <a href="{{ route('pagos-horarios-extendidos.edit', $pago) }}" class="ip-action" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form action="{{ route('pagos-horarios-extendidos.destroy', $pago) }}" method="POST" class="d-inline"
+                                          onsubmit="return confirm('¿Seguro que deseas eliminar este pago?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="ip-action ip-action-danger" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center ip-muted py-4">
+                                No hay pagos de horario extendido registrados.
+                                <a href="{{ route('pagos-horarios-extendidos.create') }}" class="d-block mt-2">Registrar el primero</a>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div class="ip-card-body d-flex justify-content-center">
+            {{ $pagos->links() }}
+        </div>
+    </div>
+@endsection

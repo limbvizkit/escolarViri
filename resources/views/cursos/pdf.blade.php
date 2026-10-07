@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Listado de inscripciones a talleres</title>
+    <title>Listado de inscripciones a cursos</title>
     <style>
         @page {
             margin: 18mm 10mm 18mm 10mm;
@@ -97,35 +97,36 @@
     </div>
 
     <div class="header">
-        <h1>Listado de inscripciones a talleres</h1>
+        <h1>Listado de inscripciones a cursos</h1>
         <p>Generado el {{ now()->format('d/m/Y H:i') }}</p>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>Taller</th>
+                <th>Curso</th>
                 <th>Alumno</th>
                 <th>Grado Escolar</th>
+                <th>Fecha inicio</th>
+                <th>Fecha fin</th>
                 <th>Horario</th>
                 <th class="num">Costo</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($inscripciones as $inscripcion)
-                @php
-                    $horario = substr($inscripcion->hora_inicio ?? '', 0, 5) . ' - ' . substr($inscripcion->hora_fin ?? '', 0, 5);
-                @endphp
                 <tr>
-                    <td>{{ $inscripcion->taller->nombre ?? '—' }}</td>
+                    <td>{{ $inscripcion->curso->nombre ?? '—' }}</td>
                     <td>{{ $inscripcion->alumno->nombre_completo ?? '—' }}</td>
                     <td>{{ $inscripcion->alumno->gradoEscolar->nombre ?? '—' }}</td>
-                    <td>{{ $horario }}</td>
-                    <td class="num">${{ number_format((float) ($inscripcion->taller->costo ?? 0), 2) }}</td>
+                    <td>{{ $inscripcion->curso?->fecha_inicio?->format('d/m/Y') ?? '—' }}</td>
+                    <td>{{ $inscripcion->curso?->fecha_fin?->format('d/m/Y') ?? '—' }}</td>
+                    <td>{{ $inscripcion->curso?->horario_label ?? '—' }}</td>
+                    <td class="num">${{ number_format((float) ($inscripcion->curso->costo ?? 0), 2) }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="empty">Sin registros</td>
+                    <td colspan="7" class="empty">Sin registros</td>
                 </tr>
             @endforelse
         </tbody>

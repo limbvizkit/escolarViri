@@ -14,6 +14,10 @@
             'natgeo' => 'NatGeo',
             'entrevista' => 'Entrevista',
         ];
+
+        // Campos que se capturan en sus respectivos módulos y quedan bloqueados
+        // aquí para no romper la consistencia.
+        $camposBloqueados = ['talleres', 'lunch', 'horario_extendido', 'cursos'];
     @endphp
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -48,8 +52,14 @@
             <h5 class="ip-card-title">Listado de pagos</h5>
         </div>
 
-        <div class="ip-card-body ip-table-hint">
-            <i class="bi bi-pencil-fill me-1"></i>Haz clic en el lápiz de una fila para editar en la tabla las columnas que quieras.
+        <div class="ip-card-body ip-table-hint d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span>
+                <i class="bi bi-pencil-fill me-1"></i>Haz clic en el lápiz de una fila para editar en la tabla las columnas que quieras.
+                Talleres, Lunch, Horario extendido y Cursos están bloqueados.
+            </span>
+            <button type="button" id="btn-desbloquear-campos" class="btn ip-btn-outline btn-sm">
+                <i class="bi bi-lock-fill me-1"></i>Desbloquear campos
+            </button>
         </div>
 
         <div class="table-responsive">
@@ -155,7 +165,7 @@
                                 <div class="input-group input-group-sm cell-edit d-none">
                                     <span class="input-group-text">$</span>
                                     <input type="number" step="0.01" min="0" name="talleres" form="{{ $formId }}"
-                                           data-key="talleres" data-format="money"
+                                           data-key="talleres" data-format="money" data-bloqueado="1"
                                            class="form-control" value="{{ $pago->talleres }}" data-original="{{ $pago->talleres }}">
                                 </div>
                             </td>
@@ -167,7 +177,7 @@
                                 <div class="input-group input-group-sm cell-edit d-none">
                                     <span class="input-group-text">$</span>
                                     <input type="number" step="0.01" min="0" name="lunch" form="{{ $formId }}"
-                                           data-key="lunch" data-format="money"
+                                           data-key="lunch" data-format="money" data-bloqueado="1"
                                            class="form-control" value="{{ $pago->lunch }}" data-original="{{ $pago->lunch }}">
                                 </div>
                             </td>
@@ -181,6 +191,7 @@
                                         <span class="input-group-text">$</span>
                                         <input type="number" step="0.01" min="0" name="{{ $campo }}" form="{{ $formId }}"
                                                data-key="{{ $campo }}" data-format="money"
+                                               @if (in_array($campo, $camposBloqueados, true)) data-bloqueado="1" @endif
                                                class="form-control" value="{{ $pago->$campo }}" data-original="{{ $pago->$campo }}">
                                     </div>
                                 </td>
@@ -234,6 +245,26 @@
             {{ $pagos->links() }}
         </div>
     </div>
+
+    <div class="modal fade" id="modalDesbloquearCampos" tabindex="-1" aria-labelledby="modalDesbloquearCamposLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalDesbloquearCamposLabel">Desbloquear campos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        Al modificar estos datos se perderá la consistencia de los mismos, favor de capturarlos en sus respectivos módulos. ¿Desea desbloquear los campos?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn ip-btn-outline" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn ip-btn-success" id="btn-si-desbloquear">Sí</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -243,6 +274,10 @@
 
             const table = document.getElementById('pagos-table');
             if (!table) return;
+
+            // Campos bloqueados: se habilitan solo tras confirmar en el modal.
+            let camposDesbloqueados = false;
+            const aplicaBloqueo = (inp) => inp.dataset.bloqueado === '1' && !camposDesbloqueados;
 
             const MESES = [
                 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -322,8 +357,8 @@
                 row.querySelector('.js-inline-save')?.classList.toggle('d-none', !editando);
                 row.querySelector('.js-inline-cancel')?.classList.toggle('d-none', !editando);
                 if (editando) {
-                    row.querySelectorAll('[data-key]').forEach(i => i.disabled = false);
-                    const primero = row.querySelector('input[data-key], select[data-key]');
+                    row.querySelectorAll('[data-key]').forEach(i => { i.disabled = aplicaBloqueo(i); });
+                    const primero = row.querySelector('[data-key]:not(:disabled)');
                     if (primero) primero.focus();
                 }
             }
@@ -332,6 +367,10 @@
                 const form = row.querySelector('form[id^="inline-"]');
                 if (!form) return;
                 row.querySelectorAll('[data-key]').forEach(inp => {
+                    if (aplicaBloqueo(inp)) {
+                        inp.disabled = true;
+                        return;
+                    }
                     inp.disabled = (inp.dataset.original || '') === (inp.value || '');
                 });
                 const guardarBtn = row.querySelector('.js-inline-save');
@@ -369,7 +408,9 @@
                 }).catch(() => {
                     mostrarAlerta('Error de conexión al guardar.', 'danger');
                 }).finally(() => {
-                    row.querySelectorAll('[data-key]').forEach(inp => inp.disabled = false);
+                    row.querySelectorAll('[data-key]').forEach(inp => {
+                        if (!aplicaBloqueo(inp)) inp.disabled = false;
+                    });
                     if (guardarBtn) guardarBtn.disabled = false;
                 });
             }
@@ -383,6 +424,30 @@
             }
 
             crearContenedorAlertas();
+
+            const botonDesbloquear = document.getElementById('btn-desbloquear-campos');
+            const modalDesbloquear = document.getElementById('modalDesbloquearCampos');
+            if (botonDesbloquear && modalDesbloquear) {
+                const modal = new bootstrap.Modal(modalDesbloquear);
+
+                botonDesbloquear.addEventListener('click', () => modal.show());
+
+                document.getElementById('btn-si-desbloquear').addEventListener('click', function () {
+                    camposDesbloqueados = true;
+
+                    document.querySelectorAll('[data-bloqueado="1"]').forEach(function (inp) {
+                        inp.disabled = false;
+                        inp.removeAttribute('data-bloqueado');
+                    });
+
+                    botonDesbloquear.disabled = true;
+                    botonDesbloquear.classList.remove('ip-btn-outline');
+                    botonDesbloquear.classList.add('ip-btn-success');
+                    botonDesbloquear.innerHTML = '<i class="bi bi-unlock-fill me-1"></i>Campos desbloqueados';
+
+                    modal.hide();
+                });
+            }
 
             table.querySelector('tbody').addEventListener('click', function (e) {
                 const toggle = e.target.closest('.js-inline-toggle');
