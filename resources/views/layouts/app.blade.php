@@ -47,6 +47,21 @@
             <a href="{{ route('talleres.index') }}" class="{{ request()->routeIs('talleres.*') ? 'active' : '' }}">
                 <i class="bi bi-easel"></i><span>Talleres</span>
             </a>
+            <a href="{{ route('cursos.index') }}" class="{{ request()->routeIs('cursos.*') ? 'active' : '' }}">
+                <i class="bi bi-book"></i><span>Cursos</span>
+            </a>
+            <a href="{{ route('pagos-talleres.index') }}" class="{{ request()->routeIs('pagos-talleres.*') ? 'active' : '' }}">
+                <i class="bi bi-easel2"></i><span>Pagos talleres</span>
+            </a>
+            <a href="{{ route('pagos-cursos.index') }}" class="{{ request()->routeIs('pagos-cursos.*') ? 'active' : '' }}">
+                <i class="bi bi-mortarboard"></i><span>Pagos cursos</span>
+            </a>
+            <a href="{{ route('pagos-lunch.index') }}" class="{{ request()->routeIs('pagos-lunch.*') ? 'active' : '' }}">
+                <i class="bi bi-cup-hot"></i><span>Pagos lunch</span>
+            </a>
+            <a href="{{ route('pagos-horarios-extendidos.index') }}" class="{{ request()->routeIs('pagos-horarios-extendidos.*') ? 'active' : '' }}">
+                <i class="bi bi-clock-history"></i><span>Pagos horario extendido</span>
+            </a>
             <a href="{{ route('online-payments.index') }}" class="{{ request()->routeIs('online-payments.*') ? 'active' : '' }}">
                 <i class="bi bi-credit-card"></i><span>Pagos en línea</span>
             </a>

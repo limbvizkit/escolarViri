@@ -3,6 +3,7 @@
 use App\Http\Controllers\AcademicDocumentController;
 use App\Http\Controllers\AdeudoController;
 use App\Http\Controllers\AlumnoController;
+use App\Http\Controllers\CursoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentacionController;
 use App\Http\Controllers\EmpleadoController;
@@ -12,6 +13,10 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OnlinePaymentController;
 use App\Http\Controllers\OpenpayWebhookController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\PagoCursoController;
+use App\Http\Controllers\PagoHorarioExtendidoController;
+use App\Http\Controllers\PagoLunchController;
+use App\Http\Controllers\PagoTallerController;
 use App\Http\Controllers\Portal\PortalDashboardController;
 use App\Http\Controllers\Portal\PortalLoginController;
 use App\Http\Controllers\Portal\PortalPasswordChangeController;
@@ -69,6 +74,8 @@ Route::middleware(['auth', 'role:admin|super-admin'])->group(function () {
     Route::get('pagos/exportar/excel', [PagoController::class, 'exportExcel'])->name('pagos.export.excel');
     Route::get('talleres/exportar/pdf', [TallerController::class, 'exportPdf'])->name('talleres.export.pdf');
     Route::get('talleres/exportar/excel', [TallerController::class, 'exportExcel'])->name('talleres.export.excel');
+    Route::get('cursos/exportar/pdf', [CursoController::class, 'exportPdf'])->name('cursos.export.pdf');
+    Route::get('cursos/exportar/excel', [CursoController::class, 'exportExcel'])->name('cursos.export.excel');
     Route::get('adeudos/exportar/pdf', [AdeudoController::class, 'exportPdf'])->name('adeudos.export.pdf');
     Route::get('adeudos/exportar/excel', [AdeudoController::class, 'exportExcel'])->name('adeudos.export.excel');
 
@@ -145,6 +152,32 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 
 /*
 |--------------------------------------------------------------------------
+| Pagos de talleres
+|
+| Allowed for admin, super-admin, director and recepcion.
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+    Route::resource('pagos-talleres', PagoTallerController::class)
+        ->parameters(['pagos-talleres' => 'pagoTaller'])
+        ->except(['show']);
+
+    Route::resource('pagos-cursos', PagoCursoController::class)
+        ->parameters(['pagos-cursos' => 'pagoCurso'])
+        ->except(['show']);
+
+    Route::resource('pagos-lunch', PagoLunchController::class)
+        ->parameters(['pagos-lunch' => 'pagoLunch'])
+        ->except(['show']);
+
+    Route::resource('pagos-horarios-extendidos', PagoHorarioExtendidoController::class)
+        ->parameters(['pagos-horarios-extendidos' => 'pagoHorarioExtendido'])
+        ->except(['show']);
+});
+
+/*
+|--------------------------------------------------------------------------
 | Adeudos
 |
 | Allowed for admin, super-admin, director and recepcion.
@@ -217,6 +250,37 @@ Route::middleware(['auth', 'role:admin|super-admin|director'])->group(function (
 
 Route::middleware(['auth', 'role:admin|super-admin|director|profesor'])->group(function () {
     Route::get('talleres', [TallerController::class, 'index'])->name('talleres.index');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Cursos - write routes
+|
+| Allowed for admin, super-admin and director.
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin|super-admin|director'])->group(function () {
+    Route::resource('cursos', CursoController::class)
+        ->parameters(['cursos' => 'curso'])
+        ->except(['index', 'show']);
+
+    Route::get('cursos/{curso}/alumnos/create', [CursoController::class, 'alumnoCreate'])->name('cursos.alumnos.create');
+    Route::post('cursos/{curso}/alumnos', [CursoController::class, 'alumnoStore'])->name('cursos.alumnos.store');
+    Route::post('cursos/{curso}/alumnos/bulk', [CursoController::class, 'alumnosStoreBulk'])->name('cursos.alumnos.bulk.store');
+    Route::delete('cursos/{curso}/alumnos/{alumno}', [CursoController::class, 'alumnoDestroy'])->name('cursos.alumnos.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Cursos - read routes
+|
+| Allowed for admin, super-admin, director and profesor.
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin|super-admin|director|profesor'])->group(function () {
+    Route::get('cursos', [CursoController::class, 'index'])->name('cursos.index');
 });
 
 /*
