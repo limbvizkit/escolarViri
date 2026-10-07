@@ -192,7 +192,7 @@ Do not skip step 1. Without it, everything done before compaction is lost from m
 <!-- project-conventions -->
 ## Project Conventions
 
-- Stack: Laravel 13 (PHP 8.3), Blade + Vite + Tailwind CSS v4, SQLite, Eloquent.
+- Stack: Laravel 13 (PHP 8.3), Blade + Vite + Tailwind CSS v4, MySQL, Eloquent.
 - Domain: school administration (Alumno, Empleado, Escuela, FormaPago, Nivel, Pago, Rol, Sucursal, User).
 - Keep controllers thin; put business logic in models, services, or actions.
 - Run `vendor/bin/pint` before finishing work. Run tests with `php artisan test`.
