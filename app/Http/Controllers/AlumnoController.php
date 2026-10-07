@@ -34,19 +34,28 @@ class AlumnoController extends Controller
             'id',
         );
 
+        $gradosEscolares = $this->gradosDisponibles();
+
         $filtros = [
-            ['name' => 'grado_escolar_id', 'label' => 'Grado Escolar', 'options' => GradoEscolar::orderBy('nombre')->pluck('nombre', 'id')->all()],
+            ['name' => 'grado_escolar_id', 'label' => 'Grado Escolar', 'options' => $gradosEscolares->pluck('nombre', 'id')->all()],
             ['name' => 'sucursal_id', 'label' => 'Sucursal', 'options' => Sucursal::active()->orderBy('nombre')->pluck('nombre', 'id')->all()],
             ['name' => 'horario_extendido_id', 'label' => 'Horario extendido', 'options' => HorarioExtendido::active()->orderBy('nombre')->pluck('nombre', 'id')->all()],
             ['name' => 'sexo', 'label' => 'Sexo', 'options' => Alumno::opcionesSexo()],
             ['name' => 'estatus', 'label' => 'Estatus', 'options' => [Estatus::ACTIVO => 'Activo', Estatus::INACTIVO => 'Inactivo']],
         ];
 
-        $gradosEscolares = GradoEscolar::active()->orderBy('nombre')->get();
         $sucursales = Sucursal::active()->orderBy('nombre')->get();
         $horariosExtendidos = HorarioExtendido::active()->orderBy('nombre')->get();
 
-        return view('alumnos.index', compact('alumnos', 'filtros', 'gradosEscolares', 'sucursales', 'horariosExtendidos'));
+        return view('alumnos.index', [
+            'alumnos' => $alumnos,
+            'filtros' => $filtros,
+            'gradosEscolares' => $gradosEscolares,
+            'sucursales' => $sucursales,
+            'horariosExtendidos' => $horariosExtendidos,
+            'rp' => $this->prefijoRuta(),
+            'tituloModulo' => $this->tituloModulo(),
+        ]);
     }
 
     public function inlineUpdate(Request $request, Alumno $alumno)
@@ -75,11 +84,17 @@ class AlumnoController extends Controller
 
     public function create(): View
     {
-        $gradosEscolares = GradoEscolar::active()->orderBy('nombre')->get();
+        $gradosEscolares = $this->gradosDisponibles();
         $sucursales = Sucursal::active()->orderBy('nombre')->get();
         $horariosExtendidos = HorarioExtendido::active()->orderBy('nombre')->get();
 
-        return view('alumnos.create', compact('gradosEscolares', 'sucursales', 'horariosExtendidos'));
+        return view('alumnos.create', [
+            'gradosEscolares' => $gradosEscolares,
+            'sucursales' => $sucursales,
+            'horariosExtendidos' => $horariosExtendidos,
+            'rp' => $this->prefijoRuta(),
+            'gradoFijo' => $this->gradoFijo(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -87,6 +102,7 @@ class AlumnoController extends Controller
         $validated = $request->validate($this->reglas(), $this->mensajes());
 
         $this->applyNaFlags($request, $validated);
+        $this->forzarGrado($validated);
 
         $datos = $validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)];
 
@@ -98,7 +114,7 @@ class AlumnoController extends Controller
 
         $this->guardarArchivosMultiples($request, $alumno);
 
-        return redirect()->route('alumnos.index')
+        return redirect()->route($this->prefijoRuta().'.index')
             ->with('success', 'Alumno creado correctamente.');
     }
 
@@ -106,18 +122,28 @@ class AlumnoController extends Controller
     {
         $alumno->load(['gradoEscolar', 'sucursal', 'horarioExtendido', 'archivos']);
 
-        return view('alumnos.show', compact('alumno'));
+        return view('alumnos.show', [
+            'alumno' => $alumno,
+            'rp' => $this->prefijoRuta(),
+        ]);
     }
 
     public function edit(Alumno $alumno): View
     {
-        $gradosEscolares = GradoEscolar::active()->orderBy('nombre')->get();
+        $gradosEscolares = $this->gradosDisponibles();
         $sucursales = Sucursal::active()->orderBy('nombre')->get();
         $horariosExtendidos = HorarioExtendido::active()->orderBy('nombre')->get();
 
         $alumno->load('archivos');
 
-        return view('alumnos.edit', compact('alumno', 'gradosEscolares', 'sucursales', 'horariosExtendidos'));
+        return view('alumnos.edit', [
+            'alumno' => $alumno,
+            'gradosEscolares' => $gradosEscolares,
+            'sucursales' => $sucursales,
+            'horariosExtendidos' => $horariosExtendidos,
+            'rp' => $this->prefijoRuta(),
+            'gradoFijo' => $this->gradoFijo(),
+        ]);
     }
 
     public function update(Request $request, Alumno $alumno): RedirectResponse
@@ -125,6 +151,7 @@ class AlumnoController extends Controller
         $validated = $request->validate($this->reglas(), $this->mensajes());
 
         $this->applyNaFlags($request, $validated);
+        $this->forzarGrado($validated);
 
         $datos = $validated + ['estatus_id' => (int) $request->input('estatus_id', Estatus::ACTIVO)];
 
@@ -138,7 +165,7 @@ class AlumnoController extends Controller
 
         $this->guardarArchivosMultiples($request, $alumno);
 
-        return redirect()->route('alumnos.index')
+        return redirect()->route($this->prefijoRuta().'.index')
             ->with('success', 'Alumno actualizado correctamente.');
     }
 
@@ -146,7 +173,7 @@ class AlumnoController extends Controller
     {
         $alumno->update(['estatus_id' => Estatus::ELIMINADO]);
 
-        return redirect()->route('alumnos.index')
+        return redirect()->route($this->prefijoRuta().'.index')
             ->with('success', 'Alumno eliminado correctamente.');
     }
 
@@ -158,7 +185,7 @@ class AlumnoController extends Controller
 
         $pdf = Pdf::loadView('alumnos.pdf', compact('alumnos'))->setPaper('a4', 'landscape');
 
-        return $pdf->download('alumnos-'.now()->format('Y-m-d').'.pdf');
+        return $pdf->download($this->prefijoRuta().'-'.now()->format('Y-m-d').'.pdf');
     }
 
     public function exportExcel(Request $request)
@@ -166,7 +193,7 @@ class AlumnoController extends Controller
         $query = $this->filteredQuery($request)
             ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request));
 
-        return Excel::download(new AlumnoExport($query), 'alumnos-'.now()->format('Y-m-d').'.xlsx');
+        return Excel::download(new AlumnoExport($query), $this->prefijoRuta().'-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function uploadArchivo(Request $request, Alumno $alumno): RedirectResponse
@@ -175,7 +202,7 @@ class AlumnoController extends Controller
 
         $this->guardarArchivosMultiples($request, $alumno);
 
-        return redirect()->route('alumnos.edit', $alumno)
+        return redirect()->route($this->prefijoRuta().'.edit', $alumno)
             ->with('success', 'Archivo(s) cargado(s) correctamente.');
     }
 
@@ -187,7 +214,7 @@ class AlumnoController extends Controller
 
         $archivo->delete();
 
-        return redirect()->route('alumnos.edit', $alumno)
+        return redirect()->route($this->prefijoRuta().'.edit', $alumno)
             ->with('success', 'Archivo eliminado correctamente.');
     }
 
@@ -231,6 +258,8 @@ class AlumnoController extends Controller
     {
         $query = Alumno::with(['gradoEscolar', 'sucursal', 'horarioExtendido']);
 
+        $this->aplicarAlcanceGrado($query);
+
         if ($request->filled('q')) {
             $query->search($request->input('q'));
         }
@@ -256,6 +285,114 @@ class AlumnoController extends Controller
         }
 
         return $query;
+    }
+
+    /**
+     * Indica si el controlador opera en modo Estimulación Temprana.
+     */
+    protected function esEstimulacionTemprana(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Prefijo de las rutas del módulo (alumnos o estimulacion-temprana).
+     */
+    protected function prefijoRuta(): string
+    {
+        return 'alumnos';
+    }
+
+    protected function tituloModulo(): string
+    {
+        return 'Alumnos';
+    }
+
+    protected function gradoEstimulacionTemprana(): ?GradoEscolar
+    {
+        return GradoEscolar::query()
+            ->where('slug', GradoEscolar::SLUG_ESTIMULACION_TEMPRANA)
+            ->first();
+    }
+
+    /**
+     * Grado fijo del módulo (Estimulación Temprana) o null si no aplica.
+     */
+    protected function gradoFijo(): ?GradoEscolar
+    {
+        return $this->esEstimulacionTemprana() ? $this->gradoEstimulacionTemprana() : null;
+    }
+
+    /**
+     * Grados escolares que puede usar el módulo: en modo Estimulación Temprana
+     * solo ese grado; en modo normal, todos menos ese.
+     */
+    protected function gradosDisponibles()
+    {
+        $et = $this->gradoEstimulacionTemprana();
+
+        if ($this->esEstimulacionTemprana()) {
+            return $et ? collect([$et]) : collect();
+        }
+
+        $query = GradoEscolar::active()->orderBy('nombre');
+
+        if ($et) {
+            $query->whereKeyNot($et->id);
+        }
+
+        return $query->get();
+    }
+
+    private function aplicarAlcanceGrado(Builder $query): void
+    {
+        $et = $this->gradoEstimulacionTemprana();
+
+        if ($this->esEstimulacionTemprana()) {
+            if ($et) {
+                $query->where('alumnos.grado_escolar_id', $et->id);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+
+            return;
+        }
+
+        if ($et) {
+            $query->where(function (Builder $q) use ($et) {
+                $q->where('alumnos.grado_escolar_id', '!=', $et->id)
+                    ->orWhereNull('alumnos.grado_escolar_id');
+            });
+        }
+    }
+
+    private function forzarGrado(array &$datos): void
+    {
+        if (! $this->esEstimulacionTemprana()) {
+            return;
+        }
+
+        $et = $this->gradoEstimulacionTemprana();
+
+        if ($et) {
+            $datos['grado_escolar_id'] = $et->id;
+        }
+    }
+
+    private function reglasGrado(): array
+    {
+        $reglas = ['required', 'exists:grados_escolares,id'];
+        $et = $this->gradoEstimulacionTemprana();
+
+        if ($et === null) {
+            return $reglas;
+        }
+
+        $reglas[] = $this->esEstimulacionTemprana()
+            ? Rule::in([$et->id])
+            : Rule::notIn([$et->id]);
+
+        return $reglas;
     }
 
     private function allowedSorts(): array
@@ -290,7 +427,7 @@ class AlumnoController extends Controller
     private function reglasBase(): array
     {
         return [
-            'grado_escolar_id' => ['required', 'exists:grados_escolares,id'],
+            'grado_escolar_id' => $this->reglasGrado(),
             'sucursal_id' => ['nullable', 'exists:sucursales,id'],
             'nombre' => ['required', 'string', 'max:255'],
             'apellido_paterno' => ['required', 'string', 'max:255'],

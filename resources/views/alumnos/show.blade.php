@@ -1,4 +1,6 @@
 @php
+    $rp = $rp ?? 'alumnos';
+
     $esImagen = function (string $ruta): bool {
         return in_array(strtolower(pathinfo($ruta, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp', 'gif'], true);
     };
@@ -15,7 +17,7 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="ip-muted mb-0">Detalle del alumno</p>
-        <a href="{{ route('alumnos.edit', $alumno) }}" class="btn ip-btn">
+        <a href="{{ route($rp.'.edit', $alumno) }}" class="btn ip-btn">
             <i class="bi bi-pencil-square me-1"></i>Editar
         </a>
     </div>
@@ -96,7 +98,7 @@
                 <div class="row g-4">
                     @foreach ($archivosExistentes as $archivoItem)
                         @php
-                            $urlArchivo = route('alumnos.archivos.download', [$alumno, $archivoItem]);
+                            $urlArchivo = route($rp.'.archivos.download', [$alumno, $archivoItem]);
                             $imagenArchivo = $esImagen($archivoItem->archivo);
                             $nombreArchivo = $archivoItem->nombre_original ?? basename($archivoItem->archivo);
                         @endphp
@@ -119,7 +121,7 @@
                                     <span class="badge ip-badge-active">Guardado</span>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
-                                    <a href="{{ route('alumnos.archivos.download', [$alumno, $archivoItem]) }}"
+                                    <a href="{{ route($rp.'.archivos.download', [$alumno, $archivoItem]) }}"
                                        class="btn ip-btn-outline btn-sm" title="Descargar">
                                         <i class="bi bi-download"></i>
                                     </a>
@@ -130,7 +132,7 @@
 
                     @if ($archivoLegacy)
                         @php
-                            $urlLegacy = route('alumnos.archivo.download', $alumno);
+                            $urlLegacy = route($rp.'.archivo.download', $alumno);
                             $imagenLegacy = $esImagen($archivoLegacy);
                             $nombreLegacy = basename($archivoLegacy);
                         @endphp

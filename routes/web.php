@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentacionController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\EscuelaController;
+use App\Http\Controllers\EstimulacionTempranaController;
 use App\Http\Controllers\GradoEscolarController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OnlinePaymentController;
@@ -70,6 +71,8 @@ Route::middleware(['auth', 'role:admin|super-admin'])->group(function () {
     // Bulk exports (administrative only).
     Route::get('alumnos/exportar/pdf', [AlumnoController::class, 'exportPdf'])->name('alumnos.export.pdf');
     Route::get('alumnos/exportar/excel', [AlumnoController::class, 'exportExcel'])->name('alumnos.export.excel');
+    Route::get('estimulacion-temprana/exportar/pdf', [EstimulacionTempranaController::class, 'exportPdf'])->name('estimulacion-temprana.export.pdf');
+    Route::get('estimulacion-temprana/exportar/excel', [EstimulacionTempranaController::class, 'exportExcel'])->name('estimulacion-temprana.export.excel');
     Route::get('pagos/exportar/pdf', [PagoController::class, 'exportPdf'])->name('pagos.export.pdf');
     Route::get('pagos/exportar/excel', [PagoController::class, 'exportExcel'])->name('pagos.export.excel');
     Route::get('talleres/exportar/pdf', [TallerController::class, 'exportPdf'])->name('talleres.export.pdf');
@@ -131,6 +134,40 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 Route::middleware(['auth', 'role:admin|super-admin|director|recepcion|profesor'])->group(function () {
     Route::get('alumnos', [AlumnoController::class, 'index'])->name('alumnos.index');
     Route::get('alumnos/{alumno}', [AlumnoController::class, 'show'])->name('alumnos.show');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Estimulación Temprana - write routes
+|
+| Allowed for admin, super-admin, director and recepcion.
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+    Route::resource('estimulacion-temprana', EstimulacionTempranaController::class)
+        ->parameters(['estimulacion-temprana' => 'alumno'])
+        ->except(['index', 'show']);
+
+    Route::put('estimulacion-temprana/{alumno}/inline-update', [EstimulacionTempranaController::class, 'inlineUpdate'])->name('estimulacion-temprana.inline-update');
+
+    Route::get('estimulacion-temprana/{alumno}/archivos/{archivo}/descargar', [EstimulacionTempranaController::class, 'downloadArchivo'])->name('estimulacion-temprana.archivos.download')->scopeBindings();
+    Route::get('estimulacion-temprana/{alumno}/archivo/descargar', [EstimulacionTempranaController::class, 'downloadLegacyArchivo'])->name('estimulacion-temprana.archivo.download');
+    Route::post('estimulacion-temprana/{alumno}/archivos', [EstimulacionTempranaController::class, 'uploadArchivo'])->name('estimulacion-temprana.archivos.store');
+    Route::delete('estimulacion-temprana/{alumno}/archivos/{archivo}', [EstimulacionTempranaController::class, 'destroyArchivo'])->name('estimulacion-temprana.archivos.destroy')->scopeBindings();
+});
+
+/*
+|--------------------------------------------------------------------------
+| Estimulación Temprana - read routes
+|
+| Allowed for admin, super-admin, director, recepcion and profesor.
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin|super-admin|director|recepcion|profesor'])->group(function () {
+    Route::get('estimulacion-temprana', [EstimulacionTempranaController::class, 'index'])->name('estimulacion-temprana.index');
+    Route::get('estimulacion-temprana/{alumno}', [EstimulacionTempranaController::class, 'show'])->name('estimulacion-temprana.show');
 });
 
 /*

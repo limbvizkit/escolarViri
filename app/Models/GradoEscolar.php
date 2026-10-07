@@ -12,6 +12,8 @@ class GradoEscolar extends Model
     use ConEstatus;
     use HasFactory;
 
+    public const SLUG_ESTIMULACION_TEMPRANA = 'estimulacion-temprana';
+
     protected $table = 'grados_escolares';
 
     protected $fillable = [

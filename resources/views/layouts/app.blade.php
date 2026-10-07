@@ -100,6 +100,9 @@
             <a href="{{ route('alumnos.index') }}" class="{{ request()->routeIs('alumnos.*') ? 'active' : '' }}">
                 <i class="bi bi-person-lines-fill"></i><span>Alumnos</span>
             </a>
+            <a href="{{ route('estimulacion-temprana.index') }}" class="{{ request()->routeIs('estimulacion-temprana.*') ? 'active' : '' }}">
+                <i class="bi bi-balloon"></i><span>Estimulación Temprana</span>
+            </a>
         </nav>
     </aside>
 
