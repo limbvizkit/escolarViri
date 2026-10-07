@@ -33,12 +33,6 @@ class DashboardController extends Controller
             ->orderByDesc('alumnos_count')
             ->get();
 
-        $ingresosPorMes = Pago::select('mes')
-            ->selectRaw("SUM({$montoTotal}) as total")
-            ->groupBy('mes')
-            ->orderBy('mes')
-            ->get();
-
         $pagosPorFormaPago = Pago::select('forma_pago_id')
             ->selectRaw("SUM({$montoTotal}) as total")
             ->groupBy('forma_pago_id')
@@ -67,7 +61,7 @@ class DashboardController extends Controller
             ->limit(8)
             ->get();
 
-        $alumnosPorId = Alumno::whereIn(
+        $alumnosPorId = Alumno::with('gradoEscolar')->whereIn(
             'id',
             $adeudosPorAlumno->pluck('alumno_id')->filter()->all()
         )->get()->keyBy('id');
@@ -76,10 +70,6 @@ class DashboardController extends Controller
             'alumnosPorGradoEscolar' => [
                 'labels' => $alumnosPorGradoEscolar->pluck('nombre')->all(),
                 'data' => $alumnosPorGradoEscolar->pluck('alumnos_count')->map(fn ($n) => (int) $n)->all(),
-            ],
-            'ingresosPorMes' => [
-                'labels' => $ingresosPorMes->map(fn ($pago) => Pago::mesLabel($pago->mes))->all(),
-                'data' => $ingresosPorMes->pluck('total')->map(fn ($t) => (float) $t)->all(),
             ],
             'pagosPorFormaPago' => [
                 'labels' => $pagosPorFormaPago->map(fn ($pago) => $pago->formaPago->nombre ?? 'Sin forma')->all(),
@@ -91,7 +81,18 @@ class DashboardController extends Controller
             ],
             'adeudosPorAlumno' => [
                 'labels' => $adeudosPorAlumno
-                    ->map(fn ($adeudo) => $alumnosPorId[$adeudo->alumno_id]->nombre_completo ?? 'Sin alumno')
+                    ->map(function ($adeudo) use ($alumnosPorId) {
+                        $alumno = $alumnosPorId[$adeudo->alumno_id] ?? null;
+
+                        if ($alumno === null) {
+                            return ['Sin alumno', 'Sin grado'];
+                        }
+
+                        return [
+                            $alumno->nombre_completo,
+                            $alumno->gradoEscolar->nombre ?? 'Sin grado',
+                        ];
+                    })
                     ->all(),
                 'data' => $adeudosPorAlumno->pluck('saldo')->map(fn ($s) => (float) $s)->all(),
             ],
