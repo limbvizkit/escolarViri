@@ -1,8 +1,10 @@
 @php
     $alumno = $alumno ?? null;
     $editing = isset($alumno);
+    $rp = $rp ?? 'alumnos';
+    $gradoFijo = $gradoFijo ?? null;
     $title = $editing ? 'Editar alumno' : 'Nuevo alumno';
-    $action = $editing ? route('alumnos.update', $alumno) : route('alumnos.store');
+    $action = $editing ? route($rp.'.update', $alumno) : route($rp.'.store');
     $method = $editing ? 'PUT' : 'POST';
     $presetGradoEscolar = request()->query('grado_escolar_id', $alumno->grado_escolar_id ?? '');
 
@@ -42,7 +44,7 @@
                         <div class="row g-3 mb-4">
                             @foreach ($archivosExistentes as $archivoItem)
                                 @php
-                                    $urlArchivo = route('alumnos.archivos.download', [$alumno, $archivoItem]);
+                                    $urlArchivo = route($rp.'.archivos.download', [$alumno, $archivoItem]);
                                     $imagenArchivo = $esImagen($archivoItem->archivo);
                                     $nombreArchivo = $archivoItem->nombre_original ?? basename($archivoItem->archivo);
                                 @endphp
@@ -65,11 +67,11 @@
                                             <span class="badge ip-badge-active">Guardado</span>
                                         </div>
                                         <div class="d-flex align-items-center gap-2">
-                                            <a href="{{ route('alumnos.archivos.download', [$alumno, $archivoItem]) }}"
+                                            <a href="{{ route($rp.'.archivos.download', [$alumno, $archivoItem]) }}"
                                                class="btn ip-btn-outline btn-sm" title="Descargar">
                                                 <i class="bi bi-download"></i>
                                             </a>
-                                            <form action="{{ route('alumnos.archivos.destroy', [$alumno, $archivoItem]) }}"
+                                            <form action="{{ route($rp.'.archivos.destroy', [$alumno, $archivoItem]) }}"
                                                   method="POST" class="d-inline"
                                                   onsubmit="return confirm('¿Seguro que deseas eliminar este archivo?')">
                                                 @csrf
@@ -85,7 +87,7 @@
 
                             @if ($archivoLegacy)
                                 @php
-                                    $urlLegacy = route('alumnos.archivo.download', $alumno);
+                                    $urlLegacy = route($rp.'.archivo.download', $alumno);
                                     $imagenLegacy = $esImagen($archivoLegacy);
                                     $nombreLegacy = basename($archivoLegacy);
                                 @endphp
@@ -130,16 +132,21 @@
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <label for="grado_escolar_id" class="form-label">Grado Escolar <span class="ip-required">*</span></label>
-                                <select id="grado_escolar_id" name="grado_escolar_id"
-                                        class="form-select @error('grado_escolar_id') is-invalid @enderror" required>
-                                    <option value="">— Seleccionar grado escolar —</option>
-                                    @foreach ($gradosEscolares as $gradoEscolar)
-                                        <option value="{{ $gradoEscolar->id }}"
-                                            {{ old('grado_escolar_id', $presetGradoEscolar) == $gradoEscolar->id ? 'selected' : '' }}>
-                                            {{ $gradoEscolar->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                @if ($gradoFijo)
+                                    <input type="text" class="form-control" value="{{ $gradoFijo->nombre }}" disabled>
+                                    <input type="hidden" id="grado_escolar_id" name="grado_escolar_id" value="{{ $gradoFijo->id }}">
+                                @else
+                                    <select id="grado_escolar_id" name="grado_escolar_id"
+                                            class="form-select @error('grado_escolar_id') is-invalid @enderror" required>
+                                        <option value="">— Seleccionar grado escolar —</option>
+                                        @foreach ($gradosEscolares as $gradoEscolar)
+                                            <option value="{{ $gradoEscolar->id }}"
+                                                {{ old('grado_escolar_id', $presetGradoEscolar) == $gradoEscolar->id ? 'selected' : '' }}>
+                                                {{ $gradoEscolar->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                @endif
                                 @error('grado_escolar_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
 
@@ -330,7 +337,7 @@
                         </div>
 
                         <div class="ip-form-actions">
-                            <a href="{{ route('alumnos.index') }}" class="btn ip-btn-outline">Cancelar</a>
+                            <a href="{{ route($rp.'.index') }}" class="btn ip-btn-outline">Cancelar</a>
                             <button type="submit" class="btn ip-btn-success">
                                 <i class="bi bi-check-lg me-1"></i>{{ $editing ? 'Actualizar' : 'Guardar' }}
                             </button>

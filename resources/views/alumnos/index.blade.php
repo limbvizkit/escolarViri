@@ -1,21 +1,25 @@
 @extends('layouts.app')
 
-@section('title', 'Alumnos')
+@section('title', $tituloModulo ?? 'Alumnos')
 
 @section('content')
+    @php
+        $rp = $rp ?? 'alumnos';
+    @endphp
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="ip-muted mb-0">Gestión de alumnos por grado escolar</p>
         <div class="d-flex gap-2">
             @php
                 $exportQuery = array_filter(request()->only(['q', 'grado_escolar_id', 'sucursal_id', 'horario_extendido_id', 'sexo', 'estatus', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
             @endphp
-            <a href="{{ route('alumnos.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
+            <a href="{{ route($rp.'.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i>PDF
             </a>
-            <a href="{{ route('alumnos.export.excel', $exportQuery) }}" class="btn ip-btn-success btn-sm">
+            <a href="{{ route($rp.'.export.excel', $exportQuery) }}" class="btn ip-btn-success btn-sm">
                 <i class="bi bi-file-earmark-excel me-1"></i>Excel
             </a>
-            <a href="{{ route('alumnos.create') }}" class="btn ip-btn">
+            <a href="{{ route($rp.'.create') }}" class="btn ip-btn">
                 <i class="bi bi-plus-lg me-1"></i>Nuevo alumno
             </a>
         </div>
@@ -77,8 +81,8 @@
                             <td>{{ $alumno->id }}</td>
 
                             <td>
-                                <div class="cell-view fw-semibold" data-target="nombre" data-href="{{ route('alumnos.show', $alumno) }}">
-                                    <a href="{{ route('alumnos.show', $alumno) }}" class="ip-link">{{ $alumno->nombre }}</a>
+                                <div class="cell-view fw-semibold" data-target="nombre" data-href="{{ route($rp.'.show', $alumno) }}">
+                                    <a href="{{ route($rp.'.show', $alumno) }}" class="ip-link">{{ $alumno->nombre }}</a>
                                 </div>
                                 <input type="text" name="nombre" form="{{ $formId }}" data-key="nombre" data-format="text"
                                        class="form-control form-control-sm cell-edit d-none"
@@ -237,12 +241,12 @@
                             </td>
 
                             <td class="text-end">
-                                <form id="{{ $formId }}" method="POST" action="{{ route('alumnos.inline-update', $alumno) }}">
+                                <form id="{{ $formId }}" method="POST" action="{{ route($rp.'.inline-update', $alumno) }}">
                                     @csrf
                                     @method('PUT')
                                 </form>
                                 <div class="d-inline-flex gap-1">
-                                    <a href="{{ route('alumnos.show', $alumno) }}" class="ip-action" title="Ver">
+                                    <a href="{{ route($rp.'.show', $alumno) }}" class="ip-action" title="Ver">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <button type="button" class="ip-action js-inline-toggle" title="Editar en la tabla">
@@ -254,10 +258,10 @@
                                     <button type="button" class="ip-action d-none js-inline-cancel" title="Cancelar">
                                         <i class="bi bi-x-lg"></i>
                                     </button>
-                                    <a href="{{ route('alumnos.edit', $alumno) }}" class="ip-action" title="Editar (página)">
+                                    <a href="{{ route($rp.'.edit', $alumno) }}" class="ip-action" title="Editar (página)">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <form action="{{ route('alumnos.destroy', $alumno) }}" method="POST" class="d-inline"
+                                    <form action="{{ route($rp.'.destroy', $alumno) }}" method="POST" class="d-inline"
                                           onsubmit="return confirm('¿Seguro que deseas eliminar este alumno?')">
                                         @csrf
                                         @method('DELETE')
@@ -272,7 +276,7 @@
                         <tr>
                             <td colspan="19" class="text-center ip-muted py-4">
                                 No hay alumnos registrados.
-                                <a href="{{ route('alumnos.create') }}" class="d-block mt-2">Crear el primero</a>
+                                <a href="{{ route($rp.'.create') }}" class="d-block mt-2">Crear el primero</a>
                             </td>
                         </tr>
                     @endforelse
