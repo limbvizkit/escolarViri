@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PagoHorarioExtendidoExport;
 use App\Models\Alumno;
 use App\Models\Estatus;
 use App\Models\HorarioExtendido;
 use App\Models\Pago;
 use App\Models\PagoHorarioExtendido;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PagoHorarioExtendidoController extends Controller
 {
@@ -28,6 +31,25 @@ class PagoHorarioExtendidoController extends Controller
         ];
 
         return view('pagos-horarios-extendidos.index', compact('pagos', 'filtros'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $pagos = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request))
+            ->get();
+
+        $pdf = Pdf::loadView('pagos-horarios-extendidos.pdf', compact('pagos'))->setPaper('a4', 'landscape');
+
+        return $pdf->download('pagos-horarios-extendidos-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $query = $this->filteredQuery($request)
+            ->orderBy($this->sortField($request, $this->allowedSorts(), 'id'), $this->sortDirection($request));
+
+        return Excel::download(new PagoHorarioExtendidoExport($query), 'pagos-horarios-extendidos-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function create(): View

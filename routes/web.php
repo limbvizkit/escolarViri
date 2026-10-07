@@ -196,17 +196,29 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 */
 
 Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+    Route::get('pagos-talleres/exportar/pdf', [PagoTallerController::class, 'exportPdf'])->name('pagos-talleres.export.pdf');
+    Route::get('pagos-talleres/exportar/excel', [PagoTallerController::class, 'exportExcel'])->name('pagos-talleres.export.excel');
+
     Route::resource('pagos-talleres', PagoTallerController::class)
         ->parameters(['pagos-talleres' => 'pagoTaller'])
         ->except(['show']);
+
+    Route::get('pagos-cursos/exportar/pdf', [PagoCursoController::class, 'exportPdf'])->name('pagos-cursos.export.pdf');
+    Route::get('pagos-cursos/exportar/excel', [PagoCursoController::class, 'exportExcel'])->name('pagos-cursos.export.excel');
 
     Route::resource('pagos-cursos', PagoCursoController::class)
         ->parameters(['pagos-cursos' => 'pagoCurso'])
         ->except(['show']);
 
+    Route::get('pagos-lunch/exportar/pdf', [PagoLunchController::class, 'exportPdf'])->name('pagos-lunch.export.pdf');
+    Route::get('pagos-lunch/exportar/excel', [PagoLunchController::class, 'exportExcel'])->name('pagos-lunch.export.excel');
+
     Route::resource('pagos-lunch', PagoLunchController::class)
         ->parameters(['pagos-lunch' => 'pagoLunch'])
         ->except(['show']);
+
+    Route::get('pagos-horarios-extendidos/exportar/pdf', [PagoHorarioExtendidoController::class, 'exportPdf'])->name('pagos-horarios-extendidos.export.pdf');
+    Route::get('pagos-horarios-extendidos/exportar/excel', [PagoHorarioExtendidoController::class, 'exportExcel'])->name('pagos-horarios-extendidos.export.excel');
 
     Route::resource('pagos-horarios-extendidos', PagoHorarioExtendidoController::class)
         ->parameters(['pagos-horarios-extendidos' => 'pagoHorarioExtendido'])

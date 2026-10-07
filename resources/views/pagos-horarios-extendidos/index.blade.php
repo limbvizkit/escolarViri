@@ -5,9 +5,20 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="ip-muted mb-0">Pagos de horario extendido por alumno</p>
-        <a href="{{ route('pagos-horarios-extendidos.create') }}" class="btn ip-btn">
-            <i class="bi bi-plus-lg me-1"></i>Nuevo pago de horario extendido
-        </a>
+        <div class="d-flex gap-2">
+            @php
+                $exportQuery = array_filter(request()->only(['q', 'horario_extendido_id', 'mes', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
+            @endphp
+            <a href="{{ route('pagos-horarios-extendidos.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+            </a>
+            <a href="{{ route('pagos-horarios-extendidos.export.excel', $exportQuery) }}" class="btn ip-btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel me-1"></i>Excel
+            </a>
+            <a href="{{ route('pagos-horarios-extendidos.create') }}" class="btn ip-btn">
+                <i class="bi bi-plus-lg me-1"></i>Nuevo pago de horario extendido
+            </a>
+        </div>
     </div>
 
     @include('partials.table-filters', [
