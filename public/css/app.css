@@ -25,13 +25,22 @@ body {
 .ip-sidebar {
     width: 248px;
     background: linear-gradient(180deg, #0b1c47 0%, #12265e 100%);
-    min-height: 100vh;
+    height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1040;
     padding: 1.25rem 1rem;
     transition: width .2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+@supports (height: 100dvh) {
+    .ip-sidebar {
+        height: 100dvh;
+    }
 }
 
 .ip-sidebar-top {
@@ -41,6 +50,7 @@ body {
     gap: .5rem;
     padding-bottom: 1.25rem;
     border-bottom: 1px solid rgba(255, 255, 255, .12);
+    flex-shrink: 0;
 }
 
 .ip-sidebar-toggle {
@@ -87,6 +97,36 @@ body {
 
 .ip-nav {
     margin-top: 1rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: .2rem;
+    padding-bottom: .25rem;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .3) transparent;
+}
+
+/* Scrollbar del sidebar (WebKit / Blink) */
+.ip-nav::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ip-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ip-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, .22);
+    border-radius: 50rem;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.ip-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, .4);
+    background-clip: content-box;
 }
 
 .ip-nav a {
