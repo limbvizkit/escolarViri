@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Modulo;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -58,10 +59,27 @@ class EnsureModulePermission
             return $next($request);
         }
 
+        // The catalog lives in the database, not in config: a stale config
+        // cache must never be able to disable authorization. An empty catalog
+        // fails closed instead of letting every route through.
+        $catalogo = Modulo::query()->pluck('clave', 'prefijo')->all();
+
+        if ($catalogo === []) {
+            Log::error('Module catalog is empty; authorization cannot be evaluated.', [
+                'user_id' => $user->getKey(),
+            ]);
+
+            abort(503, 'Authorization is not configured.');
+        }
+
         $nombre = $request->route()?->getName();
 
         if ($nombre === null) {
-            return $next($request);
+            Log::warning('Unnamed route reached the module permission middleware.', [
+                'user_id' => $user->getKey(),
+            ]);
+
+            abort(403, 'Forbidden');
         }
 
         // The dashboard is the only authenticated route whose name has no
@@ -73,11 +91,17 @@ class EnsureModulePermission
         }
 
         $segmentos = explode('.', $nombre);
-        $clave = $this->moduloPorPrefijo($segmentos[0]);
+        $clave = $catalogo[$segmentos[0]] ?? null;
 
-        // Route belongs to no module (logout, portal, webhooks...).
+        // A route inside a permission group that belongs to no catalogued
+        // module is a configuration error: deny instead of opening it.
         if ($clave === null) {
-            return $next($request);
+            Log::warning('Route prefix is not part of the module catalog.', [
+                'route' => $nombre,
+                'user_id' => $user->getKey(),
+            ]);
+
+            abort(403, 'Forbidden');
         }
 
         // Bulk exports are an administrative capability, not a module action:
@@ -116,17 +140,6 @@ class EnsureModulePermission
         }
 
         return $next($request);
-    }
-
-    private function moduloPorPrefijo(string $prefijo): ?string
-    {
-        foreach (config('modulos.modulos', []) as $modulo) {
-            if ($modulo['prefijo'] === $prefijo) {
-                return $modulo['clave'];
-            }
-        }
-
-        return null;
     }
 
     /**
