@@ -59,6 +59,9 @@
             <a href="{{ route('pagos-lunch.index') }}" class="{{ request()->routeIs('pagos-lunch.*') ? 'active' : '' }}">
                 <i class="bi bi-cup-hot"></i><span>Pagos lunch</span>
             </a>
+            <a href="{{ route('pagos-8am.index') }}" class="{{ request()->routeIs('pagos-8am.*') ? 'active' : '' }}">
+                <i class="bi bi-sunrise"></i><span>Pagos 8 AM</span>
+            </a>
             <a href="{{ route('pagos-horarios-extendidos.index') }}" class="{{ request()->routeIs('pagos-horarios-extendidos.*') ? 'active' : '' }}">
                 <i class="bi bi-clock-history"></i><span>Pagos horario extendido</span>
             </a>

@@ -14,6 +14,7 @@ use App\Http\Controllers\GradoEscolarController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OnlinePaymentController;
 use App\Http\Controllers\OpenpayWebhookController;
+use App\Http\Controllers\Pago8amController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PagoCursoController;
 use App\Http\Controllers\PagoHorarioExtendidoController;
@@ -216,6 +217,13 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 
     Route::resource('pagos-lunch', PagoLunchController::class)
         ->parameters(['pagos-lunch' => 'pagoLunch'])
+        ->except(['show']);
+
+    Route::get('pagos-8am/exportar/pdf', [Pago8amController::class, 'exportPdf'])->name('pagos-8am.export.pdf');
+    Route::get('pagos-8am/exportar/excel', [Pago8amController::class, 'exportExcel'])->name('pagos-8am.export.excel');
+
+    Route::resource('pagos-8am', Pago8amController::class)
+        ->parameters(['pagos-8am' => 'pago8am'])
         ->except(['show']);
 
     Route::get('pagos-horarios-extendidos/exportar/pdf', [PagoHorarioExtendidoController::class, 'exportPdf'])->name('pagos-horarios-extendidos.export.pdf');

@@ -24,7 +24,7 @@
 
     // Campos que se capturan en sus respectivos módulos y quedan bloqueados
     // aquí para no romper la consistencia.
-    $camposBloqueados = ['talleres', 'lunch', 'horario_extendido', 'cursos'];
+    $camposBloqueados = ['entrada_8am', 'talleres', 'lunch', 'horario_extendido', 'cursos'];
     $bloqueado = fn (string $campo): bool => in_array($campo, $camposBloqueados, true);
 @endphp
 
@@ -117,7 +117,7 @@
                             </button>
                         </div>
                         <div class="form-text mb-3">
-                            Talleres, Lunch, Horario extendido y Cursos se capturan en sus respectivos módulos y están bloqueados aquí para evitar inconsistencias.
+                            Entrada 8 AM, Talleres, Lunch, Horario extendido y Cursos se capturan en sus respectivos módulos y están bloqueados aquí para evitar inconsistencias.
                         </div>
                         <div class="row g-3 mb-4">
                             @foreach ($montos as $campo => $etiqueta)

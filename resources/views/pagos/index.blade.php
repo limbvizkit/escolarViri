@@ -17,7 +17,7 @@
 
         // Campos que se capturan en sus respectivos módulos y quedan bloqueados
         // aquí para no romper la consistencia.
-        $camposBloqueados = ['talleres', 'lunch', 'horario_extendido', 'cursos'];
+        $camposBloqueados = ['entrada_8am', 'talleres', 'lunch', 'horario_extendido', 'cursos'];
     @endphp
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -55,7 +55,7 @@
         <div class="ip-card-body ip-table-hint d-flex justify-content-between align-items-center flex-wrap gap-2">
             <span>
                 <i class="bi bi-pencil-fill me-1"></i>Haz clic en el lápiz de una fila para editar en la tabla las columnas que quieras.
-                Talleres, Lunch, Horario extendido y Cursos están bloqueados.
+                Entrada 8 AM, Talleres, Lunch, Horario extendido y Cursos están bloqueados.
             </span>
             <button type="button" id="btn-desbloquear-campos" class="btn ip-btn-outline btn-sm">
                 <i class="bi bi-lock-fill me-1"></i>Desbloquear campos
@@ -135,6 +135,7 @@
                                         <span class="input-group-text">$</span>
                                         <input type="number" step="0.01" min="0" name="{{ $campo }}" form="{{ $formId }}"
                                                data-key="{{ $campo }}" data-format="money"
+                                               @if (in_array($campo, $camposBloqueados, true)) data-bloqueado="1" @endif
                                                class="form-control" value="{{ $monto }}" data-original="{{ $monto }}">
                                     </div>
                                 </td>
