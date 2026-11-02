@@ -9,8 +9,12 @@ use Illuminate\Support\Facades\Schema;
  * because `config('modulos.modulos')` was read through a stale config cache
  * that predated the catalog file.
  *
- * It runs on every `migrate`, is idempotent, and reads the catalog file
- * directly, so a stale config cache can no longer leave the tables empty.
+ * Migrations run once, so this repairs existing databases only. Deployments
+ * that add or change a module later must run `php artisan modulos:sincronizar`
+ * (the same idempotent implementation) as part of the deploy.
+ *
+ * The catalog file is read directly, so a stale config cache can never leave
+ * the tables empty again.
  */
 return new class extends Migration
 {

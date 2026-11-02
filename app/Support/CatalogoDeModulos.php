@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Models\Modulo;
 use App\Models\Permiso;
 use App\Models\Rol;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 /**
@@ -23,12 +24,24 @@ use RuntimeException;
 final class CatalogoDeModulos
 {
     /**
-     * @return array{modulos: array<int, array<string, mixed>>, inicial: array<string, array<string, mixed>>}
+     * Parsed definition, memoized per process. The file is part of the code
+     * deployment, so it cannot change while a worker is serving requests.
+     *
+     * @var array{modulos: array<int, array<string, mixed>>, inicial: array<string, array<string, mixed>>, exportaciones?: array<string, array<int, string>>, exporta_default?: array<int, string>}|null
+     */
+    private static ?array $definicion = null;
+
+    /**
+     * @return array{modulos: array<int, array<string, mixed>>, inicial: array<string, array<string, mixed>>, exportaciones?: array<string, array<int, string>>, exporta_default?: array<int, string>}
      *
      * @throws RuntimeException when the catalog file is missing or empty.
      */
     public static function definicion(): array
     {
+        if (self::$definicion !== null) {
+            return self::$definicion;
+        }
+
         $ruta = config_path('modulos.php');
 
         if (! is_file($ruta)) {
@@ -41,7 +54,28 @@ final class CatalogoDeModulos
             throw new RuntimeException("Module catalog at {$ruta} is empty.");
         }
 
-        return $definicion;
+        return self::$definicion = $definicion;
+    }
+
+    /**
+     * Roles allowed to export a module's data. Bulk exports are a capability
+     * outside the three matrix actions, declared per module in the definition.
+     *
+     * Fails closed: an unavailable definition means nobody exports.
+     *
+     * @return array<int, string>
+     */
+    public static function rolesExportacion(string $clave): array
+    {
+        try {
+            $definicion = self::definicion();
+        } catch (RuntimeException) {
+            return [];
+        }
+
+        return $definicion['exportaciones'][$clave]
+            ?? $definicion['exporta_default']
+            ?? [];
     }
 
     /**
@@ -55,54 +89,56 @@ final class CatalogoDeModulos
     {
         $definicion = self::definicion();
 
-        $creados = 0;
-        $actualizados = 0;
+        return DB::transaction(function () use ($definicion): array {
+            $creados = 0;
+            $actualizados = 0;
 
-        foreach ($definicion['modulos'] as $modulo) {
-            $existia = Modulo::query()->where('clave', $modulo['clave'])->exists();
+            foreach ($definicion['modulos'] as $modulo) {
+                $existia = Modulo::query()->where('clave', $modulo['clave'])->exists();
 
-            Modulo::query()->updateOrCreate(
-                ['clave' => $modulo['clave']],
-                [
-                    'nombre' => $modulo['nombre'],
-                    'grupo' => $modulo['grupo'],
-                    'orden' => $modulo['orden'],
-                    'prefijo' => $modulo['prefijo'],
-                    'ruta' => $modulo['ruta'],
-                    'url' => $modulo['url'],
-                ],
-            );
-
-            $existia ? $actualizados++ : $creados++;
-        }
-
-        $permisos = 0;
-        $modulos = Modulo::query()->get();
-        $roles = Rol::query()->where('slug', '!=', 'super-admin')->get();
-
-        foreach ($roles as $rol) {
-            foreach ($modulos as $modulo) {
-                $acciones = $definicion['inicial'][$modulo->clave] ?? [];
-
-                $permiso = Permiso::query()->firstOrCreate(
-                    ['rol_id' => $rol->id, 'modulo_id' => $modulo->id],
+                Modulo::query()->updateOrCreate(
+                    ['clave' => $modulo['clave']],
                     [
-                        'puede_ver' => in_array($rol->slug, $acciones['ver'] ?? [], true),
-                        'puede_escribir' => in_array($rol->slug, $acciones['escribir'] ?? [], true),
-                        'puede_eliminar' => in_array($rol->slug, $acciones['eliminar'] ?? [], true),
+                        'nombre' => $modulo['nombre'],
+                        'grupo' => $modulo['grupo'],
+                        'orden' => $modulo['orden'],
+                        'prefijo' => $modulo['prefijo'],
+                        'ruta' => $modulo['ruta'],
+                        'url' => $modulo['url'],
                     ],
                 );
 
-                if ($permiso->wasRecentlyCreated) {
-                    $permisos++;
+                $existia ? $actualizados++ : $creados++;
+            }
+
+            $permisos = 0;
+            $modulos = Modulo::query()->get();
+            $roles = Rol::query()->where('slug', '!=', 'super-admin')->get();
+
+            foreach ($roles as $rol) {
+                foreach ($modulos as $modulo) {
+                    $acciones = $definicion['inicial'][$modulo->clave] ?? [];
+
+                    $permiso = Permiso::query()->firstOrCreate(
+                        ['rol_id' => $rol->id, 'modulo_id' => $modulo->id],
+                        [
+                            'puede_ver' => in_array($rol->slug, $acciones['ver'] ?? [], true),
+                            'puede_escribir' => in_array($rol->slug, $acciones['escribir'] ?? [], true),
+                            'puede_eliminar' => in_array($rol->slug, $acciones['eliminar'] ?? [], true),
+                        ],
+                    );
+
+                    if ($permiso->wasRecentlyCreated) {
+                        $permisos++;
+                    }
                 }
             }
-        }
 
-        return [
-            'modulos_creados' => $creados,
-            'modulos_actualizados' => $actualizados,
-            'permisos_creados' => $permisos,
-        ];
+            return [
+                'modulos_creados' => $creados,
+                'modulos_actualizados' => $actualizados,
+                'permisos_creados' => $permisos,
+            ];
+        });
     }
 }

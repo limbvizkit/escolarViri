@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Models\Modulo;
+use App\Support\CatalogoDeModulos;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -96,18 +97,19 @@ class EnsureModulePermission
         // A route inside a permission group that belongs to no catalogued
         // module is a configuration error: deny instead of opening it.
         if ($clave === null) {
-            Log::warning('Route prefix is not part of the module catalog.', [
+            Log::warning('Route prefix is not part of the module catalog. Run modulos:sincronizar.', [
                 'route' => $nombre,
                 'user_id' => $user->getKey(),
             ]);
 
-            abort(403, 'Forbidden');
+            abort(403, 'This module is not registered in the permission catalog.');
         }
 
         // Bulk exports are an administrative capability, not a module action:
         // each module declares which roles may export, defaulting to admin-only.
+        // Read from the definition file, never from the compiled config cache.
         if ($this->esExportacion($segmentos)) {
-            $rolesExportacion = config('modulos.exportaciones.'.$clave, config('modulos.exporta_default', []));
+            $rolesExportacion = CatalogoDeModulos::rolesExportacion($clave);
 
             if (! in_array($user->rol?->slug, $rolesExportacion, true)
                 || ! $user->puedeVer($clave)) {

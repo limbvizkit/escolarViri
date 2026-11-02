@@ -117,6 +117,26 @@ final class ModuleCatalogTest extends TestCase
         $this->actingAs($superAdmin)->get(route('roles.index'))->assertOk();
     }
 
+    public function test_export_roles_are_read_from_the_definition_not_from_config(): void
+    {
+        config(['modulos' => []]);
+
+        $this->assertSame(
+            ['admin', 'super-admin', 'director', 'recepcion'],
+            CatalogoDeModulos::rolesExportacion('pagos-talleres'),
+        );
+
+        $this->assertSame(['admin', 'super-admin'], CatalogoDeModulos::rolesExportacion('alumnos'));
+    }
+
+    public function test_export_roles_fall_back_to_the_default_for_an_unknown_module(): void
+    {
+        $this->assertSame(
+            ['admin', 'super-admin'],
+            CatalogoDeModulos::rolesExportacion('modulo-inexistente'),
+        );
+    }
+
     public function test_a_route_prefix_outside_the_catalog_is_denied(): void
     {
         Route::middleware(['web', 'permiso'])
