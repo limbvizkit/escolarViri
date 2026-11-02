@@ -169,7 +169,7 @@ class UsuarioController extends Controller
     {
         $query = Rol::query();
 
-        if (Auth::user()?->rol?->slug !== 'super-admin') {
+        if (! Auth::user()?->esSuperAdmin()) {
             $query->where('slug', '!=', 'super-admin');
         }
 

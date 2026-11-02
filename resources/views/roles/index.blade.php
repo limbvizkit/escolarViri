@@ -3,11 +3,18 @@
 @section('title', 'Roles')
 
 @section('content')
+    @php
+        $puedeEscribir = auth()->user()?->puedeEscribir('roles') ?? false;
+        $puedeEliminar = auth()->user()?->puedeEliminar('roles') ?? false;
+    @endphp
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="ip-muted mb-0">Gestión de roles de acceso</p>
-        <a href="{{ route('roles.create') }}" class="btn ip-btn">
-            <i class="bi bi-plus-lg me-1"></i>Nuevo rol
-        </a>
+        @if ($puedeEscribir)
+            <a href="{{ route('roles.create') }}" class="btn ip-btn">
+                <i class="bi bi-plus-lg me-1"></i>Nuevo rol
+            </a>
+        @endif
     </div>
 
     @include('partials.table-filters', [
@@ -44,17 +51,21 @@
                                     <a href="{{ route('roles.show', $rol) }}" class="ip-action" title="Ver">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('roles.edit', $rol) }}" class="ip-action" title="Editar">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <form action="{{ route('roles.destroy', $rol) }}" method="POST" class="d-inline"
-                                          onsubmit="return confirm('¿Seguro que deseas eliminar este rol?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="ip-action ip-action-danger" title="Eliminar">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    @if ($puedeEscribir)
+                                        <a href="{{ route('roles.edit', $rol) }}" class="ip-action" title="Editar">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    @endif
+                                    @if ($puedeEliminar)
+                                        <form action="{{ route('roles.destroy', $rol) }}" method="POST" class="d-inline"
+                                              onsubmit="return confirm('¿Seguro que deseas eliminar este rol?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="ip-action ip-action-danger" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

@@ -31,84 +31,26 @@
             </button>
         </div>
 
+        @php
+            $usuarioSidebar = auth()->user();
+            $modulosSidebar = $usuarioSidebar?->modulosVisibles() ?? collect();
+            $iconosSidebar = collect(config('modulos.modulos'))->pluck('icono', 'clave');
+        @endphp
+
         <nav class="ip-nav">
-            <div class="ip-nav-title">Principal</div>
-            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
-            </a>
-
-            <div class="ip-nav-title">Administrativo</div>
-            <a href="{{ route('pagos.index') }}" class="{{ request()->routeIs('pagos.*') ? 'active' : '' }}">
-                <i class="bi bi-cash-coin"></i><span>Pagos</span>
-            </a>
-            <a href="{{ route('adeudos.index') }}" class="{{ request()->routeIs('adeudos.*') ? 'active' : '' }}">
-                <i class="bi bi-cash-stack"></i><span>Adeudos</span>
-            </a>
-            <a href="{{ route('talleres.index') }}" class="{{ request()->routeIs('talleres.*') ? 'active' : '' }}">
-                <i class="bi bi-easel"></i><span>Talleres</span>
-            </a>
-            <a href="{{ route('cursos.index') }}" class="{{ request()->routeIs('cursos.*') ? 'active' : '' }}">
-                <i class="bi bi-book"></i><span>Cursos</span>
-            </a>
-            <a href="{{ route('pagos-talleres.index') }}" class="{{ request()->routeIs('pagos-talleres.*') ? 'active' : '' }}">
-                <i class="bi bi-easel2"></i><span>Pagos talleres</span>
-            </a>
-            <a href="{{ route('pagos-cursos.index') }}" class="{{ request()->routeIs('pagos-cursos.*') ? 'active' : '' }}">
-                <i class="bi bi-mortarboard"></i><span>Pagos cursos</span>
-            </a>
-            <a href="{{ route('pagos-lunch.index') }}" class="{{ request()->routeIs('pagos-lunch.*') ? 'active' : '' }}">
-                <i class="bi bi-cup-hot"></i><span>Pagos lunch</span>
-            </a>
-            <a href="{{ route('pagos-8am.index') }}" class="{{ request()->routeIs('pagos-8am.*') ? 'active' : '' }}">
-                <i class="bi bi-sunrise"></i><span>Pagos 8 AM</span>
-            </a>
-            <a href="{{ route('pagos-horarios-extendidos.index') }}" class="{{ request()->routeIs('pagos-horarios-extendidos.*') ? 'active' : '' }}">
-                <i class="bi bi-clock-history"></i><span>Pagos horario extendido</span>
-            </a>
-             <a href="{{ route('datos-facturacion.index') }}" class="{{ request()->routeIs('datos-facturacion.*') ? 'active' : '' }}">
-                <i class="bi bi-receipt"></i><span>Datos Facturación</span>
-            </a>
-            <a href="{{ route('online-payments.index') }}" class="{{ request()->routeIs('online-payments.*') ? 'active' : '' }}">
-                <i class="bi bi-credit-card"></i><span>Pagos en línea</span>
-            </a>
-
-            <div class="ip-nav-title">Catálogos</div>
-            <a href="{{ route('escuelas.index') }}" class="{{ request()->routeIs('escuelas.*') ? 'active' : '' }}">
-                <i class="bi bi-buildings-fill"></i><span>Escuelas</span>
-            </a>
-            <a href="{{ route('sucursales.index') }}" class="{{ request()->routeIs('sucursales.*') ? 'active' : '' }}">
-                <i class="bi bi-diagram-3-fill"></i><span>Sucursales</span>
-            </a>
-            <a href="{{ route('empleados.index') }}" class="{{ request()->routeIs('empleados.*') ? 'active' : '' }}">
-                <i class="bi bi-people-fill"></i><span>Empleados</span>
-            </a>
-            <a href="{{ route('grados-escolares.index') }}" class="{{ request()->routeIs('grados-escolares.*') ? 'active' : '' }}">
-                <i class="bi bi-layers-fill"></i><span>Grados Escolares</span>
-            </a>
-
-            <div class="ip-nav-title">Documentación</div>
-            <a href="{{ route('documentacion.index') }}" class="{{ request()->routeIs('documentacion.*') ? 'active' : '' }}">
-                <i class="bi bi-folder2-open"></i><span>Documentación</span>
-            </a>
-            <a href="{{ route('academic-documents.index') }}" class="{{ request()->routeIs('academic-documents.*') ? 'active' : '' }}">
-                <i class="bi bi-journal-text"></i><span>Documentación Académica</span>
-            </a>
-
-            <div class="ip-nav-title">Acceso</div>
-            <a href="{{ route('usuarios.index') }}" class="{{ request()->routeIs('usuarios.*') ? 'active' : '' }}">
-                <i class="bi bi-person-badge-fill"></i><span>Usuarios</span>
-            </a>
-            <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'active' : '' }}">
-                <i class="bi bi-shield-lock-fill"></i><span>Roles</span>
-            </a>
-
-            <div class="ip-nav-title">Académico</div>
-            <a href="{{ route('alumnos.index') }}" class="{{ request()->routeIs('alumnos.*') ? 'active' : '' }}">
-                <i class="bi bi-person-lines-fill"></i><span>Alumnos</span>
-            </a>
-            <a href="{{ route('estimulacion-temprana.index') }}" class="{{ request()->routeIs('estimulacion-temprana.*') ? 'active' : '' }}">
-                <i class="bi bi-balloon"></i><span>Estimulación Temprana</span>
-            </a>
+            @foreach ($modulosSidebar->groupBy('grupo') as $grupo => $modulosDelGrupo)
+                <div class="ip-nav-title">{{ $grupo }}</div>
+                @foreach ($modulosDelGrupo as $modulo)
+                    @php
+                        $activo = $modulo->clave === 'dashboard'
+                            ? request()->routeIs('dashboard')
+                            : request()->routeIs($modulo->prefijo.'.*');
+                    @endphp
+                    <a href="{{ route($modulo->ruta) }}" class="{{ $activo ? 'active' : '' }}">
+                        <i class="bi {{ $iconosSidebar[$modulo->clave] ?? 'bi-circle' }}"></i><span>{{ $modulo->nombre }}</span>
+                    </a>
+                @endforeach
+            @endforeach
         </nav>
     </aside>
 
