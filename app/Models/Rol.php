@@ -32,6 +32,16 @@ class Rol extends Model
         });
     }
 
+    /**
+     * The super-admin role is the anchor of the authorization bypass. Its slug
+     * must never change and it must never be deleted: either one would leave
+     * the system with no account able to administer permissions.
+     */
+    public function esProtegido(): bool
+    {
+        return $this->slug === 'super-admin';
+    }
+
     public function usuarios(): HasMany
     {
         return $this->hasMany(User::class, 'role_id');
@@ -76,7 +86,7 @@ class Rol extends Model
      */
     public function sembrarPermisosIniciales(): void
     {
-        if ($this->slug === 'super-admin' || ! Schema::hasTable('modulos')) {
+        if ($this->esProtegido() || ! Schema::hasTable('modulos')) {
             return;
         }
 

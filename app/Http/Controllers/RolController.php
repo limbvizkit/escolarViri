@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RolController extends Controller
@@ -87,10 +88,18 @@ class RolController extends Controller
 
         $validated = $this->validar($request, $rol);
 
+        $this->protegerSlug($rol, $validated['slug'] ?? null);
+
         DB::transaction(function () use ($rol, $validated, $request): void {
+            // A protected role keeps its slug even when only the name changed,
+            // because the bypass is resolved from the slug.
+            $slug = $rol->esProtegido()
+                ? $rol->slug
+                : ($validated['slug'] ?? Str::slug($validated['nombre']));
+
             $rol->update([
                 'nombre' => $validated['nombre'],
-                'slug' => $validated['slug'] ?? Str::slug($validated['nombre']),
+                'slug' => $slug,
             ]);
 
             $this->sincronizarPermisos($rol, (array) $request->input('permisos', []));
@@ -103,6 +112,8 @@ class RolController extends Controller
     public function destroy(Rol $rol): RedirectResponse
     {
         $this->autorizar('eliminar');
+
+        abort_if($rol->esProtegido(), 403, 'Forbidden');
 
         DB::transaction(function () use ($rol): void {
             $rol->permisos()->delete();
@@ -152,7 +163,7 @@ class RolController extends Controller
      */
     private function sincronizarPermisos(Rol $rol, array $payload): void
     {
-        if ($rol->slug === 'super-admin' || ! $this->actor()?->esSuperAdmin()) {
+        if ($rol->esProtegido() || ! $this->actor()?->esSuperAdmin()) {
             return;
         }
 
@@ -176,6 +187,21 @@ class RolController extends Controller
                 ],
             );
         });
+    }
+
+    /**
+     * The super-admin slug anchors the authorization bypass, so it can never
+     * be reassigned through the edit form.
+     */
+    private function protegerSlug(Rol $rol, ?string $slug): void
+    {
+        if (! $rol->esProtegido() || $slug === null || $slug === $rol->slug) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'slug' => 'El identificador del rol Super Administrador no se puede modificar.',
+        ]);
     }
 
     private function actor(): ?User

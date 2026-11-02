@@ -36,9 +36,14 @@
                             <input type="text" id="slug" name="slug"
                                    class="form-control @error('slug') is-invalid @enderror"
                                    value="{{ old('slug', $rol->slug ?? '') }}"
-                                   placeholder="Se genera automáticamente">
+                                   placeholder="Se genera automáticamente"
+                                   @disabled($editing && $rol->esProtegido())>
                             @error('slug')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                            <div class="form-text">Identificador único en minúsculas y guiones. Vacío = automático.</div>
+                            @if ($editing && $rol->esProtegido())
+                                <div class="form-text">El identificador del rol Super Administrador está protegido y no se puede modificar.</div>
+                            @else
+                                <div class="form-text">Identificador único en minúsculas y guiones. Vacío = automático.</div>
+                            @endif
                         </div>
                     </div>
                 </div>

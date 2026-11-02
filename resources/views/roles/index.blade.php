@@ -56,7 +56,7 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
                                     @endif
-                                    @if ($puedeEliminar)
+                                    @if ($puedeEliminar && ! $rol->esProtegido())
                                         <form action="{{ route('roles.destroy', $rol) }}" method="POST" class="d-inline"
                                               onsubmit="return confirm('¿Seguro que deseas eliminar este rol?')">
                                             @csrf
