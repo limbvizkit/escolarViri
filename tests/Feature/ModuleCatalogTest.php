@@ -42,6 +42,7 @@ final class ModuleCatalogTest extends TestCase
         // Simulates a stale `bootstrap/cache/config.php` that predates the
         // catalog file: `config()` cannot see it, the file on disk can.
         config(['modulos' => []]);
+        CatalogoDeModulos::olvidarDefinicion();
 
         $resultado = CatalogoDeModulos::sincronizar();
 
@@ -120,6 +121,7 @@ final class ModuleCatalogTest extends TestCase
     public function test_export_roles_are_read_from_the_definition_not_from_config(): void
     {
         config(['modulos' => []]);
+        CatalogoDeModulos::olvidarDefinicion();
 
         $this->assertSame(
             ['admin', 'super-admin', 'director', 'recepcion'],
@@ -132,6 +134,7 @@ final class ModuleCatalogTest extends TestCase
     public function test_export_roles_fall_back_to_the_default_for_an_unknown_module(): void
     {
         config(['modulos' => []]);
+        CatalogoDeModulos::olvidarDefinicion();
 
         $this->assertSame(
             ['admin', 'super-admin'],
@@ -146,6 +149,7 @@ final class ModuleCatalogTest extends TestCase
         // Proves the middleware reads the export allowlist from the definition
         // file: with config() emptied this request would be denied.
         config(['modulos' => []]);
+        CatalogoDeModulos::olvidarDefinicion();
 
         $this->actingAs($recepcion)
             ->get(route('pagos-talleres.export.excel'))
@@ -156,9 +160,23 @@ final class ModuleCatalogTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_the_sidebar_keeps_its_icons_without_cached_config(): void
+    {
+        $superAdmin = $this->usuario('super-admin');
+
+        config(['modulos' => []]);
+        CatalogoDeModulos::olvidarDefinicion();
+
+        $response = $this->actingAs($superAdmin)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('bi-cash-coin', false);
+    }
+
     public function test_a_new_role_gets_its_baseline_matrix_without_cached_config(): void
     {
         config(['modulos' => []]);
+        CatalogoDeModulos::olvidarDefinicion();
 
         $admin = Rol::factory()->state(['nombre' => 'Administrador', 'slug' => 'admin'])->create();
 

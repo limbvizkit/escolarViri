@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
 
@@ -83,8 +84,8 @@ class Rol extends Model
     }
 
     /**
-     * Persist the baseline matrix from `config('modulos.inicial')`. The
-     * super-admin role is skipped: it bypasses the matrix in code.
+     * Persist the baseline matrix from the module definition. The super-admin
+     * role is skipped: it bypasses the matrix in code.
      */
     public function sembrarPermisosIniciales(): void
     {
@@ -100,9 +101,14 @@ class Rol extends Model
 
         try {
             $inicial = CatalogoDeModulos::definicion()['inicial'];
-        } catch (Throwable) {
+        } catch (Throwable $e) {
             // Fail closed: a role created while the definition is unreadable
             // simply gets no permission rows.
+            Log::error('Could not read the module definition to seed a role baseline.', [
+                'rol_id' => $this->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return;
         }
 

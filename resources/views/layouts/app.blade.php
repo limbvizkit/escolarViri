@@ -34,7 +34,7 @@
         @php
             $usuarioSidebar = auth()->user();
             $modulosSidebar = $usuarioSidebar?->modulosVisibles() ?? collect();
-            $iconosSidebar = collect(config('modulos.modulos'))->pluck('icono', 'clave');
+            $iconosSidebar = \App\Support\CatalogoDeModulos::iconos();
         @endphp
 
         <nav class="ip-nav">

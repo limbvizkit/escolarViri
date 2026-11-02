@@ -8,6 +8,7 @@ use App\Models\Modulo;
 use App\Models\Permiso;
 use App\Models\Rol;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
 
@@ -70,13 +71,58 @@ final class CatalogoDeModulos
     {
         try {
             $definicion = self::definicion();
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            Log::error('Could not read the module definition to resolve export roles.', [
+                'modulo' => $clave,
+                'error' => $e->getMessage(),
+            ]);
+
             return [];
         }
 
         return $definicion['exportaciones'][$clave]
             ?? $definicion['exporta_default']
             ?? [];
+    }
+
+    /**
+     * Sidebar icons, read from the definition so a stale config cache cannot
+     * blank them out. Never throws: a broken definition only loses the icons.
+     *
+     * @return array<string, string>
+     */
+    public static function iconos(): array
+    {
+        try {
+            $modulos = self::definicion()['modulos'];
+
+            $iconos = [];
+
+            foreach ($modulos as $modulo) {
+                if (! is_array($modulo) || ! isset($modulo['clave'], $modulo['icono'])) {
+                    continue;
+                }
+
+                $iconos[$modulo['clave']] = (string) $modulo['icono'];
+            }
+
+            return $iconos;
+        } catch (Throwable $e) {
+            Log::error('Could not read the module definition to resolve sidebar icons.', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
+    }
+
+    /**
+     * Forget the memoized definition. Used by tests that must prove the file
+     * is read rather than a previous parse being reused.
+     */
+    public static function olvidarDefinicion(): void
+    {
+        self::$definicion = null;
     }
 
     /**
