@@ -14,6 +14,7 @@ use App\Http\Controllers\GradoEscolarController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OnlinePaymentController;
 use App\Http\Controllers\OpenpayWebhookController;
+use App\Http\Controllers\Pago8amController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PagoCursoController;
 use App\Http\Controllers\PagoHorarioExtendidoController;
@@ -47,14 +48,15 @@ Route::post('/openpay/webhook', [OpenpayWebhookController::class, 'handle'])->na
 
 /*
 |--------------------------------------------------------------------------
-| Admin / Super-admin only
+| Admin / Super-admin modules
 |
 | User management, configuration entities, bulk exports and any route not
-| explicitly granted to director, recepcion or profesor.
+| explicitly granted to other roles. Each module resolves its own permissions
+| through the `permiso` middleware.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     // Configuration entities.
     Route::resource('escuelas', EscuelaController::class);
     Route::resource('sucursales', SucursalController::class)->parameters(['sucursales' => 'sucursal']);
@@ -94,12 +96,11 @@ Route::middleware(['auth', 'role:admin|super-admin'])->group(function () {
 |--------------------------------------------------------------------------
 | Dashboard
 |
-| Allowed for admin, super-admin, director and profesor. Recepcion is not
-| granted dashboard access in the approved matrix.
+| Access controlled by the `permiso` middleware (module `dashboard`).
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|profesor'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 });
 
@@ -107,11 +108,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|profesor'])->group(f
 |--------------------------------------------------------------------------
 | Alumnos - write routes
 |
-| Allowed for admin, super-admin, director and recepcion.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::resource('alumnos', AlumnoController::class)
         ->parameters(['alumnos' => 'alumno'])
         ->except(['index', 'show']);
@@ -128,11 +129,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 |--------------------------------------------------------------------------
 | Alumnos - read routes
 |
-| Allowed for admin, super-admin, director, recepcion and profesor.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion|profesor'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('alumnos', [AlumnoController::class, 'index'])->name('alumnos.index');
     Route::get('alumnos/{alumno}', [AlumnoController::class, 'show'])->name('alumnos.show');
 });
@@ -141,11 +142,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion|profesor']
 |--------------------------------------------------------------------------
 | Estimulación Temprana - write routes
 |
-| Allowed for admin, super-admin, director and recepcion.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::resource('estimulacion-temprana', EstimulacionTempranaController::class)
         ->parameters(['estimulacion-temprana' => 'alumno'])
         ->except(['index', 'show']);
@@ -162,11 +163,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 |--------------------------------------------------------------------------
 | Estimulación Temprana - read routes
 |
-| Allowed for admin, super-admin, director, recepcion and profesor.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion|profesor'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('estimulacion-temprana', [EstimulacionTempranaController::class, 'index'])->name('estimulacion-temprana.index');
     Route::get('estimulacion-temprana/{alumno}', [EstimulacionTempranaController::class, 'show'])->name('estimulacion-temprana.show');
 });
@@ -175,11 +176,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion|profesor']
 |--------------------------------------------------------------------------
 | Pagos
 |
-| Allowed for admin, super-admin, director and recepcion.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('pagos/precargar', [PagoController::class, 'precargar'])->name('pagos.precargar');
     Route::post('pagos/precargar', [PagoController::class, 'precargarStore'])->name('pagos.precargar.store');
 
@@ -192,11 +193,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 |--------------------------------------------------------------------------
 | Pagos de talleres
 |
-| Allowed for admin, super-admin, director and recepcion.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('pagos-talleres/exportar/pdf', [PagoTallerController::class, 'exportPdf'])->name('pagos-talleres.export.pdf');
     Route::get('pagos-talleres/exportar/excel', [PagoTallerController::class, 'exportExcel'])->name('pagos-talleres.export.excel');
 
@@ -218,6 +219,13 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
         ->parameters(['pagos-lunch' => 'pagoLunch'])
         ->except(['show']);
 
+    Route::get('pagos-8am/exportar/pdf', [Pago8amController::class, 'exportPdf'])->name('pagos-8am.export.pdf');
+    Route::get('pagos-8am/exportar/excel', [Pago8amController::class, 'exportExcel'])->name('pagos-8am.export.excel');
+
+    Route::resource('pagos-8am', Pago8amController::class)
+        ->parameters(['pagos-8am' => 'pago8am'])
+        ->except(['show']);
+
     Route::get('pagos-horarios-extendidos/exportar/pdf', [PagoHorarioExtendidoController::class, 'exportPdf'])->name('pagos-horarios-extendidos.export.pdf');
     Route::get('pagos-horarios-extendidos/exportar/excel', [PagoHorarioExtendidoController::class, 'exportExcel'])->name('pagos-horarios-extendidos.export.excel');
 
@@ -230,11 +238,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 |--------------------------------------------------------------------------
 | Adeudos
 |
-| Allowed for admin, super-admin, director and recepcion.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('adeudos', [AdeudoController::class, 'index'])->name('adeudos.index');
     Route::get('adeudos/crear', [AdeudoController::class, 'create'])->name('adeudos.create');
     Route::post('adeudos', [AdeudoController::class, 'store'])->name('adeudos.store');
@@ -249,11 +257,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 |--------------------------------------------------------------------------
 | Datos Facturacion
 |
-| Allowed for admin, super-admin, director and recepcion.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('datos-facturacion', [DatoFacturacionController::class, 'index'])->name('datos-facturacion.index');
     Route::get('datos-facturacion/crear', [DatoFacturacionController::class, 'create'])->name('datos-facturacion.create');
     Route::post('datos-facturacion', [DatoFacturacionController::class, 'store'])->name('datos-facturacion.store');
@@ -266,11 +274,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 |--------------------------------------------------------------------------
 | Documentacion
 |
-| Allowed for admin, super-admin, director and recepcion.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('documentacion', [DocumentacionController::class, 'index'])->name('documentacion.index');
     Route::get('documentacion/descargar/{documento}', [DocumentacionController::class, 'descargar'])->name('documentacion.descargar');
     Route::get('documentacion/{alumno}', [DocumentacionController::class, 'show'])->name('documentacion.show');
@@ -291,11 +299,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|recepcion'])->group(
 |--------------------------------------------------------------------------
 | Talleres - write routes
 |
-| Allowed for admin, super-admin and director.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::resource('talleres', TallerController::class)
         ->parameters(['talleres' => 'taller'])
         ->except(['index', 'show']);
@@ -310,11 +318,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director'])->group(function (
 |--------------------------------------------------------------------------
 | Talleres - read routes
 |
-| Allowed for admin, super-admin, director and profesor.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|profesor'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('talleres', [TallerController::class, 'index'])->name('talleres.index');
 });
 
@@ -322,11 +330,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director|profesor'])->group(f
 |--------------------------------------------------------------------------
 | Cursos - write routes
 |
-| Allowed for admin, super-admin and director.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::resource('cursos', CursoController::class)
         ->parameters(['cursos' => 'curso'])
         ->except(['index', 'show']);
@@ -341,11 +349,11 @@ Route::middleware(['auth', 'role:admin|super-admin|director'])->group(function (
 |--------------------------------------------------------------------------
 | Cursos - read routes
 |
-| Allowed for admin, super-admin, director and profesor.
+| Access controlled by the `permiso` middleware on the related module.
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin|super-admin|director|profesor'])->group(function () {
+Route::middleware(['auth', 'permiso'])->group(function () {
     Route::get('cursos', [CursoController::class, 'index'])->name('cursos.index');
 });
 

@@ -278,4 +278,36 @@ class PagoTest extends TestCase
         $response->assertSee('Desea desbloquear los campos?', false);
         $response->assertSee('data-bloqueado="1"', false);
     }
+
+    public function test_el_campo_entrada_8am_esta_bloqueado_en_el_modulo_de_pagos(): void
+    {
+        $grado = GradoEscolar::create(['nombre' => 'Primaria', 'slug' => 'primaria']);
+        $alumno = Alumno::create([
+            'grado_escolar_id' => $grado->id,
+            'nombre' => 'Ana',
+            'apellido_paterno' => 'Garcia',
+        ]);
+
+        Pago::create([
+            'alumno_id' => $alumno->id,
+            'mes' => now()->format('Y-m'),
+            'entrada_8am' => 150,
+        ]);
+
+        $user = User::factory()->admin()->create();
+
+        $create = $this->actingAs($user)->get(route('pagos.create'));
+        $create->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/<input[^>]*name="entrada_8am"[^>]*disabled[^>]*data-bloqueado="1"/s',
+            $create->getContent()
+        );
+
+        $index = $this->actingAs($user)->get(route('pagos.index'));
+        $index->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/<input[^>]*name="entrada_8am"[^>]*data-bloqueado="1"/s',
+            $index->getContent()
+        );
+    }
 }

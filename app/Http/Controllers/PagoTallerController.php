@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\PagoTallerExport;
 use App\Models\Alumno;
+use App\Models\FormaPago;
 use App\Models\Pago;
 use App\Models\PagoTaller;
 use App\Models\Taller;
@@ -61,6 +62,10 @@ class PagoTallerController extends Controller
     {
         $validated = $request->validate($this->reglas($request), $this->mensajes());
 
+        if (! array_key_exists('forma_pago_id', $validated)) {
+            $validated['forma_pago_id'] = FormaPago::efectivoId();
+        }
+
         DB::transaction(function () use ($validated) {
             $pagoTaller = PagoTaller::create($validated);
 
@@ -86,6 +91,10 @@ class PagoTallerController extends Controller
         $this->authorize('update', $pagoTaller);
 
         $validated = $request->validate($this->reglas($request), $this->mensajes());
+
+        if (! array_key_exists('forma_pago_id', $validated)) {
+            $validated['forma_pago_id'] = FormaPago::efectivoId();
+        }
 
         $alumnoAnterior = (int) $pagoTaller->alumno_id;
         $mesAnterior = $pagoTaller->mes;
@@ -156,11 +165,13 @@ class PagoTallerController extends Controller
     /**
      * Datos compartidos por el formulario de alta y edición.
      *
-     * @return array{alumnos: Collection, talleresPorAlumno: array}
+     * @return array{alumnos: Collection, talleresPorAlumno: array, formasPago: Collection}
      */
     private function datosFormulario(): array
     {
         $alumnos = Alumno::with('gradoEscolar')->orderBy('apellido_paterno')->get();
+
+        $formasPago = FormaPago::active()->orderBy('nombre')->get();
 
         // Mapa alumno_id => [{ id, nombre }, ...] con solo los talleres en los
         // que el alumno está inscrito, para limitar el listado del formulario.
@@ -175,12 +186,12 @@ class PagoTallerController extends Controller
                 ->all())
             ->all();
 
-        return compact('alumnos', 'talleresPorAlumno');
+        return compact('alumnos', 'talleresPorAlumno', 'formasPago');
     }
 
     private function filteredQuery(Request $request): Builder
     {
-        $query = PagoTaller::with(['alumno.gradoEscolar', 'taller']);
+        $query = PagoTaller::with(['alumno.gradoEscolar', 'taller', 'formaPago']);
 
         if ($request->filled('q')) {
             $query->search($request->input('q'));
@@ -214,6 +225,7 @@ class PagoTallerController extends Controller
             'mes' => ['required', 'regex:/^\d{4}-\d{2}$/'],
             'monto' => ['required', 'numeric', 'min:0.01'],
             'observaciones' => ['nullable', 'string', 'max:1000'],
+            'forma_pago_id' => ['nullable', 'exists:formas_pago,id'],
         ];
     }
 

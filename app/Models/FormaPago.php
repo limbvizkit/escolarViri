@@ -24,6 +24,11 @@ class FormaPago extends Model
         return $this->hasMany(Pago::class);
     }
 
+    public static function efectivoId(): ?int
+    {
+        return static::where('nombre', 'Efectivo')->value('id');
+    }
+
     public function scopeSearch($query, ?string $busqueda)
     {
         if ($busqueda === null || trim($busqueda) === '') {

@@ -12,22 +12,22 @@ trait HasRoleChecks
 {
     private function hasDocumentAccess(User $user): bool
     {
-        return in_array($user->rol?->slug, ['admin', 'super-admin', 'director', 'recepcion'], true);
+        return $user->puedeVer('documentacion');
     }
 
     private function hasPaymentAccess(User $user): bool
     {
-        return in_array($user->rol?->slug, ['admin', 'super-admin', 'director', 'recepcion'], true);
+        return $user->puedeVer('pagos');
     }
 
     private function hasDebtAccess(User $user): bool
     {
-        return in_array($user->rol?->slug, ['admin', 'super-admin', 'director', 'recepcion'], true);
+        return $user->puedeVer('adeudos');
     }
 
     private function hasWorkshopAccess(User $user): bool
     {
-        return in_array($user->rol?->slug, ['admin', 'super-admin', 'director'], true);
+        return $user->puedeVer('talleres');
     }
 
     private function alumnoIsActive(?Alumno $alumno): bool
@@ -37,11 +37,11 @@ trait HasRoleChecks
 
     private function isUserManager(User $user): bool
     {
-        return in_array($user->rol?->slug, ['admin', 'super-admin'], true);
+        return $user->puedeVer('usuarios');
     }
 
     private function isSuperAdmin(User $user): bool
     {
-        return $user->rol?->slug === 'super-admin';
+        return $user->esSuperAdmin();
     }
 }

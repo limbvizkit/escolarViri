@@ -19,7 +19,7 @@ class PagoHorarioExtendidoExport implements FromQuery, ShouldAutoSize, WithHeadi
 
     public function headings(): array
     {
-        return ['#', 'Alumno', 'Grado', 'Horario extendido', 'Mes', 'Monto', 'Observaciones', 'Registrado'];
+        return ['#', 'Alumno', 'Grado', 'Horario extendido', 'Mes', 'Monto', 'Forma de pago', 'Observaciones', 'Registrado'];
     }
 
     public function map($pago): array
@@ -31,6 +31,7 @@ class PagoHorarioExtendidoExport implements FromQuery, ShouldAutoSize, WithHeadi
             $pago->horarioExtendido->nombre ?? '',
             $pago->mes_label,
             (float) $pago->monto,
+            $pago->formaPago->nombre ?? '',
             $pago->observaciones ?? '',
             $pago->created_at?->format('d/m/Y H:i') ?? '',
         ];

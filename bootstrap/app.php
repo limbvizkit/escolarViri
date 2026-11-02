@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\AuthorizeRole;
+use App\Http\Middleware\EnsureModulePermission;
 use App\Http\Middleware\EnsurePortalPasswordChangeCompleted;
 use App\Http\Middleware\EnsurePortalPasswordChangeRequired;
 use Illuminate\Foundation\Application;
@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'role' => AuthorizeRole::class,
+            'permiso' => EnsureModulePermission::class,
             'portal.password.change' => EnsurePortalPasswordChangeRequired::class,
             'portal.password.changed' => EnsurePortalPasswordChangeCompleted::class,
         ]);

@@ -60,7 +60,7 @@ final class UserPolicy
     public function assignRole(User $actor, Rol $rol): bool
     {
         if ($rol->slug === 'super-admin') {
-            return $this->isSuperAdmin($actor);
+            return $actor->esSuperAdmin();
         }
 
         return $this->isUserManager($actor);

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Alumno;
 use App\Models\Curso;
 use App\Models\CursoAlumno;
+use App\Models\FormaPago;
 use App\Models\Pago;
 use App\Models\PagoCurso;
 use App\Models\User;
@@ -85,6 +86,30 @@ class PagoCursoTest extends TestCase
         ]);
 
         $this->assertNotNull(PagoCurso::first()->created_at);
+    }
+
+    public function test_guarda_efectivo_por_defecto_como_forma_de_pago(): void
+    {
+        $user = User::factory()->admin()->create();
+        $alumno = Alumno::factory()->create();
+        $curso = Curso::create(['nombre' => 'Música', 'costo' => 300]);
+        $this->inscribir($alumno, $curso);
+        $efectivo = FormaPago::create(['nombre' => 'Efectivo']);
+
+        $this->actingAs($user)->post(route('pagos-cursos.store'), [
+            'alumno_id' => $alumno->id,
+            'curso_id' => $curso->id,
+            'mes' => '2026-04',
+            'monto' => '300',
+            'observaciones' => 'Abril',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('pagos_cursos', [
+            'alumno_id' => $alumno->id,
+            'curso_id' => $curso->id,
+            'mes' => '2026-04',
+            'forma_pago_id' => $efectivo->id,
+        ]);
     }
 
     public function test_rechaza_un_curso_no_inscrito_para_el_alumno(): void
@@ -241,5 +266,23 @@ class PagoCursoTest extends TestCase
 
         $this->actingAs($user)->get(route('pagos-cursos.index'))->assertForbidden();
         $this->actingAs($user)->get(route('pagos-cursos.create'))->assertForbidden();
+    }
+
+    public function test_formulario_preselecciona_efectivo_por_defecto(): void
+    {
+        $user = User::factory()->admin()->create();
+        $efectivo = FormaPago::create(['nombre' => 'Efectivo']);
+
+        $response = $this->actingAs($user)->get(route('pagos-cursos.create'));
+
+        $response->assertOk();
+
+        $html = preg_replace('/\s+/', ' ', (string) $response->getContent());
+
+        $this->assertStringContainsString(
+            'value="'.$efectivo->id.'" selected',
+            $html,
+            'El formulario debe preseleccionar Efectivo por defecto.'
+        );
     }
 }

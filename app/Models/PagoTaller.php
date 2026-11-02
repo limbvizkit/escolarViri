@@ -18,6 +18,7 @@ class PagoTaller extends Model
         'mes',
         'monto',
         'observaciones',
+        'forma_pago_id',
     ];
 
     protected function casts(): array
@@ -35,6 +36,11 @@ class PagoTaller extends Model
     public function taller(): BelongsTo
     {
         return $this->belongsTo(Taller::class);
+    }
+
+    public function formaPago(): BelongsTo
+    {
+        return $this->belongsTo(FormaPago::class);
     }
 
     public function getMesLabelAttribute(): string

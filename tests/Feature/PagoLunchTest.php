@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Alumno;
+use App\Models\FormaPago;
 use App\Models\Pago;
 use App\Models\PagoLunch;
 use App\Models\User;
@@ -61,6 +62,39 @@ class PagoLunchTest extends TestCase
             'alumno_id' => $alumno->id,
             'mes' => '2026-06',
             'lunch' => '300.00',
+        ]);
+    }
+
+    public function test_guarda_efectivo_por_defecto_como_forma_de_pago(): void
+    {
+        $user = User::factory()->admin()->create();
+        $alumno = Alumno::factory()->create();
+        $efectivo = FormaPago::create(['nombre' => 'Efectivo']);
+        $transferencia = FormaPago::create(['nombre' => 'Transferencia']);
+
+        $this->actingAs($user)->post(route('pagos-lunch.store'), [
+            'alumno_id' => $alumno->id,
+            'mes' => '2026-07',
+            'monto' => '300',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('pagos_lunch', [
+            'alumno_id' => $alumno->id,
+            'mes' => '2026-07',
+            'forma_pago_id' => $efectivo->id,
+        ]);
+
+        $this->actingAs($user)->post(route('pagos-lunch.store'), [
+            'alumno_id' => $alumno->id,
+            'mes' => '2026-08',
+            'monto' => '300',
+            'forma_pago_id' => $transferencia->id,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('pagos_lunch', [
+            'alumno_id' => $alumno->id,
+            'mes' => '2026-08',
+            'forma_pago_id' => $transferencia->id,
         ]);
     }
 
@@ -136,5 +170,23 @@ class PagoLunchTest extends TestCase
 
         $this->actingAs($user)->get(route('pagos-lunch.index'))->assertForbidden();
         $this->actingAs($user)->get(route('pagos-lunch.create'))->assertForbidden();
+    }
+
+    public function test_formulario_preselecciona_efectivo_por_defecto(): void
+    {
+        $user = User::factory()->admin()->create();
+        $efectivo = FormaPago::create(['nombre' => 'Efectivo']);
+
+        $response = $this->actingAs($user)->get(route('pagos-lunch.create'));
+
+        $response->assertOk();
+
+        $html = preg_replace('/\s+/', ' ', (string) $response->getContent());
+
+        $this->assertStringContainsString(
+            'value="'.$efectivo->id.'" selected',
+            $html,
+            'El formulario debe preseleccionar Efectivo por defecto.'
+        );
     }
 }
