@@ -131,10 +131,46 @@ final class ModuleCatalogTest extends TestCase
 
     public function test_export_roles_fall_back_to_the_default_for_an_unknown_module(): void
     {
+        config(['modulos' => []]);
+
         $this->assertSame(
             ['admin', 'super-admin'],
             CatalogoDeModulos::rolesExportacion('modulo-inexistente'),
         );
+    }
+
+    public function test_a_staff_role_can_export_a_payment_submodule_without_cached_config(): void
+    {
+        $recepcion = $this->usuario('recepcion');
+
+        // Proves the middleware reads the export allowlist from the definition
+        // file: with config() emptied this request would be denied.
+        config(['modulos' => []]);
+
+        $this->actingAs($recepcion)
+            ->get(route('pagos-talleres.export.excel'))
+            ->assertOk();
+
+        $this->actingAs($recepcion)
+            ->get(route('alumnos.export.excel'))
+            ->assertForbidden();
+    }
+
+    public function test_a_new_role_gets_its_baseline_matrix_without_cached_config(): void
+    {
+        config(['modulos' => []]);
+
+        $admin = Rol::factory()->state(['nombre' => 'Administrador', 'slug' => 'admin'])->create();
+
+        $escuelas = Modulo::query()->where('clave', 'escuelas')->firstOrFail();
+
+        $permiso = Permiso::query()
+            ->where('rol_id', $admin->id)
+            ->where('modulo_id', $escuelas->id)
+            ->firstOrFail();
+
+        $this->assertTrue($permiso->puede_ver);
+        $this->assertTrue($permiso->puede_escribir);
     }
 
     public function test_a_route_prefix_outside_the_catalog_is_denied(): void

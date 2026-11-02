@@ -9,6 +9,7 @@ use App\Models\Permiso;
 use App\Models\Rol;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Throwable;
 
 /**
  * Single implementation of "make the module catalog and the initial permission
@@ -69,7 +70,7 @@ final class CatalogoDeModulos
     {
         try {
             $definicion = self::definicion();
-        } catch (RuntimeException) {
+        } catch (Throwable) {
             return [];
         }
 

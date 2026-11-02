@@ -102,7 +102,7 @@ class EnsureModulePermission
                 'user_id' => $user->getKey(),
             ]);
 
-            abort(403, 'This module is not registered in the permission catalog.');
+            abort(403, 'Forbidden');
         }
 
         // Bulk exports are an administrative capability, not a module action:

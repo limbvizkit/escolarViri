@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\CatalogoDeModulos;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class Rol extends Model
 {
@@ -96,11 +98,19 @@ class Rol extends Model
             return;
         }
 
+        try {
+            $inicial = CatalogoDeModulos::definicion()['inicial'];
+        } catch (Throwable) {
+            // Fail closed: a role created while the definition is unreadable
+            // simply gets no permission rows.
+            return;
+        }
+
         $now = now();
         $filas = [];
 
         foreach ($modulos as $clave => $moduloId) {
-            $acciones = config('modulos.inicial.'.$clave, []);
+            $acciones = $inicial[$clave] ?? [];
 
             $filas[] = [
                 'rol_id' => $this->id,
