@@ -19,7 +19,7 @@ class Pago8amExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapp
 
     public function headings(): array
     {
-        return ['#', 'Alumno', 'Grado', 'Mes', 'Monto', 'Observaciones', 'Registrado'];
+        return ['#', 'Alumno', 'Grado', 'Mes', 'Monto', 'Forma de pago', 'Observaciones', 'Registrado'];
     }
 
     public function map($pago): array
@@ -30,6 +30,7 @@ class Pago8amExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapp
             $pago->alumno->gradoEscolar->nombre ?? '',
             $pago->mes_label,
             (float) $pago->monto,
+            $pago->formaPago->nombre ?? '',
             $pago->observaciones ?? '',
             $pago->created_at?->format('d/m/Y H:i') ?? '',
         ];

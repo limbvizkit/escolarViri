@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\Pago8amExport;
 use App\Models\Alumno;
+use App\Models\FormaPago;
 use App\Models\Pago;
 use App\Models\Pago8am;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -53,12 +54,17 @@ class Pago8amController extends Controller
         return view('pagos-8am.create', [
             'alumnos' => Alumno::with('gradoEscolar')->orderBy('apellido_paterno')->get(),
             'registrosExistentes' => $this->registrosExistentes(),
+            'formasPago' => FormaPago::active()->orderBy('nombre')->get(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate($this->reglas(), $this->mensajes());
+
+        if (! array_key_exists('forma_pago_id', $validated)) {
+            $validated['forma_pago_id'] = FormaPago::efectivoId();
+        }
 
         DB::transaction(function () use ($validated) {
             $pago8am = Pago8am::create($validated);
@@ -78,6 +84,7 @@ class Pago8amController extends Controller
             'pago8am' => $pago8am,
             'alumnos' => Alumno::with('gradoEscolar')->orderBy('apellido_paterno')->get(),
             'registrosExistentes' => [],
+            'formasPago' => FormaPago::active()->orderBy('nombre')->get(),
         ]);
     }
 
@@ -86,6 +93,10 @@ class Pago8amController extends Controller
         $this->authorize('update', $pago8am);
 
         $validated = $request->validate($this->reglas(), $this->mensajes());
+
+        if (! array_key_exists('forma_pago_id', $validated)) {
+            $validated['forma_pago_id'] = FormaPago::efectivoId();
+        }
 
         $alumnoAnterior = (int) $pago8am->alumno_id;
         $mesAnterior = $pago8am->mes;
@@ -169,7 +180,7 @@ class Pago8amController extends Controller
 
     private function filteredQuery(Request $request): Builder
     {
-        $query = Pago8am::with(['alumno.gradoEscolar']);
+        $query = Pago8am::with(['alumno.gradoEscolar', 'formaPago']);
 
         if ($request->filled('q')) {
             $query->search($request->input('q'));
@@ -194,6 +205,7 @@ class Pago8amController extends Controller
             'mes' => ['required', 'regex:/^\d{4}-\d{2}$/'],
             'monto' => ['required', 'numeric', 'min:0.01'],
             'observaciones' => ['nullable', 'string', 'max:1000'],
+            'forma_pago_id' => ['nullable', 'exists:formas_pago,id'],
         ];
     }
 

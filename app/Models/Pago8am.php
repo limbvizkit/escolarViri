@@ -17,6 +17,7 @@ class Pago8am extends Model
         'mes',
         'monto',
         'observaciones',
+        'forma_pago_id',
     ];
 
     protected function casts(): array
@@ -29,6 +30,11 @@ class Pago8am extends Model
     public function alumno(): BelongsTo
     {
         return $this->belongsTo(Alumno::class);
+    }
+
+    public function formaPago(): BelongsTo
+    {
+        return $this->belongsTo(FormaPago::class);
     }
 
     public function getMesLabelAttribute(): string

@@ -18,6 +18,7 @@ class PagoHorarioExtendido extends Model
         'mes',
         'monto',
         'observaciones',
+        'forma_pago_id',
     ];
 
     protected function casts(): array
@@ -35,6 +36,11 @@ class PagoHorarioExtendido extends Model
     public function horarioExtendido(): BelongsTo
     {
         return $this->belongsTo(HorarioExtendido::class);
+    }
+
+    public function formaPago(): BelongsTo
+    {
+        return $this->belongsTo(FormaPago::class);
     }
 
     public function getMesLabelAttribute(): string

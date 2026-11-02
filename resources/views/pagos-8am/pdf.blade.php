@@ -109,6 +109,7 @@
                 <th>Grado</th>
                 <th>Mes</th>
                 <th class="num">Monto</th>
+                <th>Forma de pago</th>
                 <th>Observaciones</th>
                 <th>Registrado</th>
             </tr>
@@ -121,12 +122,13 @@
                     <td>{{ $pago->alumno->gradoEscolar->nombre ?? '—' }}</td>
                     <td>{{ $pago->mes_label }}</td>
                     <td class="num">${{ number_format((float) $pago->monto, 2) }}</td>
+                    <td>{{ $pago->formaPago->nombre ?? '—' }}</td>
                     <td>{{ $pago->observaciones ?? '—' }}</td>
                     <td>{{ $pago->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="empty">Sin registros</td>
+                    <td colspan="8" class="empty">Sin registros</td>
                 </tr>
             @endforelse
         </tbody>

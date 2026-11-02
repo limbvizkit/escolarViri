@@ -6,6 +6,7 @@ use App\Exports\PagoCursoExport;
 use App\Models\Alumno;
 use App\Models\Curso;
 use App\Models\CursoAlumno;
+use App\Models\FormaPago;
 use App\Models\Pago;
 use App\Models\PagoCurso;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -62,6 +63,10 @@ class PagoCursoController extends Controller
     {
         $validated = $request->validate($this->reglas($request), $this->mensajes());
 
+        if (! array_key_exists('forma_pago_id', $validated)) {
+            $validated['forma_pago_id'] = FormaPago::efectivoId();
+        }
+
         DB::transaction(function () use ($validated) {
             $pagoCurso = PagoCurso::create($validated);
 
@@ -87,6 +92,10 @@ class PagoCursoController extends Controller
         $this->authorize('update', $pagoCurso);
 
         $validated = $request->validate($this->reglas($request), $this->mensajes());
+
+        if (! array_key_exists('forma_pago_id', $validated)) {
+            $validated['forma_pago_id'] = FormaPago::efectivoId();
+        }
 
         $alumnoAnterior = (int) $pagoCurso->alumno_id;
         $mesAnterior = $pagoCurso->mes;
@@ -157,11 +166,13 @@ class PagoCursoController extends Controller
     /**
      * Datos compartidos por el formulario de alta y edición.
      *
-     * @return array{alumnos: Collection, cursosPorAlumno: array}
+     * @return array{alumnos: Collection, cursosPorAlumno: array, formasPago: Collection}
      */
     private function datosFormulario(): array
     {
         $alumnos = Alumno::with('gradoEscolar')->orderBy('apellido_paterno')->get();
+
+        $formasPago = FormaPago::active()->orderBy('nombre')->get();
 
         // Mapa alumno_id => [{ id, nombre }, ...] con solo los cursos en los
         // que el alumno está inscrito, para limitar el listado del formulario.
@@ -176,12 +187,12 @@ class PagoCursoController extends Controller
                 ->all())
             ->all();
 
-        return compact('alumnos', 'cursosPorAlumno');
+        return compact('alumnos', 'cursosPorAlumno', 'formasPago');
     }
 
     private function filteredQuery(Request $request): Builder
     {
-        $query = PagoCurso::with(['alumno.gradoEscolar', 'curso']);
+        $query = PagoCurso::with(['alumno.gradoEscolar', 'curso', 'formaPago']);
 
         if ($request->filled('q')) {
             $query->search($request->input('q'));
@@ -215,6 +226,7 @@ class PagoCursoController extends Controller
             'mes' => ['required', 'regex:/^\d{4}-\d{2}$/'],
             'monto' => ['required', 'numeric', 'min:0.01'],
             'observaciones' => ['nullable', 'string', 'max:1000'],
+            'forma_pago_id' => ['nullable', 'exists:formas_pago,id'],
         ];
     }
 

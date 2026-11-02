@@ -7,6 +7,7 @@
 
     $alumnoSeleccionado = (string) old('alumno_id', $pagoTaller->alumno_id ?? '');
     $tallerSeleccionado = (string) old('taller_id', $pagoTaller->taller_id ?? '');
+    $formaPagoSeleccionada = (string) old('forma_pago_id', $pagoTaller->forma_pago_id ?? ($editing ? '' : $formasPago->firstWhere('nombre', 'Efectivo')?->id));
     $talleresSeleccionables = $talleresPorAlumno[$alumnoSeleccionado] ?? [];
 @endphp
 
@@ -84,6 +85,21 @@
                                            value="{{ old('monto', $pagoTaller->monto ?? '') }}" required>
                                 </div>
                                 @error('monto')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-5">
+                                <label for="forma_pago_id" class="form-label">Forma de pago</label>
+                                <select id="forma_pago_id" name="forma_pago_id"
+                                        class="form-select @error('forma_pago_id') is-invalid @enderror">
+                                    <option value="">— Sin forma —</option>
+                                    @foreach ($formasPago as $forma)
+                                        <option value="{{ $forma->id }}"
+                                            {{ $formaPagoSeleccionada === (string) $forma->id ? 'selected' : '' }}>
+                                            {{ $forma->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('forma_pago_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
                         </div>
 

@@ -41,6 +41,7 @@
                         <x-sortable field="taller_id" label="Taller" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="mes" label="Mes" :current="request('sort')" :direction="request('direction')" />
                         <x-sortable field="monto" label="Monto pagado" :current="request('sort')" :direction="request('direction')" />
+                        <th>Forma de pago</th>
                         <th>Observaciones</th>
                         <x-sortable field="created_at" label="Registrado" :current="request('sort')" :direction="request('direction')" />
                         <th class="text-end">Acciones</th>
@@ -61,6 +62,7 @@
                             <td>{{ $pago->taller->nombre ?? '—' }}</td>
                             <td>{{ $pago->mes_label }}</td>
                             <td class="text-end">{{ '$' . number_format((float) $pago->monto, 2) }}</td>
+                            <td>{{ $pago->formaPago->nombre ?? '—' }}</td>
                             <td class="ip-muted">{{ Str::limit($pago->observaciones ?? '', 60) ?: '—' }}</td>
                             <td>{{ $pago->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
                             <td class="text-end">
@@ -81,7 +83,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center ip-muted py-4">
+                            <td colspan="9" class="text-center ip-muted py-4">
                                 No hay pagos de talleres registrados.
                                 <a href="{{ route('pagos-talleres.create') }}" class="d-block mt-2">Registrar el primero</a>
                             </td>
