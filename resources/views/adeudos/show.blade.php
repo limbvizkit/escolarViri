@@ -33,6 +33,14 @@
                                 <div class="ip-detail-label">CONCEPTO</div>
                                 <div class="ip-detail-value">{{ $adeudo->concepto }}</div>
                             </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">MES</div>
+                                <div class="ip-detail-value">{{ $adeudo->mes_nombre }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="ip-detail-label">AÑO</div>
+                                <div class="ip-detail-value">{{ $adeudo->anio ?? '—' }}</div>
+                            </div>
                             <div class="col-md-6">
                                 <div class="ip-detail-label">ANOTACIONES</div>
                                 <div class="ip-detail-value">{{ $adeudo->anotaciones ?? '—' }}</div>
@@ -100,6 +108,26 @@
                                        class="form-control @error('concepto') is-invalid @enderror"
                                        value="{{ old('concepto', $adeudo->concepto) }}" required>
                                 @error('concepto')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="mes" class="form-label">Mes</label>
+                                <select id="mes" name="mes"
+                                        class="form-select @error('mes') is-invalid @enderror">
+                                    <option value="">Selecciona un mes</option>
+                                    @foreach (\App\Models\Adeudo::MESES as $numero => $nombre)
+                                        <option value="{{ $numero }}" @selected((string) old('mes', $adeudo->mes) === (string) $numero)>{{ $nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('mes')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="anio" class="form-label">Año</label>
+                                <input type="number" id="anio" name="anio" min="2000" max="2099" step="1" inputmode="numeric"
+                                       class="form-control @error('anio') is-invalid @enderror"
+                                       value="{{ old('anio', $adeudo->anio) }}">
+                                @error('anio')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-6">

@@ -18,11 +18,28 @@ class Adeudo extends Model
 
     public const ESTATUS_PAGADO = 'pagado';
 
+    public const MESES = [
+        1 => 'Enero',
+        2 => 'Febrero',
+        3 => 'Marzo',
+        4 => 'Abril',
+        5 => 'Mayo',
+        6 => 'Junio',
+        7 => 'Julio',
+        8 => 'Agosto',
+        9 => 'Septiembre',
+        10 => 'Octubre',
+        11 => 'Noviembre',
+        12 => 'Diciembre',
+    ];
+
     protected $table = 'adeudos';
 
     protected $fillable = [
         'alumno_id',
         'concepto',
+        'mes',
+        'anio',
         'anotaciones',
         'monto',
         'monto_pagado',
@@ -36,6 +53,8 @@ class Adeudo extends Model
         return [
             'monto' => 'decimal:2',
             'monto_pagado' => 'decimal:2',
+            'mes' => 'integer',
+            'anio' => 'integer',
             'estatus' => 'string',
             'estatus_id' => 'integer',
         ];
@@ -76,6 +95,11 @@ class Adeudo extends Model
     public function getEstatusEsActivoAttribute(): bool
     {
         return $this->estatus_id === Estatus::ACTIVO;
+    }
+
+    public function getMesNombreAttribute(): string
+    {
+        return self::MESES[$this->mes] ?? '—';
     }
 
     public function getPendienteAttribute(): float

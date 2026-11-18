@@ -7,7 +7,7 @@
         <p class="ip-muted mb-0">Adeudos y abonos por alumno</p>
         <div class="d-flex gap-2">
             @php
-                $exportQuery = array_filter(request()->only(['q', 'estatus', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
+                $exportQuery = array_filter(request()->only(['q', 'estatus', 'mes', 'anio', 'sort', 'direction']), fn ($v) => $v !== null && $v !== '');
             @endphp
             <a href="{{ route('adeudos.export.pdf', $exportQuery) }}" class="btn ip-btn-danger btn-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i>PDF
@@ -39,6 +39,8 @@
                         <th>#</th>
                         <th>Alumno</th>
                         <th>Concepto</th>
+                        <th>Mes</th>
+                        <th>Año</th>
                         <th>Anotaciones</th>
                         <th class="text-end">Monto</th>
                         <th class="text-end">Abonado</th>
@@ -60,6 +62,8 @@
                                 </span>
                             </td>
                             <td>{{ $adeudo->concepto }}</td>
+                            <td>{{ $adeudo->mes_nombre }}</td>
+                            <td>{{ $adeudo->anio ?? '—' }}</td>
                             <td class="ip-muted">{{ Str::limit($adeudo->anotaciones ?? '', 60) ?: '—' }}</td>
                             <td class="text-end">{{ '$' . number_format((float) $adeudo->monto, 2) }}</td>
                             <td class="text-end">{{ '$' . number_format((float) $adeudo->monto_pagado, 2) }}</td>
@@ -98,7 +102,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center ip-muted py-4">
+                            <td colspan="11" class="text-center ip-muted py-4">
                                 No hay adeudos registrados.
                                 <a href="{{ route('adeudos.create') }}" class="d-block mt-2">Registrar el primero</a>
                             </td>

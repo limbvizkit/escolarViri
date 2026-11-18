@@ -36,6 +36,46 @@
             font-size: 10px;
         }
 
+        .brand {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .brand td {
+            padding: 0;
+            border-bottom: 0;
+            vertical-align: middle;
+            background-color: transparent;
+        }
+
+        .brand-logo {
+            width: 74px;
+            padding-right: 10px;
+        }
+
+        .brand-logo img {
+            height: 46px;
+        }
+
+        .brand-title h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .brand-title p {
+            margin: 2px 0 0;
+            color: #6c757d;
+            font-size: 10px;
+        }
+
+        .generated {
+            margin: 8px 0 0;
+            color: #6c757d;
+            font-size: 10px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -97,8 +137,18 @@
     </div>
 
     <div class="header">
-        <h1>Listado de adeudos</h1>
-        <p>Generado el {{ now()->format('d/m/Y H:i') }}</p>
+        <table class="brand">
+            <tr>
+                <td class="brand-logo">
+                    <img src="{{ public_path('img/logo-print.jpg') }}" alt="Learning Play House">
+                </td>
+                <td class="brand-title">
+                    <h1>Learning Play House</h1>
+                    <p>Listado de adeudos</p>
+                </td>
+            </tr>
+        </table>
+        <p class="generated">Generado el {{ now()->format('d/m/Y H:i') }}</p>
     </div>
 
     <table>
@@ -107,6 +157,8 @@
                 <th>#</th>
                 <th>Alumno</th>
                 <th>Concepto</th>
+                <th>Mes</th>
+                <th>Año</th>
                 <th class="num">Monto</th>
                 <th class="num">Abonado</th>
                 <th class="num">Pendiente</th>
@@ -122,6 +174,8 @@
                     <td>{{ $adeudo->id }}</td>
                     <td>{{ $adeudo->alumno->nombre_completo ?? '—' }}</td>
                     <td>{{ $adeudo->concepto }}</td>
+                    <td>{{ $adeudo->mes_nombre }}</td>
+                    <td>{{ $adeudo->anio ?? '—' }}</td>
                     <td class="num">${{ number_format((float) $adeudo->monto, 2) }}</td>
                     <td class="num">${{ number_format((float) $adeudo->monto_pagado, 2) }}</td>
                     <td class="num">${{ number_format($pendiente, 2) }}</td>
@@ -129,7 +183,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="empty">Sin registros</td>
+                    <td colspan="9" class="empty">Sin registros</td>
                 </tr>
             @endforelse
         </tbody>

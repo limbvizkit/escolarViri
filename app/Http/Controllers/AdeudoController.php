@@ -30,7 +30,21 @@ class AdeudoController extends Controller
             'id',
         );
 
+        $anios = Adeudo::query()
+            ->whereNotNull('anio')
+            ->distinct()
+            ->orderByDesc('anio')
+            ->pluck('anio')
+            ->mapWithKeys(fn ($anio) => [$anio => $anio])
+            ->all();
+
+        if ($anios === []) {
+            $anios = [now()->year => now()->year];
+        }
+
         $filtros = [
+            ['name' => 'mes', 'label' => 'Mes', 'options' => Adeudo::MESES],
+            ['name' => 'anio', 'label' => 'Año', 'options' => $anios],
             ['name' => 'estatus', 'label' => 'Estatus', 'options' => [
                 'pendiente' => 'Pendiente',
                 'parcial' => 'Parcial',
@@ -222,7 +236,7 @@ class AdeudoController extends Controller
 
     private function allowedSorts(): array
     {
-        return ['id', 'alumno_id', 'concepto', 'monto', 'monto_pagado', 'estatus'];
+        return ['id', 'alumno_id', 'concepto', 'mes', 'anio', 'monto', 'monto_pagado', 'estatus'];
     }
 
     private function filteredQuery(Request $request): Builder
@@ -237,6 +251,14 @@ class AdeudoController extends Controller
             $query->where('adeudos.estatus', $request->input('estatus'));
         }
 
+        if ($request->filled('mes')) {
+            $query->where('adeudos.mes', (int) $request->input('mes'));
+        }
+
+        if ($request->filled('anio')) {
+            $query->where('adeudos.anio', (int) $request->input('anio'));
+        }
+
         return $query;
     }
 
@@ -245,6 +267,8 @@ class AdeudoController extends Controller
         return [
             'alumno_id' => ['required', 'exists:alumnos,id'],
             'concepto' => ['required', 'string', 'max:255'],
+            'mes' => ['required', 'integer', 'between:1,12'],
+            'anio' => ['required', 'integer', 'between:2000,2099'],
             'anotaciones' => ['nullable', 'string', 'max:1000'],
             'monto' => ['required', 'numeric', 'min:0.01'],
             'estatus' => ['required', 'in:pendiente,pagado'],
@@ -257,6 +281,12 @@ class AdeudoController extends Controller
             'alumno_id.required' => 'Selecciona un alumno.',
             'concepto.required' => 'Indica el concepto del adeudo.',
             'concepto.max' => 'El concepto no puede superar los 255 caracteres.',
+            'mes.required' => 'Selecciona un mes.',
+            'mes.integer' => 'El mes seleccionado no es válido.',
+            'mes.between' => 'El mes seleccionado no es válido.',
+            'anio.required' => 'Indica el año del adeudo.',
+            'anio.integer' => 'El año debe ser un número.',
+            'anio.between' => 'El año debe estar entre 2000 y 2099.',
             'anotaciones.max' => 'Las anotaciones no pueden superar los 1000 caracteres.',
             'monto.required' => 'Indica el monto del adeudo.',
             'monto.numeric' => 'El monto debe ser un número.',
@@ -271,6 +301,8 @@ class AdeudoController extends Controller
         return [
             'alumno_id' => ['required', 'exists:alumnos,id'],
             'concepto' => ['required', 'string', 'max:255'],
+            'mes' => ['nullable', 'integer', 'between:1,12'],
+            'anio' => ['nullable', 'integer', 'between:2000,2099'],
             'anotaciones' => ['nullable', 'string', 'max:1000'],
             'created_at' => ['required', 'date'],
         ];
@@ -283,6 +315,10 @@ class AdeudoController extends Controller
             'alumno_id.exists' => 'El alumno seleccionado no es válido.',
             'concepto.required' => 'Indica el concepto del adeudo.',
             'concepto.max' => 'El concepto no puede superar los 255 caracteres.',
+            'mes.integer' => 'El mes seleccionado no es válido.',
+            'mes.between' => 'El mes seleccionado no es válido.',
+            'anio.integer' => 'El año debe ser un número.',
+            'anio.between' => 'El año debe estar entre 2000 y 2099.',
             'anotaciones.max' => 'Las anotaciones no pueden superar los 1000 caracteres.',
             'created_at.required' => 'Indica la fecha de creación.',
             'created_at.date' => 'La fecha de creación no es válida.',

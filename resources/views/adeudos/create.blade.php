@@ -66,6 +66,28 @@
                             </div>
                         </div>
 
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="mes" class="form-label">Mes <span class="ip-required">*</span></label>
+                                <select id="mes" name="mes"
+                                        class="form-select @error('mes') is-invalid @enderror" required>
+                                    <option value="">Selecciona un mes</option>
+                                    @foreach (\App\Models\Adeudo::MESES as $numero => $nombre)
+                                        <option value="{{ $numero }}" @selected((string) old('mes') === (string) $numero)>{{ $nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('mes')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="anio" class="form-label">Año <span class="ip-required">*</span></label>
+                                <input type="number" id="anio" name="anio" min="2000" max="2099" step="1" inputmode="numeric"
+                                       class="form-control @error('anio') is-invalid @enderror"
+                                       value="{{ old('anio', now()->year) }}" required>
+                                @error('anio')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
                         <div class="mb-4">
                             <label for="anotaciones" class="form-label">Anotaciones</label>
                             <textarea id="anotaciones" name="anotaciones" rows="3" maxlength="1000"
